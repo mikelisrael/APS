@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import Sidebar from "@/components/sidebar";
+import Extras from "@/components/extras";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800", "900"],
@@ -28,11 +29,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn("font-sans antialiased ~text-sm/base", poppins.variable)}
+        className={cn(
+          "container mx-auto font-sans text-sm antialiased ~px-5/40",
+          poppins.variable,
+        )}
       >
-        <ScrollArea className="h-dvh w-full">
-          <Providers>{children}</Providers>
-        </ScrollArea>
+        <Providers>
+          <div className="grid grid-cols-[250px,1fr,250px] divide-x-2">
+            <Sidebar />
+            {children}
+            <Extras />
+          </div>
+        </Providers>
         <Toaster richColors position="top-center" />
       </body>
     </html>
