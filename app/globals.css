@@ -16,6 +16,10 @@
     grid-column: 1/-1;
     grid-row: 1/-1;
   }
+
+  .h-center-flex {
+    @apply flex items-center;
+  }
 }
 
 @layer base {
@@ -102,4 +106,18 @@
     color: var(--foreground);
     background: var(--background);
   }
+
+  .main-content {
+  transition-property: opacity, transform, filter, background;
+  transition-duration: 500ms;
 }
+
+.page-transition {
+  opacity: 0;
+  background: var(--background);
+  transform: translateY(40px);
+  filter: blur(12px);
+}
+
+}
+
