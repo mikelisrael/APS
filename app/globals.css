@@ -17,8 +17,9 @@
     grid-row: 1/-1;
   }
 
-  .h-center-flex {
-    @apply flex items-center;
+  .flex-center {
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -108,16 +109,14 @@
   }
 
   .main-content {
-  transition-property: opacity, transform, filter, background;
-  transition-duration: 500ms;
-}
+    transition-property: opacity, transform, filter, background;
+    transition-duration: 500ms;
+  }
 
-.page-transition {
-  opacity: 0;
-  background: var(--background);
-  transform: translateY(40px);
-  filter: blur(12px);
+  .page-transition {
+    opacity: 0;
+    background: var(--background);
+    transform: translateY(40px);
+    filter: blur(12px);
+  }
 }
-
-}
-

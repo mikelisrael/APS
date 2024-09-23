@@ -1,4 +1,5 @@
 import {
+  UsersRound,
   BellIcon,
   BriefcaseBusiness,
   HomeIcon,
@@ -37,5 +38,10 @@ export const navigationItems: NavigationItem[] = [
     title: "Profile",
     Icon: User2,
     href: "/profile",
+  },
+  {
+    title: "Communities",
+    Icon: UsersRound,
+    href: "/communities",
   },
 ];

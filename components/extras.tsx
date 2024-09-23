@@ -2,7 +2,7 @@ import React from "react";
 
 const Extras = () => {
   return (
-    <aside className="border-l-2 pl-5">
+    <aside className="border-l pl-5">
       Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ea, cumque.
       Velit, ex maxime, quas quod dolor laudantium tempora eius autem error
       cupiditate dicta ad quibusdam optio incidunt quia veritatis repellendus
