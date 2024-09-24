@@ -25,7 +25,7 @@ const Post = () => {
             <Ellipsis className="size-5 text-muted-foreground" />
           </Button>
         </header>
-        <p className="my-4 text-sm">
+        <p className="my-4 ~text-xs/sm">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione
           consectetur corrupti commodi esse suscipit, voluptatibus unde sunt
           blanditiis quia molestiae minus ad iste veritatis voluptas quos

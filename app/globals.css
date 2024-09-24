@@ -21,6 +21,10 @@
     display: flex;
     align-items: center;
   }
+
+  .page-title {
+    @apply mt-1 px-5 font-bold ~text-lg/xl;
+  }
 }
 
 @layer base {

@@ -28,10 +28,10 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="sticky top-0 flex h-dvh flex-col border-r py-10 pr-5">
+    <aside className="sticky top-0 hidden h-dvh flex-col border-r py-10 ~pr-2/5 sm:flex">
       <div className="flex-center gap-2 px-3">
         <Logo className="brightness-200" />
-        <h2 className="text-xl font-bold">UICS</h2>
+        <h2 className="hidden text-xl font-bold xl:inline-block">UICS</h2>
       </div>
       <ul className="mt-5">
         {navigationItems.map((item, index) => {
@@ -52,7 +52,7 @@ const Sidebar = () => {
                 <Icon
                   fill={isLinkActive ? "hsl(var(--primary))" : "transparent"}
                 />
-                <span>{title}</span>
+                <span className="hidden xl:inline-block">{title}</span>
               </Component>
             </li>
           );
@@ -65,7 +65,7 @@ const Sidebar = () => {
             <AvatarImage src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg" />
             <AvatarFallback>MI</AvatarFallback>
           </Avatar>
-          <div className="flex-1 text-left">
+          <div className="hidden flex-1 text-left xl:inline-block">
             <h3 className="line-clamp-1 font-semibold tracking-tight">
               Michael Israel
             </h3>
@@ -73,7 +73,7 @@ const Sidebar = () => {
               @justmikelisrael
             </span>
           </div>
-          <Ellipsis className="size-5 text-muted-foreground" />
+          <Ellipsis className="hidden size-5 text-muted-foreground xl:inline-block" />
         </PopoverTrigger>
 
         <PopoverContent className="space-y-2 text-sm">

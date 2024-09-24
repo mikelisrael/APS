@@ -21,16 +21,13 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
       </Avatar>
 
       <div className="flex-1 text-left">
-        <h3 className="line-clamp-1 text-sm font-semibold tracking-tight">
+        <h3 className="line-clamp-1 break-all text-sm font-semibold tracking-tight">
           {user.name}
         </h3>
 
         <div className="flex-center -translate-y-0.5 gap-1 text-xs">
-          <span className="text-muted-foreground">
-            @
-            {user.username.length > 15
-              ? `${user.username.substring(0, 11)}...`
-              : user.username}
+          <span className="line-clamp-1 break-all text-muted-foreground">
+            @{user.username}
           </span>
 
           {user.graduate && (

@@ -1,0 +1,110 @@
+[
+  {
+    "type": "welcome",
+    "read": false,
+    "title": "Welcome aboard!",
+    "message": "Welcome to the community! We're excited to have you here. You now have access to a platform that connects alumni and current students. Make sure to explore all the opportunities that lie ahead! 🎉"
+  },
+  {
+    "type": "firstPost",
+    "read": true,
+    "title": "First post created!",
+    "message": "You've successfully created your first post in the community! Keep sharing your ideas and engaging with others to grow your presence and network. 🚀"
+  },
+  {
+    "type": "partnership",
+    "read": false,
+    "title": "New Partnership Opportunity",
+    "message": "A new partnership opportunity has just been announced. This could be the perfect chance to collaborate and expand your professional network! Don't miss out. 🤝"
+  },
+  {
+    "type": "message",
+    "read": false,
+    "title": "New Message from Taiwo",
+    "message": "You have a new message from Taiwo! Check your inbox to see what they have to say. This could be the start of a great conversation. 📬"
+  },
+  {
+    "type": "alumniEvent",
+    "read": true,
+    "title": "Alumni Event Invitation",
+    "message": "We are pleased to invite you to the upcoming alumni event. This is your chance to reconnect, network, and share experiences with others who walked the same path as you. 🎓"
+  },
+  {
+    "type": "postLiked",
+    "read": false,
+    "title": "Someone liked your post!",
+    "message": "Great news! Your recent post has been liked by another member. Keep the momentum going and engage even more with the community. 👍"
+  },
+  {
+    "type": "connection",
+    "read": true,
+    "title": "New Connection!",
+    "message": "You have a new connection request! Building a strong network is key to success, and this is a great step forward. Reach out and start a conversation. 🤝"
+  },
+  {
+    "type": "networkInvite",
+    "read": false,
+    "title": "Join our growing network!",
+    "message": "We've noticed your profile matches many of our top contributors. Join our exclusive network to connect with industry professionals and start collaborating on exciting projects."
+  },
+  {
+    "type": "profileCompletion",
+    "read": true,
+    "title": "Profile completion reminder",
+    "message": "Your profile is almost complete! Ensure that you fill in all the necessary information to increase your visibility and improve your chances of networking with like-minded individuals."
+  },
+  {
+    "type": "groupInvite",
+    "read": false,
+    "title": "You've been invited to join a group!",
+    "message": "A group that aligns with your interests has invited you to join. This is a great way to connect with individuals who share your passion. Don't hesitate, join the conversation!"
+  },
+  {
+    "type": "projectCollaboration",
+    "read": true,
+    "title": "New Project Collaboration Request",
+    "message": "Someone has reached out to you to collaborate on an exciting project! This is your opportunity to work with other professionals and showcase your skills on a new stage."
+  },
+  {
+    "type": "milestone",
+    "read": false,
+    "title": "You've reached a new milestone!",
+    "message": "Congratulations! You've just hit an important milestone within the community. Your active participation and contributions are making an impact. Keep up the great work!"
+  },
+  {
+    "type": "survey",
+    "read": true,
+    "title": "Community Survey Available",
+    "message": "We'd love to hear from you! A new survey is available for members to provide feedback on their experience. Your insights help us improve and grow."
+  },
+  {
+    "type": "jobRecommendation",
+    "read": false,
+    "title": "Job Opportunity Recommendation",
+    "message": "A job opportunity that matches your profile has been recommended to you. Explore the details and see if this could be the next big step in your career."
+  },
+  {
+    "type": "messageRequest",
+    "read": true,
+    "title": "New Message Request",
+    "message": "You have a new message request! Someone is trying to reach out to you. Review their profile and decide if you'd like to connect further."
+  },
+  {
+    "type": "profileView",
+    "read": false,
+    "title": "Your Profile Has Been Viewed",
+    "message": "Someone has recently viewed your profile. Now's a great time to ensure everything is up-to-date and make a strong first impression on potential connections or opportunities."
+  },
+  {
+    "type": "friendRecommendation",
+    "read": true,
+    "title": "Friend Recommendation",
+    "message": "We've found someone you might know based on mutual connections. Reach out and see how you can strengthen your network!"
+  },
+  {
+    "type": "testimonial",
+    "read": false,
+    "title": "You've received a new testimonial!",
+    "message": "A fellow member has left a testimonial on your profile! This is a great way to build credibility and showcase your strengths to the community."
+  }
+]

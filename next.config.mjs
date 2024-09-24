@@ -3,6 +3,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  rules: {
+    quotes: "off",
+  },
 };
 
 export default nextConfig;

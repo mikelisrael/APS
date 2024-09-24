@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 
 const NewPost = () => {
   return (
-    <div className="px-5">
+    <header className="~px-2/5">
       <div className="flex-center gap-5">
         <Avatar>
           <AvatarImage src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg" />
@@ -23,18 +23,22 @@ const NewPost = () => {
         </div>
       </div>
 
-      <div className="flex-center mt-2">
+      <div className="flex-center mt-2 w-full">
         {quickActions.map((action, index) => {
           const { icon: Icon, text, color } = action;
           return (
-            <Button variant="ghost" className="w-full" key={index}>
+            <Button
+              variant="ghost"
+              className="w-full whitespace-normal"
+              key={index}
+            >
               <Icon className={`mr-2 ${color}`} />
-              {text}
+              <span className="hidden sm:inline-block">{text}</span>
             </Button>
           );
         })}
       </div>
-    </div>
+    </header>
   );
 };
 
