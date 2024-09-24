@@ -11,8 +11,9 @@ import { Ellipsis } from "lucide-react";
 import { usePathname } from "next/navigation";
 import TransitionLink from "../shared/transition-link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { navigationItems } from "./navigation-items";
 import { Button } from "../ui/button";
+import LightDarkSwitch from "./light-dark-switch";
+import { navigationItems } from "./navigation-items";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -68,15 +69,16 @@ const Sidebar = () => {
             <h3 className="line-clamp-1 font-semibold tracking-tight">
               Michael Israel
             </h3>
-            <span className="line-clamp-1 -translate-y-0.5 text-muted-foreground ~text-xs/sm">
+            <span className="line-clamp-1 -translate-y-0.5 text-xs text-muted-foreground">
               @justmikelisrael
             </span>
           </div>
           <Ellipsis className="size-5 text-muted-foreground" />
         </PopoverTrigger>
 
-        <PopoverContent className="text-sm">
-          <Button variant="ghost" className="w-full">
+        <PopoverContent className="space-y-2 text-sm">
+          <LightDarkSwitch />
+          <Button variant="destructive" className="w-full">
             Log out @justmikelisrael
           </Button>
         </PopoverContent>

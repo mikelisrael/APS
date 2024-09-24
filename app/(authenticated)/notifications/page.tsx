@@ -1,5 +1,11 @@
+import { SuspenseLoader } from "@/components/ui/loaders";
+
 const Notifications = () => {
-  return <h1 className="text-4xl">THIS IS THE NOTIFICATIONS PAGE</h1>;
+  return (
+    <SuspenseLoader fullPage>
+      <h1 className="text-lg">Notifications</h1>
+    </SuspenseLoader>
+  );
 };
 
 export default Notifications;

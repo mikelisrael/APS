@@ -1,10 +1,10 @@
 import Providers from "@/components/providers/providers";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800", "900"],

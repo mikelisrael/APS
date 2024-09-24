@@ -16,7 +16,7 @@ const NewPost = () => {
           <AvatarFallback>MI</AvatarFallback>
         </Avatar>
 
-        <div className="w-full flex-grow cursor-pointer rounded-full border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
+        <div className="h-10 w-full flex-grow cursor-pointer rounded-full border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
           <span className="line-clamp-1">
             Start a post, what's on your mind?
           </span>

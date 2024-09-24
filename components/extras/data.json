@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Tola Asenuga",
+    "username": "justmikelisrael",
+    "avatarUrl": "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "graduate": true
+  },
+  {
+    "name": "Sandra Allie",
+    "username": "sandraallie",
+    "avatarUrl": "https://images.pexels.com/photos/3289620/pexels-photo-3289620.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "graduate": false
+  },
+  {
+    "name": "John Doe",
+    "username": "johndoe",
+    "avatarUrl": "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "graduate": true
+  },
+  {
+    "name": "Michael Brown",
+    "username": "michaelbrown",
+    "avatarUrl": "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "graduate": true
+  }
+]
