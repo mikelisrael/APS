@@ -14,7 +14,7 @@ import {
   Target,
   Inbox,
   Eye,
-  Star,
+  
   ThumbsUp as TestimonialIcon,
 } from "lucide-react";
 
