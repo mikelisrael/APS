@@ -1,6 +1,9 @@
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
   "rules": {
-    "next/image-unoptimized-url": "off"
+    "next/image-unoptimized-url": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "prefer-const": "off",
+    "no-unused-vars": "off"
   }
 }

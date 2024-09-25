@@ -16,7 +16,7 @@ const Notifications = () => {
 
       <ul className="mt-8 divide-y">
         {notifications.map((notification, index) => {
-          const { type, title, message } = notification as Notification;
+          const { type, read, title, message } = notification as Notification;
           const { icon: Icon, color } = ICON_MAP[type];
 
           return (
