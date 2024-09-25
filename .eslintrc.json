@@ -5,6 +5,7 @@
     "@typescript-eslint/ban-ts-comment": "off",
     "react-hooks/exhaustive-deps": "off",
     "prefer-const": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-var": "off"
   }
 }
