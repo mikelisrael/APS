@@ -2,6 +2,7 @@ import UserAvatar from "@/components/shared/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getInitials } from "@/lib/utils";
+import { IoPersonAddOutline } from "react-icons/io5";
 
 interface SuggestedUserProps {
   user: {
@@ -44,6 +45,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
       </div>
 
       <Button variant="link" className="text-xs font-normal">
+        <IoPersonAddOutline className="mr-1.5 size-4" />
         Connect
       </Button>
     </li>
