@@ -1,4 +1,22 @@
 /** @type {import('next').NextConfig} */
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  dynamicStartUrl: true,
+  dynamicStartUrlRedirect: "/login",
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === "development",
+  fallbacks: {
+    document: "/~offline"
+  },
+  workboxOptions: {
+    disableDevLogs: true
+  }
+});
+
 const nextConfig = {
   webpack(config) {
     config.module.rules.push({
@@ -12,4 +30,4 @@ const nextConfig = {
   }
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

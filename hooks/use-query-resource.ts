@@ -1,4 +1,6 @@
 import {
+  InfiniteData,
+  QueryKey,
   QueryOptions,
   useInfiniteQuery,
   UseInfiniteQueryOptions,
@@ -21,21 +23,6 @@ interface ResourceOptionsProps
   onError?: (error: any) => void;
   placeholderData?: any;
   staleTime?: number;
-}
-
-interface InfiniteResourceOptionsProps<T = any>
-  extends Omit<
-    UseInfiniteQueryOptions<T, Error, T, T, readonly unknown[], unknown>,
-    "queryKey" | "queryFn" | "getNextPageParam" | "initialPageParam"
-  > {
-  key: string[];
-  fn: (pageParam: any) => Promise<any>;
-  select?: (data: any) => any;
-  enabled?: boolean;
-  onSuccess?: (data: any) => void;
-  onError?: (error: any) => void;
-  getNextPageParam?: (lastPage: any, allPages: any[]) => any;
-  initialPageParam?: any;
 }
 
 interface MutationOptionsProps<T, Variables = any>
@@ -111,59 +98,59 @@ export const useGetResource = (options: ResourceOptionsProps) => {
   return query;
 };
 
-export const useInfiniteResource = <T = any>(
-  options: InfiniteResourceOptionsProps<T>
-) => {
-  const {
-    key,
-    fn,
-    select,
-    onSuccess,
-    onError,
-    initialPageParam = 1,
-    ...rest
-  } = options;
+// export const useInfiniteResource = <T = any>(
+//   options: InfiniteResourceOptionsProps<T>
+// ) => {
+//   const {
+//     key,
+//     fn,
+//     select,
+//     onSuccess,
+//     onError,
+//     initialPageParam = 1,
+//     ...rest
+//   } = options;
 
-  const query = useInfiniteQuery({
-    ...rest,
-    queryKey: key || ["defaultInfiniteKey"],
-    queryFn: async ({ pageParam }) => {
-      try {
-        const response = await fn(pageParam);
-        if (response?.error) {
-          throw new Error(response.error || "Something went wrong");
-        }
-        return response;
-      } catch (error) {
-        throw error;
-      }
-    },
-    initialPageParam,
-    getNextPageParam: (lastPage: any) => {
-      const meta = lastPage?.data?.meta;
-      if (meta?.hasNextPage) {
-        return meta.currentPage + 1;
-      }
-      return undefined;
-    },
-    select: select ? (data) => select(data) : undefined
-  });
+//   const query = useInfiniteQuery({
+//     ...rest,
+//     queryKey: key || ["defaultInfiniteKey"],
+//     queryFn: async ({ pageParam }) => {
+//       try {
+//         const response = await fn(pageParam);
+//         if (response?.error) {
+//           throw new Error(response.error || "Something went wrong");
+//         }
+//         return response;
+//       } catch (error) {
+//         throw error;
+//       }
+//     },
+//     initialPageParam,
+//     getNextPageParam: (lastPage: any) => {
+//       const meta = lastPage?.data?.meta;
+//       if (meta?.hasNextPage) {
+//         return meta.currentPage + 1;
+//       }
+//       return undefined;
+//     },
+//     select: select ? (data) => select(data) : undefined
+//   });
 
-  const { data, error, isSuccess, isError } = query;
+//   const { data, error, isSuccess, isError } = query;
 
-  React.useEffect(() => {
-    if (isSuccess && data && onSuccess) {
-      onSuccess(data);
-    }
-  }, [data, isSuccess, onSuccess]);
+//   React.useEffect(() => {
+//     if (isSuccess && data && onSuccess) {
+//       onSuccess(data);
+//     }
+//   }, [data, isSuccess, onSuccess]);
 
-  React.useEffect(() => {
-    if (isError && error && onError) {
-      onError(error);
-    } else if (isError && error) {
-      toast.error("Something went wrong while loading data");
-    }
-  }, [error, isError, onError]);
+//   React.useEffect(() => {
+//     if (isError && error && onError) {
+//       onError(error);
+//     } else if (isError && error) {
+//       toast.error("Something went wrong while loading data");
+//     }
+//   }, [error, isError, onError]);
 
-  return query;
-};
+//   return query;
+// };

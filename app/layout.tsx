@@ -9,19 +9,33 @@ import "./globals.css";
 const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-sans"
 });
 
 export const metadata: Metadata = {
   title: {
     template: "%s • UICS Connect",
-    default: "UICS Connect",
+    default: "UICS Connect"
   },
   description: "Connecting the students and Alumni of the university of ibadan",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "UICS Connect"
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false
+  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "#100c0b" }
+  ]
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
