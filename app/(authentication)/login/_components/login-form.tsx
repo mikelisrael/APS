@@ -1,14 +1,13 @@
 "use client";
 
 import SubmitButton from "@/components/shared/submit-button";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +17,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z.string().min(1, { message: "Password is required" })
 });
 
 const LoginForm = () => {
@@ -26,8 +25,8 @@ const LoginForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
-    },
+      password: ""
+    }
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -52,7 +51,7 @@ const LoginForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Email</FormLabel>
+              <FormLabel>School Email</FormLabel>
               <FormControl>
                 <Input
                   id="email"

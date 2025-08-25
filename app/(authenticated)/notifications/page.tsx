@@ -1,4 +1,3 @@
-import { SuspenseLoader } from "@/components/ui/loaders";
 import { ICON_MAP, NotificationType } from "./icon-map";
 import notifications from "./notifications.json";
 
@@ -11,7 +10,7 @@ interface Notification {
 
 const Notifications = () => {
   return (
-    <SuspenseLoader fullPage>
+    <main className="max-w-2xl">
       <h1 className="page-title">Notifications</h1>
 
       <ul className="mt-8 divide-y">
@@ -33,7 +32,7 @@ const Notifications = () => {
           );
         })}
       </ul>
-    </SuspenseLoader>
+    </main>
   );
 };
 

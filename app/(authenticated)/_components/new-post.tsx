@@ -2,10 +2,14 @@ import {
   BriefcaseBusiness,
   CalendarPlus,
   Image,
-  Newspaper,
+  Newspaper
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage
+} from "../../../components/ui/avatar";
+import { Button } from "../../../components/ui/button";
 
 const NewPost = () => {
   return (
@@ -48,21 +52,21 @@ const quickActions = [
   {
     icon: Image,
     text: "Media",
-    color: "text-blue-400",
+    color: "text-blue-400"
   },
   {
     icon: BriefcaseBusiness,
     text: "Job",
-    color: "text-red-400",
+    color: "text-red-400"
   },
   {
     icon: CalendarPlus,
     text: "Event",
-    color: "text-pink-400",
+    color: "text-pink-400"
   },
   {
     icon: Newspaper,
     text: "Article",
-    color: "text-amber-600",
-  },
+    color: "text-amber-600"
+  }
 ];

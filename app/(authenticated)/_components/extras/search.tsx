@@ -2,14 +2,14 @@
 
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input";
+import { PlaceholdersAndVanishInput } from "../../../../components/ui/placeholders-and-vanish-input";
 
 const placeholders = [
   "Search for alumni, students, or projects",
   "Find job opportunities, internships, or mentors",
   "Explore research topics, publications, or tech stacks",
   "Discover networking events, workshops, or seminars",
-  "Look up department news",
+  "Look up department news"
 ];
 
 const Search = () => {

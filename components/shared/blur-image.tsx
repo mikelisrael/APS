@@ -6,13 +6,14 @@ import React from "react";
 
 type OmitOnLoad = Omit<ImageProps, "onLoad">;
 
-const BlurImage = ({ className, ...props }: OmitOnLoad) => {
+const BlurImage = ({ className, alt, ...props }: OmitOnLoad) => {
   const [loaded, setLoaded] = React.useState(false);
 
   return (
     <Image
       {...props}
       onLoad={() => setLoaded(true)}
+      alt={alt}
       className={cn(className, loaded ? "blur-none" : "blur-md")}
     />
   );

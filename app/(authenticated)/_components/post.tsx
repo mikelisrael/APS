@@ -1,6 +1,10 @@
 import { Ellipsis, MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage
+} from "../../../components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const Post = () => {
   return (
@@ -32,7 +36,7 @@ const Post = () => {
           incidunt cumque ex tempora? Lorem ipsum dolor sit amet consectetur
           adipisicing elit. Fugit, magni?...
         </p>
-        <footer className="flex-center justify-between">
+        <footer className="flex-between">
           <div className="flex-center cursor-pointer gap-1 text-sm text-muted-foreground hover:text-blue-400">
             <ThumbsUp className="size-5" />
             <span>1.5k</span>

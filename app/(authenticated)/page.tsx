@@ -1,14 +1,19 @@
-import NewPost from "@/components/home/new-post";
-import Feed from "@/components/home/feed";
-import React from "react";
-import { SuspenseLoader } from "@/components/ui/loaders";
+import Feed from "@/app/(authenticated)/_components/feed";
+import NewPost from "@/app/(authenticated)/_components/new-post";
+import Extras from "./_components/extras";
 
 const Home = () => {
   return (
-    <SuspenseLoader fullPage>
-      <NewPost />
-      <Feed />
-    </SuspenseLoader>
+    <main>
+      <div className="grid lg:grid-cols-[1fr,350px] xl:grid-cols-[1fr,350px]">
+        <div>
+          <NewPost />
+          <Feed />
+        </div>
+
+        <Extras />
+      </div>
+    </main>
   );
 };
 

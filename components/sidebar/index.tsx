@@ -4,13 +4,13 @@ import Logo from "@/components/shared/logo";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverTrigger
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Ellipsis } from "lucide-react";
 import { usePathname } from "next/navigation";
 import TransitionLink from "../shared/transition-link";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import UserAvatar from "../shared/user-avatar";
 import { Button } from "../ui/button";
 import LightDarkSwitch from "./light-dark-switch";
 import { navigationItems } from "./navigation-items";
@@ -29,7 +29,7 @@ const Sidebar = () => {
 
   return (
     <aside className="sticky top-0 hidden h-dvh flex-col border-r py-10 ~pr-2/5 sm:flex">
-      <div className="flex-center gap-2 px-3">
+      <div className="flex items-center gap-2 px-3">
         <Logo className="brightness-200" />
         <h2 className="hidden text-xl font-bold xl:inline-block">UICS</h2>
       </div>
@@ -45,7 +45,7 @@ const Sidebar = () => {
                 className={cn(
                   "flex-center w-max gap-4 rounded-full px-5 py-3 text-lg font-normal transition-colors duration-200 hover:bg-accent hover:text-accent-foreground",
                   isLinkActive &&
-                    "cursor-default font-medium text-primary hover:bg-transparent hover:text-primary",
+                    "cursor-default font-medium text-primary hover:bg-transparent hover:text-primary"
                 )}
                 href={href}
               >
@@ -61,10 +61,11 @@ const Sidebar = () => {
 
       <Popover>
         <PopoverTrigger className="flex-center mt-auto justify-between gap-2 rounded-full px-2 py-3 hover:bg-accent hover:text-accent-foreground">
-          <Avatar>
-            <AvatarImage src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg" />
-            <AvatarFallback>MI</AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg"
+            fallback="MI"
+          />
+
           <div className="hidden flex-1 text-left xl:inline-block">
             <h3 className="line-clamp-1 font-semibold tracking-tight">
               Michael Israel

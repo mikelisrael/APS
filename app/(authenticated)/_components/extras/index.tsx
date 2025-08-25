@@ -1,9 +1,9 @@
 import React from "react";
+import { Button } from "../../../../components/ui/button";
 import suggestedUsers from "./data.json";
 import Search from "./search";
 import SuggestedUser from "./suggested-user";
 import TrendingTopics from "./trending-topics";
-import { Button } from "../ui/button";
 
 const footerItems = [
   "About",
@@ -14,12 +14,12 @@ const footerItems = [
   "Privacy",
   "Terms",
   "Locations",
-  "Language",
+  "Language"
 ];
 
 const Extras = () => {
   return (
-    <aside className="hidden space-y-5 border-l py-11 pl-5 lg:block">
+    <aside className="hidden space-y-5 border-l pl-5 lg:block">
       <Search />
 
       <section className="space-y-2 rounded-lg border p-2">

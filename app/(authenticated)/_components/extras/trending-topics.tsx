@@ -11,7 +11,7 @@ const trendingTopics: TrendingTopic[] = [
   { category: "Backend technologies", hashtag: "#Backend", count: "25.5k" },
   { category: "Machine Learning", hashtag: "#ML", count: "40.2k" },
   { category: "Data Science", hashtag: "#DataScience", count: "35.7k" },
-  { category: "DevOps practices", hashtag: "#DevOps", count: "22.3k" },
+  { category: "DevOps practices", hashtag: "#DevOps", count: "22.3k" }
 ];
 
 const TrendingTopics = () => {
@@ -20,7 +20,7 @@ const TrendingTopics = () => {
       {trendingTopics.map((topic, index) => (
         <li
           key={index}
-          className="flex-center cursor-pointer justify-between gap-4 rounded-md p-2 hover:bg-muted"
+          className="flex-between cursor-pointer gap-4 rounded-md p-2 hover:bg-muted"
         >
           <div>
             <span className="line-clamp-1 text-sm text-muted-foreground">
