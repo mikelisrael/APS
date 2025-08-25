@@ -30,7 +30,7 @@ const Sidebar = () => {
   return (
     <aside className="sticky top-0 hidden h-dvh flex-col border-r py-10 ~pr-2/5 sm:flex">
       <div className="flex items-center gap-3 px-3">
-        <Logo className="size-8 brightness-200" />
+        <Logo className="size-8 text-primary" />
         <h2 className="hidden text-xl font-bold xl:inline-block">UICS</h2>
       </div>
       <ul className="mt-5">
