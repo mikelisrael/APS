@@ -51,12 +51,12 @@ const LoginForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>School Email</FormLabel>
+              <FormLabel>Student Email</FormLabel>
               <FormControl>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="m@stu.ui.edu.ng"
                   {...field}
                 />
               </FormControl>
