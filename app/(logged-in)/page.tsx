@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <main>
       <div className="grid lg:grid-cols-[1fr,350px] xl:grid-cols-[1fr,350px]">
-        <section>
+        <section className="safe-area">
           <NewPost />
           <Feed />
         </section>

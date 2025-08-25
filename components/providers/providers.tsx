@@ -1,19 +1,27 @@
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
 import { ContextProvider } from "./context";
 import KeyboardCommandsProvider from "./keyboard-commands-provider";
 import { ThemeProvider } from "./theme-provider";
 
+const queryClient = new QueryClient();
+
 export default function Providers({ children }: PropsWithChildren) {
   return (
-    <ContextProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <KeyboardCommandsProvider>{children}</KeyboardCommandsProvider>
-      </ThemeProvider>
-    </ContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <ContextProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <KeyboardCommandsProvider>{children}</KeyboardCommandsProvider>
+        </ThemeProvider>
+      </ContextProvider>
+    </QueryClientProvider>
   );
 }
+  

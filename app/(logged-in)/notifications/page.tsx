@@ -10,7 +10,7 @@ interface Notification {
 
 const Notifications = () => {
   return (
-    <main className="max-w-2xl">
+    <main className="safe-area max-w-2xl">
       <h1 className="page-title">Notifications</h1>
 
       <ul className="mt-8 divide-y">

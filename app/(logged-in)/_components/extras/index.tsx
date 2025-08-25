@@ -19,7 +19,7 @@ const footerItems = [
 
 const Extras = () => {
   return (
-    <aside className="hidden space-y-5 border-l pl-5 lg:block">
+    <aside className="safe-area hidden space-y-5 border-l pl-5 lg:block">
       <Search />
 
       <section className="space-y-2 rounded-lg border p-2">

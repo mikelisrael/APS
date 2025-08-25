@@ -1,18 +1,14 @@
-import { Ellipsis, MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage
-} from "../../../components/ui/avatar";
+import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
+import { Ellipsis, MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
 
 const Post = () => {
   return (
     <article className="grid grid-cols-[auto,1fr] gap-2 rounded-lg border p-5">
-      <Avatar>
-        <AvatarImage src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg" />
-        <AvatarFallback>MI</AvatarFallback>
-      </Avatar>
+      <UserAvatar
+        src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg"
+        fallback="MI"
+      />
 
       <section>
         <header className="flex-center justify-between gap-5">

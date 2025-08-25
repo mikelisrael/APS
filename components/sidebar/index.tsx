@@ -1,12 +1,12 @@
 "use client";
 
-import Logo from "@/components/shared/logo";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import Logo from "@/public/main-logo.svg";
 import { Ellipsis } from "lucide-react";
 import { usePathname } from "next/navigation";
 import TransitionLink from "../shared/transition-link";
@@ -29,8 +29,8 @@ const Sidebar = () => {
 
   return (
     <aside className="sticky top-0 hidden h-dvh flex-col border-r py-10 ~pr-2/5 sm:flex">
-      <div className="flex items-center gap-2 px-3">
-        <Logo className="brightness-200" />
+      <div className="flex items-center gap-3 px-3">
+        <Logo className="size-8 brightness-200" />
         <h2 className="hidden text-xl font-bold xl:inline-block">UICS</h2>
       </div>
       <ul className="mt-5">

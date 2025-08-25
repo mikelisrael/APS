@@ -116,6 +116,7 @@
     background-size: cover;
     shape-margin: 1rem;
     user-select: none;
+    pointer-events: none;
   }
 
   body {
@@ -126,6 +127,10 @@
   .main-content {
     transition-property: opacity, transform, filter, background;
     transition-duration: 500ms;
+  }
+
+  .safe-area {
+    @apply py-10;
   }
 
   .page-transition {
