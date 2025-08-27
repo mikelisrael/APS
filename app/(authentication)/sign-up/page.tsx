@@ -22,10 +22,10 @@ export default function SignUpPage() {
         src="/people-grid.gif"
         alt="People connecting"
         fill
-        className="inset-0 -z-[1] size-full object-cover blur-sm"
+        className="inset-0 -z-[5] size-full object-cover blur-sm"
       />
 
-      <div className="pointer-events-none absolute -inset-10 flex items-center justify-center bg-transparent [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
+      <div className="pointer-events-none absolute -inset-10 -z-[1] flex items-center justify-center bg-transparent [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
 
       <SuspenseLoader>
         <Card className="mx-4 max-w-md">
