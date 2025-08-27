@@ -7,12 +7,12 @@ const AuthLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <main className="h-svh">
-      <div className="fixed bottom-10 left-5 rounded-md sm:left-10">
+    <>
+      <div className="fixed bottom-10 left-5 z-10 rounded-md bg-background sm:left-10">
         <LightDarkSwitch />
       </div>
       {children}
-    </main>
+    </>
   );
 };
 

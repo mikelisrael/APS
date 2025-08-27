@@ -1,6 +1,7 @@
 "use client";
 
 import SubmitButton from "@/components/shared/submit-button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,7 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -21,6 +24,8 @@ const formSchema = z.object({
 });
 
 const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,15 +38,19 @@ const LoginForm = () => {
     console.log(values);
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mx-auto grid w-[350px] gap-6 duration-700 animate-in fade-in-30 slide-in-from-bottom-10"
+        className="mx-auto grid w-full max-w-[350px] gap-6 px-5 duration-700 animate-in fade-in-30 slide-in-from-bottom-10"
       >
         <div className="grid gap-2 text-center">
           <h1 className="text-3xl font-semibold">Login</h1>
-          <p className="text-balance text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Enter your details below to login to your account
           </p>
         </div>
@@ -70,14 +79,38 @@ const LoginForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>password</FormLabel>
+              <div className="flex-between">
+                <FormLabel>Password</FormLabel>
+                <Link href="forgot-password" className="text-sm underline">
+                  Forgot Password
+                </Link>
+              </div>
               <FormControl>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="pr-10"
+                    {...field}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={togglePasswordVisibility}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
