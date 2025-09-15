@@ -7,6 +7,8 @@
   "display": "standalone",
   "start_url": "/",
   "orientation": "any",
+  "categories": ["social", "education", "networking"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
