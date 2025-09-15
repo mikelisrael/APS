@@ -38,6 +38,7 @@ export async function signUp(userData: {
     email: userData.email,
     password: userData.password,
     options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}`,
       data: {
         first_name: userData.firstName,
         last_name: userData.lastName,
@@ -55,6 +56,40 @@ export async function signUp(userData: {
   return {
     success: true,
     message: "Check your email to confirm your account!"
+  };
+}
+
+export async function forgotPassword(email: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return {
+    success: true,
+    message: "Check your email for the password reset link!"
+  };
+}
+
+export async function resetPassword(password: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: password
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return {
+    success: true,
+    message: "Password updated successfully!"
   };
 }
 

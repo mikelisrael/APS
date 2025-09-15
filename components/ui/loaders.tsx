@@ -1,5 +1,5 @@
+import { TextShimmerWave } from "@/components/shared/text-shimmer-wave";
 import { cn } from "@/lib/utils";
-import { LoaderCircle } from "lucide-react";
 import { Suspense } from "react";
 
 interface LoaderProps extends React.PropsWithChildren {
@@ -11,11 +11,12 @@ export const LoaderSpinner = ({ fullPage }: LoaderProps) => {
     <div
       className={cn(
         "flex size-full items-center justify-center gap-2 opacity-80",
-        fullPage && "h-screen w-screen",
+        fullPage && "h-svh w-full"
       )}
     >
-      <LoaderCircle size={20} className="animate-spin" />
-      <span>Loading...</span>
+      <TextShimmerWave className="font-mono text-base" duration={1}>
+        loading...
+      </TextShimmerWave>
     </div>
   );
 };

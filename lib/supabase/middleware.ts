@@ -1,7 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/forgot-password", "/login", "/sign-up"];
+const PUBLIC_ROUTES = [
+  "/forgot-password",
+  "/login",
+  "/sign-up",
+  "/reset-password"
+];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -50,8 +55,10 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    // Add the intended destination as a callback URL
-    url.searchParams.set("callbackUrl", pathname);
+    // Add the intended destination as a callback URL only if it's not the homepage
+    if (pathname !== "/") {
+      url.searchParams.set("callbackUrl", pathname);
+    }
     return NextResponse.redirect(url);
   }
 

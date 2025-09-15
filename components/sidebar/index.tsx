@@ -75,10 +75,10 @@ const Sidebar = () => {
           />
 
           <div className="hidden flex-1 text-left xl:inline-block">
-            <h3 className="line-clamp-1 font-semibold tracking-tight">
+            <h3 className="line-clamp-1 break-all font-semibold tracking-tight">
               {firstName} {lastName}
             </h3>
-            <span className="line-clamp-1 -translate-y-0.5 text-xs text-muted-foreground">
+            <span className="line-clamp-1 -translate-y-0.5 break-all text-xs text-muted-foreground">
               {username ? "@" + username : email}
             </span>
           </div>
@@ -89,13 +89,13 @@ const Sidebar = () => {
           <LightDarkSwitch />
           <Button
             variant="destructive"
-            className="w-full"
+            className="line-clamp-1 w-full break-all"
             onClick={() => logout(undefined)}
             disabled={isLoggingOut}
           >
             {isLoggingOut
               ? "Logging out..."
-              : `Log out ${user?.user_metadata?.username ? "@" + user.user_metadata.username : ""}`}
+              : `Log out ${username ? "@" + username : ""}`}
           </Button>
         </PopoverContent>
       </Popover>
