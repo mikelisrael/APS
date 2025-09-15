@@ -17,31 +17,31 @@ export const navigationItems: NavigationItem[] = [
   {
     title: "Home",
     Icon: HomeIcon,
-    href: "/",
+    href: "/"
   },
   {
     title: "Notifications",
     Icon: BellIcon,
-    href: "/notifications",
+    href: "/notifications"
   },
   {
     title: "Chat",
     Icon: MessageCircle,
-    href: "/chat",
-  },
-  {
-    title: "Jobs",
-    Icon: BriefcaseBusiness,
-    href: "/jobs",
-  },
-  {
-    title: "Profile",
-    Icon: User2,
-    href: "/profile",
+    href: "/chat"
   },
   {
     title: "Communities",
     Icon: UsersRound,
-    href: "/communities",
+    href: "/communities"
   },
+  {
+    title: "Jobs",
+    Icon: BriefcaseBusiness,
+    href: "/jobs"
+  },
+  {
+    title: "Profile",
+    Icon: User2,
+    href: "/profile"
+  }
 ];
