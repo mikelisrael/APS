@@ -1,6 +1,5 @@
 "use client";
 
-import SubmitButton from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import {
@@ -12,16 +11,27 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import useFormState from "@/hooks/use-form-state";
+import { signUp } from "@/lib/auth/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
   lastName: z.string().min(1, { message: "Last name is required" }),
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters long" })
+    .max(20, { message: "Username must not exceed 20 characters" })
+    .regex(/^[a-zA-Z0-9_-]+$/, {
+      message:
+        "Username can only contain letters, numbers, hyphens, and underscores"
+    }),
   studentType: z.enum(["undergraduate", "alumnus"], {
     required_error: "Please select your student status"
   }),
@@ -38,20 +48,44 @@ const formSchema = z.object({
 
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const { SubmitButton, status, setSubmitted, setLoading, setError } =
+    useFormState();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
+      username: "",
       studentType: "undergraduate",
       email: "",
       password: ""
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading();
+
+    try {
+      const result = await signUp({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        username: values.username,
+        studentType: values.studentType,
+        email: values.email,
+        password: values.password
+      });
+
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        setSubmitted();
+        toast.success(result?.message || "Account created successfully!");
+        form.reset();
+      }
+    } catch (error) {
+      setError("Something went wrong. Please try again.");
+    }
   }
 
   const togglePasswordVisibility = () => {
@@ -90,6 +124,32 @@ const SignUpForm = () => {
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input
+                    id="username"
+                    placeholder="maxrobinson"
+                    {...field}
+                    onChange={(e) => {
+                      // Convert to lowercase and remove invalid characters as user types
+                      const value = e.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9_-]/g, "");
+                      field.onChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="studentType"
@@ -179,7 +239,7 @@ const SignUpForm = () => {
               </FormItem>
             )}
           />
-          <SubmitButton loading={false} className="w-full">
+          <SubmitButton status={status} className="w-full">
             Create an account
           </SubmitButton>
         </form>

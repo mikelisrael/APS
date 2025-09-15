@@ -29,7 +29,10 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       disabled={status !== "idle"}
       type="submit"
       variant={isSubmitted ? undefined : variant}
-      className={cn("items-center transition-colors duration-200", className)}
+      className={cn(
+        "items-center gap-1 transition-colors duration-200",
+        className
+      )}
       style={
         isSubmitted
           ? { backgroundColor: "#16a34a ", color: "#fff", opacity: 1 }
@@ -37,7 +40,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       }
       {...props}
     >
-      {isLoading && <Spinner />}
+      {isLoading && <Spinner size={18} />}
       {isSubmitted && <FaCheck className="duration-600 animate-in fade-in-0" />}
       {isSubmitted ? "Submitted" : children || "Submit"}
     </Button>

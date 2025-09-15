@@ -1,15 +1,13 @@
+import { createClient } from "@/lib/supabase/client";
 import {
-  InfiniteData,
-  QueryKey,
   QueryOptions,
-  useInfiniteQuery,
-  UseInfiniteQueryOptions,
   useMutation,
   UseMutationOptions,
   useQuery,
   useQueryClient
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
@@ -96,6 +94,48 @@ export const useGetResource = (options: ResourceOptionsProps) => {
   }, [error, isError, onError]);
 
   return query;
+};
+
+export const useAuth = () => {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const { data: user, isLoading } = useGetResource({
+    key: ["auth", "user"],
+    fn: async () => {
+      const {
+        data: { user },
+        error
+      } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    },
+    staleTime: 1000 * 60 * 5 // Cache for 5 minutes
+  });
+
+  const logout = useModifyResource({
+    key: ["auth"],
+    fn: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return null;
+    },
+    onSuccess: () => {
+      router.push("/login");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to logout");
+    },
+    invalidateAll: true
+  });
+
+  return {
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    logout: logout.mutate,
+    isLoggingOut: logout.isPending
+  };
 };
 
 // export const useInfiniteResource = <T = any>(

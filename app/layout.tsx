@@ -1,9 +1,9 @@
 import Providers from "@/components/providers/providers";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
 
 const poppins = Poppins({

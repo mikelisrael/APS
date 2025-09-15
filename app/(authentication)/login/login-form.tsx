@@ -1,6 +1,5 @@
 "use client";
 
-import SubmitButton from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,9 +10,12 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import useFormState from "@/hooks/use-form-state";
+import { login } from "@/lib/auth/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,6 +27,9 @@ const formSchema = z.object({
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const { SubmitButton, status, setLoading, setError, setSubmitted } =
+    useFormState();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,8 +39,21 @@ const LoginForm = () => {
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading();
+
+    try {
+      const callbackUrl = searchParams.get("callbackUrl") || "/";
+      const result = await login(values.email, values.password, callbackUrl);
+
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        setSubmitted();
+      }
+    } catch (error) {
+      setError("Something went wrong. Please try again.");
+    }
   }
 
   const togglePasswordVisibility = () => {
@@ -117,7 +135,7 @@ const LoginForm = () => {
           )}
         />
 
-        <SubmitButton loading={false} className="w-full">
+        <SubmitButton status={status} className="w-full">
           Login
         </SubmitButton>
 
