@@ -76,15 +76,24 @@ export async function forgotPassword(email: string) {
   };
 }
 
-export async function resetPassword(password: string) {
+export async function resetPassword(password: string, code: string) {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.updateUser({
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return {
+      error:
+        "Invalid or expired reset link. Please request a new password reset."
+    };
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
     password: password
   });
 
-  if (error) {
-    return { error: error.message };
+  if (updateError) {
+    return { error: updateError.message };
   }
 
   return {

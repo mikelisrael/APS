@@ -15,7 +15,8 @@ import useFormState from "@/hooks/use-form-state";
 import { resetPassword } from "@/lib/auth/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -39,6 +40,8 @@ export default function ResetPasswordForm() {
   const { SubmitButton, status, setLoading, setError, setSubmitted } =
     useFormState();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const code = searchParams.get("code");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,10 +52,17 @@ export default function ResetPasswordForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!code) {
+      setError(
+        "Invalid or expired reset link. Please request a new password reset."
+      );
+      return;
+    }
+
     setLoading();
 
     try {
-      const result = await resetPassword(values.password);
+      const result = await resetPassword(values.password, code);
 
       if (result?.error) {
         setError(result.error);
@@ -152,10 +162,16 @@ export default function ResetPasswordForm() {
           />
 
           <SubmitButton status={status} className="w-full">
-            Update Password
+            Reset Password
           </SubmitButton>
         </form>
       </Form>
+
+      <div className="mt-3 text-center">
+        <Button variant="link" asChild>
+          <Link href="/forgot-password">Back to Forgot Password</Link>
+        </Button>
+      </div>
     </CardContent>
   );
 }
