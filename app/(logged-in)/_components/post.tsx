@@ -4,7 +4,7 @@ import { Ellipsis, MessageCircle, Repeat2, Send, ThumbsUp } from "lucide-react";
 
 const Post = () => {
   return (
-    <article className="grid grid-cols-[auto,1fr] gap-2 rounded-lg border p-5">
+    <article className="grid grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card p-5">
       <UserAvatar
         src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg"
         fallback="MI"

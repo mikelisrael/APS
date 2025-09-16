@@ -22,7 +22,7 @@ const Extras = () => {
     <aside className="safe-area hidden space-y-5 border-l pl-5 lg:block">
       <Search />
 
-      <section className="space-y-2 rounded-lg border p-2">
+      <section className="space-y-2 rounded-lg border bg-card p-2">
         <h2 className="font-semibold tracking-tighter ~text-base/lg">
           You might like
         </h2>
@@ -36,7 +36,7 @@ const Extras = () => {
         </Button>
       </section>
 
-      <section className="space-y-2 rounded-lg border p-2">
+      <section className="space-y-2 rounded-lg border bg-card p-2">
         <h2 className="font-semibold tracking-tighter ~text-base/lg">
           Trending today
         </h2>
