@@ -1,3 +1,4 @@
+import Alumnus from "@/components/shared/alumnus-tag";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,15 +33,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
             @{user.username}
           </span>
 
-          {user.graduate && (
-            <>
-              <span>•</span>
-
-              <Badge variant="naked" className="font-medium">
-                Alumnus
-              </Badge>
-            </>
-          )}
+          {user.graduate && <Alumnus />}
         </div>
       </div>
 
