@@ -1,4 +1,5 @@
 import Providers from "@/components/providers/providers";
+import ThemeColorUpdater from "@/components/shared/theme-color-updater";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,10 @@ export default function RootLayout({
         className={cn("font-sans antialiased ~text-sm/base", poppins.variable)}
       >
         <ScrollArea className="h-dvh w-full">
-          <Providers>{children}</Providers>
+          <Providers>
+            <ThemeColorUpdater />
+            {children}
+          </Providers>
         </ScrollArea>
         <Toaster richColors position="top-center" />
       </body>
