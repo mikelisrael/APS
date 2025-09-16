@@ -7,21 +7,17 @@ export default function ThemeColorUpdater() {
   const { theme, systemTheme } = useTheme();
 
   useEffect(() => {
-    // Determine the current effective theme
     const currentTheme = theme === "system" ? systemTheme : theme;
 
-    // Define your theme colors (match these to your app's background colors)
     const themeColors = {
       light: "#ffffff",
-      dark: "#100c0b"
+      dark: "#121212"
     };
 
-    // Get the appropriate color
     const themeColor =
       themeColors[currentTheme as keyof typeof themeColors] ||
       themeColors.light;
 
-    // Update the meta theme-color tag
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
 
     if (!metaThemeColor) {
