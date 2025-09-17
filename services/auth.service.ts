@@ -101,15 +101,3 @@ export async function resetPassword(password: string, code: string) {
     message: "Password updated successfully!"
   };
 }
-
-export async function signOut() {
-  const supabase = await createClient();
-
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  redirect("/login");
-}
