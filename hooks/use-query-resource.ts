@@ -56,6 +56,7 @@ export const useModifyResource = <T>(options: MutationOptionsProps<T>) => {
     },
     onError: (e: AxiosError) => {
       onError?.(e) || toast.error(e.message || "Error");
+      throw e;
     }
   });
 };

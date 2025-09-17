@@ -9,6 +9,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { DialogDescription } from "@radix-ui/react-dialog";
 import { Trash2, Upload } from "lucide-react";
 import NextImage from "next/image";
 import { useCallback, useEffect, useState } from "react";
@@ -296,6 +297,10 @@ const FileUploader = ({
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Crop Image</DialogTitle>
+              <DialogDescription>
+                Adjust the crop area and zoom level, then click {`"Apply" `}to
+                save.
+              </DialogDescription>
             </DialogHeader>
             <div className="relative h-64 w-full">
               {originalImage && (

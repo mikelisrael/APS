@@ -1,5 +1,6 @@
 "use client";
 
+import Spinner from "@/components/shared/spinner";
 import {
   Dialog,
   DialogClose,
@@ -33,6 +34,7 @@ interface ResponsiveDialogProps {
   onSubmit?: () => void;
   disabledSubmit?: boolean;
   submitButtonText?: string;
+  loading?: boolean;
   title: string;
 }
 
@@ -46,7 +48,8 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   onClose,
   disabledSubmit,
   onSubmit,
-  submitButtonText = "Save"
+  submitButtonText = "Save",
+  loading
 }) => {
   const isMobile = useIsMobile(mobileBreakpoint);
 
@@ -71,10 +74,11 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
               <Button
-                className="flex-1"
+                className="flex-1 gap-1"
                 onClick={() => onSubmit?.()}
-                disabled={disabledSubmit}
+                disabled={disabledSubmit || loading}
               >
+                {loading && <Spinner size={18} />}
                 {submitButtonText}
               </Button>
             </div>
@@ -99,10 +103,11 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
             <Button variant="outline">Cancel</Button>
           </DrawerClose>
           <Button
-            className="w-full"
+            className="w-full gap-1"
             onClick={() => onSubmit?.()}
-            disabled={disabledSubmit}
+            disabled={disabledSubmit || loading}
           >
+            {loading && <Spinner size={18} />}
             {submitButtonText}
           </Button>
         </DrawerFooter>

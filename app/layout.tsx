@@ -20,12 +20,7 @@ export const metadata: Metadata = {
   },
   description: "Connecting the students and Alumni of the university of ibadan",
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "UICS Connect"
-    // startUpImage: [],
-  },
+
   formatDetection: {
     telephone: false
   },

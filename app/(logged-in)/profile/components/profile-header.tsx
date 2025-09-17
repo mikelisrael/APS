@@ -4,20 +4,51 @@ import UserAvatar from "@/components/shared/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useAuth, useModifyResource } from "@/hooks/use-query-resource";
+import { updateProfilePicture } from "@/services/profile.service";
 import { Camera } from "lucide-react";
 import { useState } from "react";
 import { IoPeopleOutline } from "react-icons/io5";
+import { toast } from "sonner";
 import ProfilePictureUploader from "./profile-picture-uploader";
 
 const ProfileHeader = () => {
+  const { user } = useAuth();
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [uploadedFile, setUploadedFile] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleSubmit = () => {
+  const { mutate: handleUploadMutation } = useModifyResource({
+    key: ["auth", "user"],
+    fn: async () => {
+      if (!uploadedFile) return;
+
+      const result = await updateProfilePicture(uploadedFile);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Profile picture updated successfully!");
+      setOpenUploadDialog(false);
+      setIsUploading(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update profile picture");
+      setIsUploading(false);
+    }
+  });
+
+  const handleSubmit = async () => {
     if (!uploadedFile) return;
-    console.log("Uploading:", uploadedFile);
-    setOpenUploadDialog(false);
+    setIsUploading(true);
+    handleUploadMutation(undefined);
   };
+
+  const firstName = user?.user_metadata?.first_name || "";
+  const lastName = user?.user_metadata?.last_name || "";
+  const avatar_url = user?.user_metadata?.avatar_url || "";
 
   return (
     <>
@@ -39,8 +70,8 @@ const ProfileHeader = () => {
           <div className="flex items-center gap-2">
             <div className="flex-center group relative -mt-16">
               <UserAvatar
-                src="https://pbs.twimg.com/profile_images/1757743586349629440/Ug9EDUpk_400x400.jpg"
-                fallback="MI"
+                src={avatar_url}
+                fallback={`${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase()}
                 className="size-32 border-[6px] border-background"
               />
 
@@ -87,7 +118,8 @@ const ProfileHeader = () => {
         title="Upload Profile Picture"
         onSubmit={handleSubmit}
         disabledSubmit={!uploadedFile}
-        submitButtonText="Save Changes"
+        submitButtonText={isUploading ? "Uploading..." : "Save Changes"}
+        loading={isUploading}
         className="max-w-sm"
       >
         <ProfilePictureUploader
