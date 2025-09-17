@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useFormState from "@/hooks/use-form-state";
-import { signUp } from "@/lib/auth/actions";
+import { signUp } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -76,6 +76,8 @@ const SignUpForm = () => {
         password: values.password
       });
 
+      console.log(result)
+
       if (result?.error) {
         setError(result.error);
       } else {
@@ -137,7 +139,6 @@ const SignUpForm = () => {
                     placeholder="maxrobinson"
                     {...field}
                     onChange={(e) => {
-                      // Convert to lowercase and remove invalid characters as user types
                       const value = e.target.value
                         .toLowerCase()
                         .replace(/[^a-z0-9_-]/g, "");

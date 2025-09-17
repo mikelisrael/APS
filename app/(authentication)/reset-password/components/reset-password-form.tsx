@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useFormState from "@/hooks/use-form-state";
-import { resetPassword } from "@/lib/auth/actions";
+import { resetPassword } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";

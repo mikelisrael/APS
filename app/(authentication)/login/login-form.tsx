@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useFormState from "@/hooks/use-form-state";
-import { login } from "@/lib/auth/actions";
+import { login } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +26,7 @@ const formSchema = z.object({
 });
 
 const LoginForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const { SubmitButton, status, setLoading, setError, setSubmitted } =
@@ -50,6 +51,7 @@ const LoginForm = () => {
         setError(result.error);
       } else {
         setSubmitted();
+        router.replace(callbackUrl);
       }
     } catch (error) {
       setError("Something went wrong. Please try again.");
