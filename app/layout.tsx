@@ -19,8 +19,6 @@ export const metadata: Metadata = {
     default: "UICS Connect"
   },
   description: "Connecting the students and Alumni of the university of ibadan",
-  manifest: "/manifest.json",
-
   formatDetection: {
     telephone: false
   },
@@ -36,9 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn("font-sans antialiased ~text-sm/base", poppins.variable)}
+        suppressHydrationWarning
       >
         <ScrollArea className="h-dvh w-full">
           <Providers>
