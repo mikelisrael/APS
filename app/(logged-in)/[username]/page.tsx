@@ -1,0 +1,12 @@
+import ProfileClient from "./components/profile-client";
+
+export const metadata = {
+  title: "Profile",
+  description: "View profile information"
+};
+
+const Profile = () => {
+  return <ProfileClient />;
+};
+
+export default Profile;

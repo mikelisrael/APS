@@ -48,6 +48,7 @@ const ProfileHeader = () => {
 
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";
+  const fullName = `${firstName} ${lastName}`.trim() || "...";
   const avatar_url = user?.user_metadata?.avatar_url || "";
 
   return (
@@ -67,8 +68,8 @@ const ProfileHeader = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2">
-            <div className="flex-center group relative -mt-16">
+          <section className="flex flex-col items-center gap-2 md:flex-row">
+            <div className="flex-center group relative ~-mt-7/16">
               <UserAvatar
                 src={avatar_url}
                 fallback={`${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase()}
@@ -83,22 +84,20 @@ const ProfileHeader = () => {
               </button>
             </div>
 
-            <div className="flex-between grow flex-wrap gap-1">
-              <div>
-                <h1 className="font-semibold ~text-lg/2xl">Israel Michael</h1>
+            <div className="flex w-full grow flex-col flex-wrap items-center justify-between gap-1 sm:flex-row">
+              <div className="space-y-1">
+                <h1 className="text-center font-semibold ~text-lg/2xl sm:text-left">
+                  {fullName}
+                </h1>
 
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm text-muted-foreground">
                     Frontend Engineer
                   </span>
 
-                  <>
-                    <span>•</span>
-
-                    <Badge variant="alumnus-filled" className="font-medium">
-                      Alumnus
-                    </Badge>
-                  </>
+                  <Badge variant="alumnus-filled" className="font-medium">
+                    Alumnus
+                  </Badge>
                 </div>
               </div>
 
@@ -106,9 +105,8 @@ const ProfileHeader = () => {
                 <IoPeopleOutline size={20} />
                 48 Connections
               </div>
-              {/* <Button size="sm">Edit Profile</Button> */}
             </div>
-          </div>
+          </section>
         </CardContent>
       </Card>
 

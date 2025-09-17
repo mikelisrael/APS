@@ -1,6 +1,6 @@
 import Alumnus from "@/components/shared/alumnus-tag";
+import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getInitials } from "@/lib/utils";
 import { IoPersonAddOutline } from "react-icons/io5";
@@ -23,7 +23,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
         fallback={getInitials(user.name)}
       />
 
-      <div className="flex-1 text-left">
+      <TransitionLink href={`/${user.username}`} className="flex-1 text-left">
         <h3 className="line-clamp-1 break-all text-sm font-semibold tracking-tight">
           {user.name}
         </h3>
@@ -35,7 +35,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
 
           {user.graduate && <Alumnus />}
         </div>
-      </div>
+      </TransitionLink>
 
       <Button variant="link" className="text-xs font-normal">
         <IoPersonAddOutline className="mr-1.5 size-4" />
