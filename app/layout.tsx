@@ -3,7 +3,7 @@ import ThemeColorUpdater from "@/components/shared/theme-color-updater";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 
@@ -21,7 +21,10 @@ export const metadata: Metadata = {
   description: "Connecting the students and Alumni of the university of ibadan",
   formatDetection: {
     telephone: false
-  },
+  }
+};
+
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "#121212" }
