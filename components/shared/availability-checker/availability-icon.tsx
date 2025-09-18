@@ -1,11 +1,5 @@
-import { Check, X, Loader2 } from "lucide-react";
-
-type AvailabilityStatus =
-  | "idle"
-  | "checking"
-  | "available"
-  | "unavailable"
-  | "error";
+import { Check, Loader2, X } from "lucide-react";
+import { AvailabilityStatus } from ".";
 
 interface AvailabilityIconProps {
   status: AvailabilityStatus;
@@ -28,6 +22,8 @@ export const AvailabilityIcon = ({
     case "unavailable":
       return <X className={`${className} text-red-600`} />;
     case "error":
+      return <X className={`${className} text-red-600`} />;
+    case "error-domain":
       return <X className={`${className} text-red-600`} />;
     default:
       return null;

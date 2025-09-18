@@ -10,9 +10,9 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { checkEmailExists, checkUsernameExists } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { forwardRef, useEffect } from "react";
+import { AvailabilityMessage, AvailabilityStatus } from ".";
 import { AvailabilityIcon } from "./availability-icon";
 import { getAvailabilityInputClassName } from "./availability-styles";
-import { AvailabilityMessage, AvailabilityStatus } from "./index";
 
 interface AvailabilityInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -77,10 +77,17 @@ export const AvailabilityInput = forwardRef<
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isValidEmail = emailRegex.test(debouncedInput);
         const isValidDomain = debouncedInput.endsWith("@stu.ui.edu.ng");
-        if (!isValidEmail || !isValidDomain) {
+
+        if (!isValidEmail) {
           setStatus("idle");
           return;
         }
+
+        if (isValidEmail && !isValidDomain) {
+          setStatus("error-domain");
+          return;
+        }
+
         setStatus("checking");
         try {
           const exists = await checkEmailExists(debouncedInput);

@@ -1,11 +1,5 @@
 import { cn } from "@/lib/utils";
-
-type AvailabilityStatus =
-  | "idle"
-  | "checking"
-  | "available"
-  | "unavailable"
-  | "error";
+import { AvailabilityStatus } from ".";
 
 interface AvailabilityMessageProps {
   status: AvailabilityStatus;
@@ -44,6 +38,11 @@ export const AvailabilityMessage = ({
         return (
           customMessages?.error || `Error checking ${fieldName} availability`
         );
+      case "error-domain":
+        return (
+          customMessages?.error ||
+          `${capitalizedField} should end with @stu.ui.edu.ng`
+        );
       default:
         return null;
     }
@@ -58,6 +57,8 @@ export const AvailabilityMessage = ({
       case "checking":
         return "text-muted-foreground";
       case "error":
+        return "text-red-600";
+      case "error-domain":
         return "text-red-600";
       default:
         return "";

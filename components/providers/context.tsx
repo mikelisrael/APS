@@ -1,7 +1,8 @@
 "use client";
 
-import { IAppContext } from "@/types";
 import React, { PropsWithChildren, useContext } from "react";
+
+interface IAppContext {}
 
 const AppContext = React.createContext<IAppContext | undefined>(undefined);
 
