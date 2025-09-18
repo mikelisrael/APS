@@ -29,7 +29,7 @@ export default function SignUpPage() {
       <div className="pointer-events-none absolute -inset-10 -z-[1] flex items-center justify-center bg-transparent [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
 
       <SuspenseLoader>
-        <Card className="mx-4 max-w-md">
+        <Card className="mx-4 max-w-md duration-700 animate-in fade-in-30 slide-in-from-bottom-10">
           <CardHeader className="text-center">
             <Logo className="mx-auto mb-5 size-8 text-primary" />
             <CardTitle className="text-xl">Join the Circle</CardTitle>

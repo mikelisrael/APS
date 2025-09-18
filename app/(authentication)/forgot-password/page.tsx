@@ -16,7 +16,7 @@ const ForgotPassword = () => {
   return (
     <main className="flex-center min-h-svh">
       <SuspenseLoader>
-        <Card className="mx-4 max-w-sm">
+        <Card className="mx-4 max-w-sm duration-700 animate-in fade-in-30 slide-in-from-bottom-10">
           <CardHeader className="text-center">
             <Logo className="mx-auto mb-5 size-8 text-primary" />
             <CardTitle className="text-xl">Forgot password</CardTitle>
