@@ -29,9 +29,10 @@ export async function updateProfilePicture(file: string) {
     if (uploadError) throw uploadError;
 
     // Use signed URL instead of public URL
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-      .from("avatars")
-      .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
+    const { data: signedUrlData, error: signedUrlError } =
+      await supabase.storage
+        .from("avatars")
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
 
     if (signedUrlError) throw signedUrlError;
 
@@ -47,6 +48,118 @@ export async function updateProfilePicture(file: string) {
 
     console.log("Generated signed URL:", avatarUrl);
     return { success: true, avatarUrl };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function updateCoverPhoto(file: string) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const base64Data = file.split(",")[1];
+    const blob = Buffer.from(base64Data, "base64");
+
+    const fileExt = file.split(";")[0].split("/")[1];
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const filePath = fileName;
+
+    // Check if the file exists first
+    const { data: existingFile } = await supabase.storage
+      .from("covers")
+      .list(user.id);
+
+    // Remove existing cover photo if it exists
+    if (existingFile && existingFile.length > 0) {
+      await supabase.storage
+        .from("covers")
+        .remove([`${user.id}/${existingFile[0].name}`]);
+    }
+
+    // Upload new cover photo
+    const { error: uploadError } = await supabase.storage
+      .from("covers")
+      .upload(`${user.id}/${fileName}`, blob, {
+        contentType: `image/${fileExt}`,
+        upsert: true
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: signedUrlData, error: signedUrlError } =
+      await supabase.storage
+        .from("covers")
+        .createSignedUrl(`${user.id}/${fileName}`, 60 * 60 * 24 * 365); // 1 year expiry
+
+    if (signedUrlError) throw signedUrlError;
+
+    const coverUrl = signedUrlData.signedUrl;
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        cover_photo: coverUrl
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return { success: true, coverUrl };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function updateProfile({
+  firstName,
+  lastName,
+  username,
+  studentType,
+  coverPhoto
+}: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  studentType: "undergraduate" | "alumnus";
+  coverPhoto?: string;
+}) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    // If a new cover photo is provided, upload it first
+    let coverUrl = user.user_metadata.cover_photo;
+    if (coverPhoto && coverPhoto !== coverUrl) {
+      const result = await updateCoverPhoto(coverPhoto);
+      if (result.error) throw new Error(result.error);
+      coverUrl = result.coverUrl;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
+        status: studentType,
+        cover_photo: coverUrl,
+        full_name: `${firstName} ${lastName}`
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+      message: "Profile updated successfully!"
+    };
   } catch (error: any) {
     return { error: error.message };
   }

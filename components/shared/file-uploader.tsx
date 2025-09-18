@@ -9,6 +9,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { Trash2, Upload } from "lucide-react";
 import NextImage from "next/image";
@@ -225,11 +226,14 @@ const FileUploader = ({
   return (
     <>
       <div
-        className={`relative flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
-          dragActive
-            ? "border-primary bg-primary/20"
-            : "border-input hover:border-gray-400"
-        }`}
+        className={cn(
+          `relative flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-all ${
+            dragActive
+              ? "border-primary bg-primary/20"
+              : "border-input hover:border-gray-400"
+          }`,
+          className
+        )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}

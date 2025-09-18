@@ -1,6 +1,6 @@
+import Alumnus from "@/components/shared/alumnus-tag";
 import ImageLoader from "@/components/shared/image-loader";
 import UserAvatar from "@/components/shared/user-avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-query-resource";
@@ -49,9 +49,7 @@ const ProfileHeader = () => {
                     Frontend Engineer
                   </span>
 
-                  <Badge variant="alumnus-filled" className="font-medium">
-                    Alumnus
-                  </Badge>
+                  <Alumnus showCircle={false} variant="alumnus-filled" />
                 </div>
 
                 <div className="flex-center gap-2 text-sm sm:w-max">

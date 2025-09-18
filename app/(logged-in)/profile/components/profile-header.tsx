@@ -1,7 +1,8 @@
+import Alumnus from "@/components/shared/alumnus-tag";
 import ImageLoader from "@/components/shared/image-loader";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
+import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuth, useModifyResource } from "@/hooks/use-query-resource";
@@ -50,20 +51,26 @@ const ProfileHeader = () => {
   const lastName = user?.user_metadata?.last_name || "";
   const fullName = `${firstName} ${lastName}`.trim() || "...";
   const avatar_url = user?.user_metadata?.avatar_url || "";
+  const username = user?.user_metadata?.username || "...";
+  const cover_photo = user?.user_metadata?.cover_photo || "";
 
   return (
     <>
       <Card className="col-span-2 h-auto shadow-none">
         <CardHeader className="relative p-4">
-          <ImageLoader
-            src="https://w.wallhaven.cc/full/y8/wallhaven-y85ojk.png"
-            alt="Cover Photo"
-            className="aspect-[4/1] w-full object-cover"
-          />
+          {cover_photo ? (
+            <ImageLoader
+              src={cover_photo}
+              alt="Cover Photo"
+              className="aspect-[4/1] w-full object-cover"
+            />
+          ) : (
+            <div className="aspect-[4/1] w-full bg-muted" />
+          )}
 
           <div className="absolute right-10 top-5">
-            <Button variant="secondary" size="sm">
-              Edit Profile
+            <Button asChild variant="secondary" size="sm">
+              <TransitionLink href="/profile/edit">Edit Profile</TransitionLink>
             </Button>
           </div>
         </CardHeader>
@@ -92,12 +99,10 @@ const ProfileHeader = () => {
 
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    Frontend Engineer
+                    @{username}
                   </span>
 
-                  <Badge variant="alumnus-filled" className="font-medium">
-                    Alumnus
-                  </Badge>
+                  <Alumnus showCircle={false} variant="alumnus-filled" />
                 </div>
               </div>
 
