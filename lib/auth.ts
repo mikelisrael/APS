@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 export async function checkEmailExists(email: string) {
   const supabase = await createClient();
 
-  // First check your custom users table
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("id")

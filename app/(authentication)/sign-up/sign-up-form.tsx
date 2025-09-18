@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  AvailabilityInput,
+  AvailabilityStatus
+} from "@/components/shared/availability-checker";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import {
@@ -12,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useFormState from "@/hooks/use-form-state";
+import { trimData } from "@/lib/utils";
 import { signUp } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -48,6 +53,10 @@ const formSchema = z.object({
 
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameStatus, setUsernameStatus] =
+    useState<AvailabilityStatus>("idle");
+  const [emailStatus, setEmailStatus] = useState<AvailabilityStatus>("idle");
+
   const { SubmitButton, status, setSubmitted, setLoading, setError } =
     useFormState();
 
@@ -63,18 +72,38 @@ const SignUpForm = () => {
     }
   });
 
+  const isFormValid = () => {
+    const formErrors = Object.keys(form.formState.errors).length === 0;
+    const usernameReady = usernameStatus === "available";
+    const emailReady = emailStatus === "available";
+    const hasAllFields = Object.values(form.getValues()).every(
+      (val) => val !== ""
+    );
+
+    return formErrors && usernameReady && emailReady && hasAllFields;
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (usernameStatus !== "available" || emailStatus !== "available") {
+      toast.error(
+        "Please ensure username and email are available before submitting."
+      );
+      return;
+    }
+
     setLoading();
 
     try {
-      const result = await signUp({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        username: values.username,
-        studentType: values.studentType,
-        email: values.email,
-        password: values.password
-      });
+      const result = await signUp(
+        trimData({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          username: values.username,
+          studentType: values.studentType,
+          email: values.email,
+          password: values.password
+        })
+      );
 
       if (result?.error) {
         setError(result.error);
@@ -82,6 +111,8 @@ const SignUpForm = () => {
         setSubmitted();
         toast.success(result?.message || "Account created successfully!");
         form.reset();
+        setUsernameStatus("idle");
+        setEmailStatus("idle");
       }
     } catch (error) {
       setError("Something went wrong. Please try again.");
@@ -131,19 +162,15 @@ const SignUpForm = () => {
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input
-                    id="username"
-                    placeholder="maxrobinson"
-                    {...field}
-                    onChange={(e) => {
-                      const value = e.target.value
-                        .toLowerCase()
-                        .replace(/[^a-z0-9_-]/g, "");
-                      field.onChange(value);
-                    }}
-                  />
-                </FormControl>
+                <AvailabilityInput
+                  checkingFor="username"
+                  status={usernameStatus}
+                  setStatus={setUsernameStatus}
+                  id="username"
+                  placeholder="maxrobinson"
+                  filterInput={true}
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -183,24 +210,27 @@ const SignUpForm = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <FormLabel>Student Email</FormLabel>
-                <FormControl>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@stu.ui.edu.ng"
-                    {...field}
-                  />
-                </FormControl>
+                <AvailabilityInput
+                  checkingFor="email"
+                  status={emailStatus}
+                  setStatus={setEmailStatus}
+                  id="email"
+                  type="email"
+                  placeholder="m@stu.ui.edu.ng"
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="password"
@@ -238,7 +268,12 @@ const SignUpForm = () => {
               </FormItem>
             )}
           />
-          <SubmitButton status={status} className="w-full">
+
+          <SubmitButton
+            status={status}
+            className="w-full"
+            disabled={!isFormValid() || status === "loading"}
+          >
             Create an account
           </SubmitButton>
         </form>

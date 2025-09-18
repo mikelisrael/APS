@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import useFormState from "@/hooks/use-form-state";
+import { trimData } from "@/lib/utils";
 import { login } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -43,9 +44,15 @@ const LoginForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading();
 
+    const trimmedData = trimData(values);
+
     try {
       const callbackUrl = searchParams.get("callbackUrl") || "/";
-      const result = await login(values.email, values.password, callbackUrl);
+      const result = await login(
+        trimmedData.email,
+        trimmedData.password,
+        callbackUrl
+      );
 
       if (result?.error) {
         setError(result.error);

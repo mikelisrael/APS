@@ -8,7 +8,8 @@ export default function UserNotFound() {
       <div className="space-y-3">
         <h1 className="text-4xl font-bold">User Not Found</h1>
         <p className="text-lg text-muted-foreground">
-          The user profile you&apos;re looking for doesn&apos;t exist.
+          The link you followed may be broken, or the page may have been
+          removed.
         </p>
       </div>
 

@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-// Update your updateProfilePicture function
 export async function updateProfilePicture(file: string) {
   try {
     const supabase = await createClient();
@@ -28,11 +27,10 @@ export async function updateProfilePicture(file: string) {
 
     if (uploadError) throw uploadError;
 
-    // Use signed URL instead of public URL
     const { data: signedUrlData, error: signedUrlError } =
       await supabase.storage
         .from("avatars")
-        .createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year expiry
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365);
 
     if (signedUrlError) throw signedUrlError;
 
@@ -69,19 +67,16 @@ export async function updateCoverPhoto(file: string) {
     const fileName = `${user.id}-${Date.now()}.${fileExt}`;
     const filePath = fileName;
 
-    // Check if the file exists first
     const { data: existingFile } = await supabase.storage
       .from("covers")
       .list(user.id);
 
-    // Remove existing cover photo if it exists
     if (existingFile && existingFile.length > 0) {
       await supabase.storage
         .from("covers")
         .remove([`${user.id}/${existingFile[0].name}`]);
     }
 
-    // Upload new cover photo
     const { error: uploadError } = await supabase.storage
       .from("covers")
       .upload(`${user.id}/${fileName}`, blob, {
@@ -94,7 +89,7 @@ export async function updateCoverPhoto(file: string) {
     const { data: signedUrlData, error: signedUrlError } =
       await supabase.storage
         .from("covers")
-        .createSignedUrl(`${user.id}/${fileName}`, 60 * 60 * 24 * 365); // 1 year expiry
+        .createSignedUrl(`${user.id}/${fileName}`, 60 * 60 * 24 * 365);
 
     if (signedUrlError) throw signedUrlError;
 
@@ -135,7 +130,6 @@ export async function updateProfile({
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    // If a new cover photo is provided, upload it first
     let coverUrl = user.user_metadata.cover_photo;
     if (coverPhoto && coverPhoto !== coverUrl) {
       const result = await updateCoverPhoto(coverPhoto);
