@@ -1,12 +1,54 @@
+import { createClient } from "@/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
 import ProfileClient from "./components/profile-client";
 
-export const metadata = {
-  title: "Profile",
-  description: "View profile information"
+export const generateMetadata = async ({
+  params
+}: {
+  params: { username: string };
+}) => {
+  const supabase = await createClient();
+  const { data: user } = await supabase
+    .from("users")
+    .select("first_name")
+    .ilike("username", params.username)
+    .single();
+
+  if (!user) {
+    return {
+      title: "Profile Not Found",
+      description: "This user profile does not exist"
+    };
+  }
+
+  return {
+    title: `${user.first_name}'s Profile`,
+    description: `View ${params.username}'s profile`
+  };
 };
 
-const Profile = () => {
-  return <ProfileClient />;
+const Profile = async ({ params }: { params: { username: string } }) => {
+  const supabase = await createClient();
+
+  const {
+    data: { user: session }
+  } = await supabase.auth.getUser();
+
+  const { data: user } = await supabase
+    .from("users")
+    .select("username, email, first_name, last_name")
+    .eq("username", params.username)
+    .single();
+
+  if (!user) {
+    notFound();
+  }
+
+  if (session?.email === user.email) {
+    redirect("/profile");
+  }
+
+  return <ProfileClient user={user} />;
 };
 
 export default Profile;

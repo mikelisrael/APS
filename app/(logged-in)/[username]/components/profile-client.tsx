@@ -7,7 +7,13 @@ import ProfileExperience from "./profile-experience";
 import ProfileHeader from "./profile-header";
 import ProfileSkills from "./profile-skills";
 
-const ProfileClient = () => {
+interface ProfileClientProps {
+  user: any;
+}
+
+const ProfileClient = ({ user }: ProfileClientProps) => {
+  console.log(user);
+
   return (
     <main className="safe-area ~space-y-4/5 ~px-2/5">
       <ProfileHeader />

@@ -23,7 +23,6 @@ const TransitionLink: React.FC<TransitionLinkProps> = ({
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
     e.preventDefault();
-    console.log("Navigating to:", href);
     const mainContent = document.querySelector(".main-content");
     mainContent?.classList.add("page-transition");
     await sleep(500);
