@@ -53,6 +53,7 @@ const ProfileHeader = () => {
   const avatar_url = user?.user_metadata?.avatar_url || "";
   const username = user?.user_metadata?.username || "...";
   const cover_photo = user?.user_metadata?.cover_photo || "";
+  const isAlumnus = user?.user_metadata?.status === "alumnus";
 
   return (
     <>
@@ -69,7 +70,7 @@ const ProfileHeader = () => {
           )}
 
           <div className="absolute right-10 top-5">
-            <Button asChild variant="secondary" size="sm">
+            <Button asChild variant="white" size="sm">
               <TransitionLink href="/profile/edit">Edit Profile</TransitionLink>
             </Button>
           </div>
@@ -102,7 +103,9 @@ const ProfileHeader = () => {
                     @{username}
                   </span>
 
-                  <Alumnus showCircle={false} variant="alumnus-filled" />
+                  {isAlumnus && (
+                    <Alumnus showCircle={false} variant="alumnus-filled" />
+                  )}
                 </div>
               </div>
 

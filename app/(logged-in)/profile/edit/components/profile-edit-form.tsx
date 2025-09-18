@@ -67,11 +67,14 @@ const ProfileEditForm = ({
     onFormChange?.(form.getValues());
   };
 
-  // Watch for form changes and notify parent
-  const formValues = form.watch();
+  // Watch for form changes and notify parent with debounce
   useEffect(() => {
-    onFormChange?.(formValues);
-  }, [formValues, onFormChange]);
+    const subscription = form.watch((value) => {
+      onFormChange?.(value as z.infer<typeof formSchema>);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, onFormChange]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading();
@@ -110,6 +113,7 @@ const ProfileEditForm = ({
               <FormLabel>Cover Photo</FormLabel>
               <FormControl>
                 <FileUploader
+                  id="cover-photo-uploader"
                   acceptedFileTypes={["image/*"]}
                   max={2}
                   onChange={handleImageUpload}

@@ -2,13 +2,13 @@
 
 import Alumnus from "@/components/shared/alumnus-tag";
 import ImageLoader from "@/components/shared/image-loader";
+import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-query-resource";
 import { ArrowLeft, Eye, PenSquare } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ProfileEditForm from "./profile-edit-form";
 
@@ -22,7 +22,6 @@ interface PreviewData {
 
 const EditProfileClient = () => {
   const { user } = useAuth();
-  const router = useRouter();
 
   const [formData, setFormData] = useState<PreviewData>({
     firstName:
@@ -44,11 +43,13 @@ const EditProfileClient = () => {
       <div className="mb-6">
         <Button
           variant="ghost"
+          asChild
           className="flex items-center gap-2 hover:bg-muted"
-          onClick={() => router.back()}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Profile
+          <TransitionLink href="/profile">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Profile
+          </TransitionLink>
         </Button>
       </div>
 
@@ -73,11 +74,15 @@ const EditProfileClient = () => {
         </TabsContent>
         <TabsContent value="preview">
           <Card className="relative overflow-hidden">
-            <ImageLoader
-              src={formData.coverPhoto || ""}
-              alt="Cover photo"
-              className="aspect-[4/1] w-full object-cover"
-            />
+            {formData.coverPhoto ? (
+              <ImageLoader
+                src={formData.coverPhoto || ""}
+                alt="Cover photo"
+                className="aspect-[4/1] w-full object-cover"
+              />
+            ) : (
+              <div className="aspect-[4/1] w-full bg-muted" />
+            )}
 
             <div className="p-6">
               <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">

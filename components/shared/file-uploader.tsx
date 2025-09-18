@@ -60,6 +60,7 @@ const formatFileSize = (sizeInBytes: number) => {
 };
 
 export interface FileUploaderProps {
+  id?: string;
   acceptedFileTypes: string[];
   max: number;
   enableCrop?: boolean;
@@ -72,6 +73,7 @@ export interface FileUploaderProps {
 }
 
 const FileUploader = ({
+  id,
   acceptedFileTypes = ["image/*"],
   max = 5,
   enableCrop = false,
@@ -221,7 +223,8 @@ const FileUploader = ({
     return Array.from(new Set(parts)).join(", ");
   };
 
-  const uploaderId = `file-uploader-${Math.random().toString(36).substring(2, 9)}`;
+  const uploaderId =
+    id || `file-uploader-${Math.random().toString(36).substring(2, 9)}`;
 
   return (
     <>
