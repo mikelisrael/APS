@@ -5,16 +5,20 @@ import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useAuth, useModifyResource } from "@/hooks/use-query-resource";
+import { useModifyResource } from "@/hooks/use-query-resource";
 import { updateProfilePicture } from "@/services/profile.service";
+import { AuthUserProfile } from "@/types/models";
 import { Camera } from "lucide-react";
 import { useState } from "react";
 import { IoPeopleOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import ProfilePictureUploader from "./profile-picture-uploader";
 
-const ProfileHeader = () => {
-  const { user } = useAuth();
+interface ProfileHeaderProps {
+  user: AuthUserProfile;
+}
+
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [uploadedFile, setUploadedFile] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -49,7 +53,7 @@ const ProfileHeader = () => {
 
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";
-  const fullName = `${firstName} ${lastName}`.trim() || "...";
+  const fullName = user?.user_metadata?.full_name || "...";
   const avatar_url = user?.user_metadata?.avatar_url || "";
   const username = user?.user_metadata?.username || "...";
   const cover_photo = user?.user_metadata?.cover_photo || "";

@@ -36,7 +36,7 @@ const Profile = async ({ params }: { params: { username: string } }) => {
 
   const { data: user } = await supabase
     .from("users")
-    .select("username, email, first_name, last_name")
+    .select("*")
     .eq("username", params.username)
     .single();
 
