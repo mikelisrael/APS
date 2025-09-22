@@ -47,7 +47,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
                     @{username}
                   </span>
 
-                  <Alumnus showCircle={false} variant="alumnus-filled" />
+                  {user.status === "alumnus" && (
+                    <Alumnus showCircle={false} variant="alumnus-filled" />
+                  )}
                 </div>
 
                 <div className="flex-center gap-2 text-sm sm:w-max">
