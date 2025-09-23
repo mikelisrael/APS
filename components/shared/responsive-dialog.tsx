@@ -56,7 +56,9 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   if (!isMobile) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className={cn("text-sm", className)}>
+        <DialogContent
+          className={cn("max-h-[85vh] overflow-y-auto text-sm", className)}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="sr-only">{title}</DialogDescription>
@@ -90,13 +92,13 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className={cn("text-sm", className)}>
+      <DrawerContent className={cn("max-h-[85vh] text-sm", className)}>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription className="sr-only">{title}</DrawerDescription>
         </DrawerHeader>
 
-        <div className="px-4 pt-2">{children}</div>
+        <div className="grow overflow-y-auto px-4 pt-2">{children}</div>
 
         <DrawerFooter>
           <DrawerClose asChild className="w-full" onClick={() => onClose?.()}>

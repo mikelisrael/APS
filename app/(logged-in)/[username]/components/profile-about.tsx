@@ -16,7 +16,9 @@ const ProfileAbout = () => {
           <p>
             Passionate software engineer with expertise in React, TypeScript,
             and Node.js working with 7+ years of experience building scalable
-            web applications.
+            web applications. Passionate software engineer with expertise in
+            React, TypeScript, and Node.js working with 7+ years of experience
+            building scalable web applications.
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">

@@ -158,3 +158,46 @@ export async function updateProfile({
     return { error: error.message };
   }
 }
+
+export async function updateProfileAbout({
+  about,
+  email,
+  websiteTitle,
+  websiteUrl
+}: {
+  about?: string;
+  email?: string;
+  websiteTitle?: string;
+  websiteUrl?: string;
+}) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        profile: {
+          about: about || "",
+          email: email || "",
+          website: {
+            title: websiteTitle || undefined,
+            url: websiteUrl || undefined
+          }
+        }
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+      message: "Profile about updated successfully!"
+    };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
