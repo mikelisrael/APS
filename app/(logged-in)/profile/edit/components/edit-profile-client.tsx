@@ -74,15 +74,12 @@ const EditProfileClient = () => {
         </TabsContent>
         <TabsContent value="preview">
           <Card className="relative overflow-hidden">
-            {formData.coverPhoto ? (
-              <ImageLoader
-                src={formData.coverPhoto || ""}
-                alt="Cover photo"
-                className="aspect-[4/1] w-full object-cover"
-              />
-            ) : (
-              <div className="aspect-[4/1] w-full bg-muted" />
-            )}
+            <ImageLoader
+              src={formData.coverPhoto || "/cover-placeholder.png"}
+              alt="Cover Photo"
+              className="aspect-[4/1] w-full bg-muted object-cover"
+              showLoader={false}
+            />
 
             <div className="p-6">
               <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">

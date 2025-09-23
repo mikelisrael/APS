@@ -51,8 +51,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
     handleUploadMutation(undefined);
   };
 
-  const firstName = user?.user_metadata?.first_name || "";
-  const lastName = user?.user_metadata?.last_name || "";
   const fullName = user?.user_metadata?.full_name || "...";
   const avatar_url = user?.user_metadata?.avatar_url || "";
   const username = user?.user_metadata?.username || "...";
@@ -63,15 +61,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
     <>
       <Card className="col-span-2 h-auto shadow-none">
         <CardHeader className="relative p-4">
-          {cover_photo ? (
-            <ImageLoader
-              src={cover_photo}
-              alt="Cover Photo"
-              className="aspect-[4/1] w-full object-cover"
-            />
-          ) : (
-            <div className="aspect-[4/1] w-full bg-muted" />
-          )}
+          <ImageLoader
+            src={cover_photo || "/cover-placeholder.png"}
+            alt="Cover Photo"
+            className="aspect-[4/1] w-full bg-muted object-cover"
+            showLoader={false}
+          />
 
           <div className="absolute right-10 top-5">
             <Button asChild variant="white" size="sm">
@@ -84,7 +79,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
             <div className="flex-center group relative ~-mt-7/16">
               <UserAvatar
                 src={avatar_url}
-                fallback={`${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase()}
                 className="size-32 border-[6px] border-background"
               />
 

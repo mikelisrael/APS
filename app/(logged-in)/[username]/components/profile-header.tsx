@@ -24,9 +24,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
       <Card className="col-span-2 h-auto shadow-none">
         <CardHeader className="relative p-4">
           <ImageLoader
-            src={cover_photo}
+            src={cover_photo || "/cover-placeholder.png"}
             alt="Cover Photo"
-            className="aspect-[4/1] w-full object-cover"
+            className="aspect-[4/1] w-full bg-muted object-cover"
+            showLoader={false}
           />
         </CardHeader>
         <CardContent>
