@@ -54,14 +54,12 @@ interface AboutEditFormProps {
     websiteTitle?: string;
     websiteUrl?: string;
   };
-  onFormSubmit: () => void;
   setIsFormValid: React.Dispatch<React.SetStateAction<boolean>>;
   onFormChange?: (values: z.infer<typeof formSchema>) => void;
 }
 
 const AboutEditForm: React.FC<AboutEditFormProps> = ({
   profile,
-  onFormSubmit,
   setIsFormValid,
   onFormChange
 }) => {
@@ -90,17 +88,9 @@ const AboutEditForm: React.FC<AboutEditFormProps> = ({
     return () => subscription.unsubscribe();
   }, [form, setIsFormValid, onFormChange]);
 
-  async function handleSubmit(values: z.infer<typeof formSchema>) {
-    onFormSubmit();
-  }
-
   return (
     <Form {...form}>
-      <form
-        id="profile-edit-form"
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="h-full space-y-6 overflow-y-auto"
-      >
+      <form id="profile-edit-form" className="h-full space-y-6 overflow-y-auto">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />

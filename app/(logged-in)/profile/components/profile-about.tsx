@@ -164,7 +164,6 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile }) => {
           profile={formData}
           setIsFormValid={setIsFormValid}
           onFormChange={handleFormChange}
-          onFormSubmit={handleSubmit}
         />
       </ResponsiveDialog>
     </>
