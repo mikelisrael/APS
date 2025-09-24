@@ -231,3 +231,63 @@ export async function updateProfileSkills(skills: string[]) {
     return { error: error.message || "Failed to update skills" };
   }
 }
+
+export async function updateProfileExperiences(experiences: any[]) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        ...user.user_metadata,
+        profile: {
+          ...(user.user_metadata?.profile || {}),
+          experiences
+        }
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+      message: "Experience updated successfully!"
+    };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update experience" };
+  }
+}
+
+export async function updateProfileEducation(education: any[]) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        ...user.user_metadata,
+        profile: {
+          ...(user.user_metadata?.profile || {}),
+          education
+        }
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+      message: "Education updated successfully!"
+    };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update education" };
+  }
+}
