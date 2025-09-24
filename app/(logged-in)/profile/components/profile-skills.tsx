@@ -3,12 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import useFormState from "@/hooks/use-form-state";
 import { useModifyResource } from "@/hooks/use-query-resource";
+import { trimData } from "@/lib/utils";
+import { updateProfileSkills } from "@/services/profile.service";
 import { Plus, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import SkillsEditForm from "./profile-skills-edit-form";
-import { trimData } from "@/lib/utils";
-import { updateProfileSkills } from "@/services/profile.service";
 
 interface ProfileSkillsProps {
   skills: string[];
@@ -18,7 +18,7 @@ const ProfileSkills: React.FC<ProfileSkillsProps> = ({ skills }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState(skills);
   const [isFormValid, setIsFormValid] = useState(false);
-  const { setLoading, setError, setSubmitted, isLoading } = useFormState();
+  const { setLoading, setError, isLoading } = useFormState();
 
   useEffect(() => {
     setFormData(skills);
