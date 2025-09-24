@@ -11,6 +11,8 @@ import ProfileSkills from "./profile-skills";
 const ProfileClient = () => {
   const { user } = useAuth();
 
+  // console.log(user?.user_metadata);
+
   return (
     <main className="safe-area ~space-y-4/5 ~px-2/5">
       <ProfileHeader user={user} />
@@ -23,7 +25,7 @@ const ProfileClient = () => {
         </section>
 
         <section className="~space-y-4/5">
-          <ProfileSkills />
+          <ProfileSkills skills={user?.user_metadata?.profile?.skills} />
           <ProfileConnections />
         </section>
       </section>

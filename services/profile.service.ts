@@ -201,3 +201,33 @@ export async function updateProfileAbout({
     return { error: error.message };
   }
 }
+
+export async function updateProfileSkills(skills: string[]) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        ...user.user_metadata,
+        profile: {
+          ...(user.user_metadata?.profile || {}),
+          skills
+        }
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    return {
+      success: true,
+      message: "Skills updated successfully!"
+    };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update skills" };
+  }
+}
