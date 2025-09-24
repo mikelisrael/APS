@@ -91,12 +91,14 @@ const ProfileEducation: React.FC<ProfileEducationProps> = ({ education }) => {
 
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-foreground">
-                      {edu.degree}
-                      {edu.fieldOfStudy && ` in ${edu.fieldOfStudy}`}
+                      {edu.institution}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      {edu.institution}
-                      {edu.location && ` • ${edu.location}`}
+                      {edu.degree}
+                      {edu.fieldOfStudy && ` in ${edu.fieldOfStudy}`}{" "}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {edu.location && ` ${edu.location}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(edu.startDate)} -{" "}

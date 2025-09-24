@@ -1,3 +1,4 @@
+import { SuspenseLoader } from "@/components/ui/loaders";
 import ProfileClient from "./components/profile-client";
 
 export const metadata = {
@@ -6,7 +7,11 @@ export const metadata = {
 };
 
 const Profile = () => {
-  return <ProfileClient />;
+  return (
+    <SuspenseLoader>
+      <ProfileClient />
+    </SuspenseLoader>
+  );
 };
 
 export default Profile;

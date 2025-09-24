@@ -1,5 +1,6 @@
 "use client";
 
+import { LoaderSpinner } from "@/components/ui/loaders";
 import { useAuth } from "@/hooks/use-query-resource";
 import ProfileAbout from "./profile-about";
 import ProfileConnections from "./profile-connections";
@@ -9,9 +10,9 @@ import ProfileHeader from "./profile-header";
 import ProfileSkills from "./profile-skills";
 
 const ProfileClient = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  // console.log(user?.user_metadata);
+  if (isLoading) return <LoaderSpinner fullPage />;
 
   return (
     <main className="safe-area ~space-y-4/5 ~px-2/5">
