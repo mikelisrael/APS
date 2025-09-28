@@ -17,7 +17,11 @@ const badgeVariants = cva(
           "border-transparent bg-transparent p-0 text-amber-600 dark:text-amber-500 font-semibold",
         ["alumnus-filled"]:
           "border-transparent bg-amber-600/10 border-amber-600/40 text-amber-600 font-semibold dark:text-amber-500",
-        primary: "border-transparent bg-primary/20 text-primary"
+        primary: "border-transparent bg-primary/20 text-primary",
+        ["part-time"]:
+          "border-transparent bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400",
+        internship:
+          "border-transparent bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400"
       }
     },
     defaultVariants: {

@@ -1,5 +1,17 @@
+import { SuspenseLoader } from "@/components/ui/loaders";
+import JobsClient from "./components/jobs-client";
+
+export const metadata = {
+  title: "Job Postings",
+  description: "View and apply for job postings"
+};
+
 const JobPosting = () => {
-  return <h1 className="text-4xl">THIS IS THE JOBS PAGE</h1>;
+  return (
+    <SuspenseLoader>
+      <JobsClient />
+    </SuspenseLoader>
+  );
 };
 
 export default JobPosting;
