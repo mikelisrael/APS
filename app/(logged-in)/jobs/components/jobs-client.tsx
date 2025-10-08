@@ -22,7 +22,7 @@ import {
 import { useDebounce } from "@/hooks/use-debounce";
 import emptyAnimation from "@/public/animations/emptyBusiness.json";
 import Lottie from "lottie-react";
-import { Building, Filter, MapPin, Search } from "lucide-react";
+import { Briefcase, Building, Filter, MapPin, Search } from "lucide-react";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -317,6 +317,11 @@ const JobsClient = () => {
                   <h3 className="w-max font-semibold">{job.title}</h3>
 
                   <div className="flex-center w-max gap-2 text-sm">
+                    <div className="flex-center gap-1">
+                      <Briefcase size={18} />
+                      <span className="text-muted-foreground">Mid-Level</span>
+                    </div>
+
                     <div className="flex-center gap-1">
                       <Building size={18} />
                       <span className="text-muted-foreground">
