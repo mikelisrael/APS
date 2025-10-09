@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { VariantProps } from "class-variance-authority";
 import React from "react";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 
 interface ResponsiveDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ interface ResponsiveDialogProps {
   onSubmit?: () => void;
   disabledSubmit?: boolean;
   submitButtonText?: string;
+  submitButtonVariant?: VariantProps<typeof buttonVariants>["variant"];
   loading?: boolean;
   title: string;
 }
@@ -49,6 +51,7 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   disabledSubmit,
   onSubmit,
   submitButtonText = "Save",
+  submitButtonVariant = "default",
   loading
 }) => {
   const isMobile = useIsMobile(mobileBreakpoint);
@@ -79,6 +82,7 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
                 className="flex-1 gap-1"
                 onClick={() => onSubmit?.()}
                 disabled={disabledSubmit || loading}
+                variant={submitButtonVariant}
               >
                 {loading && <Spinner size={18} />}
                 {submitButtonText}
@@ -108,6 +112,7 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
             className="w-full gap-1"
             onClick={() => onSubmit?.()}
             disabled={disabledSubmit || loading}
+            variant={submitButtonVariant}
           >
             {loading && <Spinner size={18} />}
             {submitButtonText}

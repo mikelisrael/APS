@@ -109,14 +109,43 @@ export async function rejectConnectionRequest(
 
 /**
  * Delete a connection permanently
+ * Only the requester or receiver can delete the connection
  */
 export async function removeConnection(connectionId: string): Promise<void> {
-  const { error } = await createClient()
+  const user = await getCurrentUser();
+  const supabase = createClient();
+
+  // First verify the user is part of this connection
+  const { data: connection, error: fetchError } = await supabase
+    .from("connections")
+    .select("*")
+    .eq("id", connectionId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  if (!connection) {
+    throw new Error("Connection not found");
+  }
+
+  // Check if current user is either the requester or receiver
+  if (
+    connection.requester_id !== user.id &&
+    connection.receiver_id !== user.id
+  ) {
+    throw new Error("You don't have permission to remove this connection");
+  }
+
+  // Delete the connection
+  const { error } = await supabase
     .from("connections")
     .delete()
     .eq("id", connectionId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Delete error:", error);
+    throw error;
+  }
 }
 
 /**
@@ -194,7 +223,7 @@ export async function getPendingRequests() {
       `
       *,
       user:users!connections_requester_id_fkey(
-        id, username, first_name, last_name, avatar_url, status
+        id, username, first_name, last_name, avatar_url, status, full_name
       )
     `
     )
@@ -235,7 +264,9 @@ export async function getConnectionSuggestions(
   // Build query for suggestions
   let query = supabase
     .from("users")
-    .select("id, username, first_name, last_name, avatar_url, status")
+    .select(
+      "id, username, first_name, last_name, avatar_url, status, full_name"
+    )
     .not("id", "in", `(${excludeIds.join(",")})`);
 
   // Apply status filter if provided

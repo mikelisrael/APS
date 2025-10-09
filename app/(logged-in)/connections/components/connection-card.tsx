@@ -5,7 +5,7 @@ import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserProfile } from "@/types/models";
-import { Check, SendHorizontal, X } from "lucide-react";
+import { Check, UserRoundPlus, X } from "lucide-react";
 import Link from "next/link";
 
 interface ConnectionCardProps {
@@ -81,7 +81,7 @@ export const ConnectionCard = ({
                 onClick={onConnect}
                 disabled={isConnecting}
               >
-                <SendHorizontal className="mr-1 size-4" />
+                <UserRoundPlus className="mr-2 h-4 w-4" />
                 {isConnecting ? "Connecting..." : "Connect"}
               </Button>
             )}

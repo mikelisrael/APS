@@ -1,4 +1,5 @@
 import Alumnus from "@/components/shared/alumnus-tag";
+import ResponsiveDialog from "@/components/shared/responsive-dialog";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,47 +21,69 @@ interface SingleConnectionProps {
 }
 
 const SingleConnection = ({ connection }: SingleConnectionProps) => {
+  const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
   const removeConnectionMutation = useRemoveConnection();
 
   const handleRemove = () => {
-    removeConnectionMutation.mutate(connection.id);
+    removeConnectionMutation.mutate(connection.id, {
+      onSuccess: () => {
+        setOpenRemoveDialog(false);
+      }
+    });
   };
 
   return (
-    <li className="flex items-center gap-3 py-3">
-      <UserAvatar
-        className="size-14"
-        src={connection.user.avatar_url}
-        alt={`${connection.user.first_name} ${connection.user.last_name}`}
-      />
-      <div className="grow">
-        <h2 className="font-medium">{connection.user.full_name}</h2>
-        <div className="mt-1 flex items-center gap-1 text-xs">
-          <span className="line-clamp-1 break-all text-muted-foreground">
-            @{connection.user.username}
-          </span>
-          {connection.user.status === "alumnus" && <Alumnus />}
+    <>
+      <li className="flex items-center gap-3 py-3">
+        <UserAvatar
+          className="size-14"
+          src={connection.user.avatar_url}
+          alt={`${connection.user.first_name} ${connection.user.last_name}`}
+        />
+        <div className="grow">
+          <h2 className="font-medium">{connection.user.full_name}</h2>
+          <div className="mt-1 flex items-center gap-1 text-xs">
+            <span className="line-clamp-1 break-all text-muted-foreground">
+              @{connection.user.username}
+            </span>
+            {connection.user.status === "alumnus" && <Alumnus />}
+          </div>
         </div>
-      </div>
-      <div className="flex-center">
-        <Button variant="link" className="text-xs" size="sm" asChild>
-          <Link href={`/chat/${connection.user.username}`}>
-            <MessageCircle className="mr-1 size-4" />
-            Message
-          </Link>
-        </Button>
-        <Button
-          className="text-xs text-red-500 dark:text-red-600"
-          variant="link"
-          size="sm"
-          onClick={handleRemove}
-          disabled={removeConnectionMutation.isPending}
-        >
-          <UserRoundX className="mr-1 size-4" />
-          {removeConnectionMutation.isPending ? "Removing..." : "Remove"}
-        </Button>
-      </div>
-    </li>
+        <div className="flex-center">
+          <Button variant="link" className="text-xs" size="sm" asChild>
+            <Link href={`/chat/${connection.user.username}`}>
+              <MessageCircle className="mr-1 size-4" />
+              Message
+            </Link>
+          </Button>
+          <Button
+            className="text-xs text-red-500 dark:text-red-600"
+            variant="link"
+            size="sm"
+            onClick={() => setOpenRemoveDialog(true)}
+            disabled={removeConnectionMutation.isPending}
+          >
+            <UserRoundX className="mr-1 size-4" />
+            {removeConnectionMutation.isPending ? "Removing..." : "Remove"}
+          </Button>
+        </div>
+      </li>
+
+      <ResponsiveDialog
+        open={openRemoveDialog}
+        onOpenChange={setOpenRemoveDialog}
+        title="Remove Connection"
+        submitButtonText="Remove"
+        submitButtonVariant="destructive"
+        onSubmit={handleRemove}
+        loading={removeConnectionMutation.isPending}
+        className="max-w-sm"
+      >
+        Are you sure you want to remove
+        <span className="font-semibold"> {connection.user.full_name} </span>
+        from your connections?
+      </ResponsiveDialog>
+    </>
   );
 };
 
