@@ -4,9 +4,12 @@ import Alumnus from "@/components/shared/alumnus-tag";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useMutualConnectionCount } from "@/hooks/use-user-connections";
+import { createClient } from "@/lib/supabase/client";
 import { UserProfile } from "@/types/models";
-import { Check, UserRoundPlus, X } from "lucide-react";
+import { Check, UserRoundPlus, Users2, X } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface ConnectionCardProps {
   user: UserProfile;
@@ -49,6 +52,7 @@ export const ConnectionCard = ({
             </span>
             {user.status === "alumnus" && <Alumnus />}
           </div>
+          <MutualConnectionCount userId={user.id} />
           <div className="mt-2 flex" onClick={(e) => e.stopPropagation()}>
             {type === "pending" ? (
               <>
@@ -89,6 +93,36 @@ export const ConnectionCard = ({
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const MutualConnectionCount = ({ userId }: { userId: string }) => {
+  const [currentUserId, setCurrentUserId] = useState<string>();
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const {
+        data: { user }
+      } = await createClient().auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  const { data: count, isLoading } = useMutualConnectionCount(
+    currentUserId || "",
+    userId
+  );
+
+  if (isLoading || !count) return null;
+
+  return (
+    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Users2 className="size-3" />
+      {count} mutual connection{count !== 1 && "s"}
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 import { useGetResource } from "@/hooks/use-query-resource";
 import {
+  getMutualConnectionCount,
   getUserConnectionCount,
   getUserConnections
 } from "@/services/user-connections.service";
@@ -37,6 +38,23 @@ export const useUserConnectionCount = (userId: string) => {
     enabled: !!userId,
     onError: (error) => {
       console.error("Error fetching connection count:", error);
+      return 0;
+    }
+  });
+};
+
+/**
+ * Hook for fetching the number of mutual connections between two users
+ * @param userAId - First user's ID
+ * @param userBId - Second user's ID
+ */
+export const useMutualConnectionCount = (userAId: string, userBId: string) => {
+  return useGetResource({
+    key: ["mutualConnections", userAId, userBId],
+    fn: () => getMutualConnectionCount(userAId, userBId),
+    enabled: !!(userAId && userBId),
+    onError: (error) => {
+      console.error("Error fetching mutual connections:", error);
       return 0;
     }
   });

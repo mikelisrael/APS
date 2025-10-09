@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/client";
 import type {
   Connection,
   ConnectionStats,
-  ConnectionWithProfiles,
   InsertConnection,
   UpdateConnection
 } from "@/types/connection";

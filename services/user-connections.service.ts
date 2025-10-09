@@ -80,3 +80,22 @@ export async function getUserConnectionCount(userId: string) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * Get the number of mutual connections between two users
+ * @param userAId - First user's ID
+ * @param userBId - Second user's ID
+ * @returns The number of mutual connections between the users
+ */
+export async function getMutualConnectionCount(
+  userAId: string,
+  userBId: string
+) {
+  const { data, error } = await createClient().rpc(
+    "get_mutual_connection_count",
+    { user_a_id: userAId, user_b_id: userBId }
+  );
+
+  if (error) throw error;
+  return data;
+}
