@@ -41,7 +41,12 @@ const SingleConnection = ({ connection }: SingleConnectionProps) => {
           alt={`${connection.user.first_name} ${connection.user.last_name}`}
         />
         <div className="grow">
-          <h2 className="font-medium">{connection.user.full_name}</h2>
+          <Link
+            href={`/${connection.user.username}`}
+            className="font-medium hover:underline"
+          >
+            {connection.user.full_name}
+          </Link>
           <div className="mt-1 flex items-center gap-1 text-xs">
             <span className="line-clamp-1 break-all text-muted-foreground">
               @{connection.user.username}
