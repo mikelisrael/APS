@@ -19,13 +19,13 @@ const ProfileClient = ({ user }: ProfileClientProps) => {
 
       <section className="grid ~gap-4/5 lg:grid-cols-[1fr,280px]">
         <section className="~space-y-4/5">
-          <ProfileAbout />
-          <ProfileExperience />
-          <ProfileEducation />
+          <ProfileAbout user={user} />
+          <ProfileExperience user={user} />
+          <ProfileEducation user={user} />
         </section>
 
         <section className="~space-y-4/5">
-          <ProfileSkills />
+          <ProfileSkills user={user} />
           <ProfileConnections />
         </section>
       </section>

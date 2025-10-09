@@ -5,6 +5,8 @@ export interface VerificationStatus {
   phone_verified: boolean;
 }
 
+import { Profile } from "./profile";
+
 export interface RawUserMetaData extends VerificationStatus {
   avatar_url: ImageURL;
   cover_photo: ImageURL;
@@ -15,6 +17,7 @@ export interface RawUserMetaData extends VerificationStatus {
   status: "undergraduate" | "alumnus";
   sub: string;
   username: string;
+  profile?: Profile;
 }
 
 export interface UserProfile {
@@ -44,7 +47,6 @@ interface UserMetadata {
   phone_verified?: boolean;
   [key: string]: any;
 }
-
 
 export interface AuthUserProfile {
   aud: string;
