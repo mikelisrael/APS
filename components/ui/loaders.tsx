@@ -4,18 +4,25 @@ import { Suspense } from "react";
 
 interface LoaderProps extends React.PropsWithChildren {
   fullPage?: boolean;
+  text?: string;
+  className?: string;
 }
 
-export const LoaderSpinner = ({ fullPage }: LoaderProps) => {
+export const LoaderSpinner = ({
+  fullPage,
+  text = "Loading...",
+  className
+}: LoaderProps) => {
   return (
     <div
       className={cn(
         "flex size-full items-center justify-center gap-2 text-muted-foreground opacity-80",
-        fullPage && "h-svh w-full"
+        fullPage && "h-svh w-full",
+        className
       )}
     >
       <LoaderCircle size={20} className="animate-spin" />
-      <span className="text-sm">Loading...</span>
+      <span className="text-sm">{text}</span>
     </div>
   );
 };

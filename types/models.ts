@@ -27,7 +27,7 @@ export interface UserProfile {
   last_name: string;
   full_name: string;
   username: string;
-  status: "undergraduate" | "postgraduate" | string;
+  status: "undergraduate" | "alumnus";
   avatar_url: ImageURL;
   cover_photo: ImageURL;
   created_at: string;

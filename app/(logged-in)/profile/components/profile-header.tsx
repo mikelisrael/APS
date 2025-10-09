@@ -1,4 +1,5 @@
 import Alumnus from "@/components/shared/alumnus-tag";
+import ConnectionCount from "@/components/shared/connection-count";
 import ImageLoader from "@/components/shared/image-loader";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
 import TransitionLink from "@/components/shared/transition-link";
@@ -10,7 +11,6 @@ import { updateProfilePicture } from "@/services/profile.service";
 import { AuthUserProfile } from "@/types/models";
 import { Camera } from "lucide-react";
 import { useState } from "react";
-import { IoPeopleOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import ProfilePictureUploader from "./profile-picture-uploader";
 
@@ -107,10 +107,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
                 </div>
               </div>
 
-              <div className="flex-center gap-2 text-sm">
-                <IoPeopleOutline size={20} />
-                48 Connections
-              </div>
+              <ConnectionCount userId={user.id} />
             </div>
           </section>
         </CardContent>

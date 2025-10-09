@@ -1,19 +1,16 @@
 import Alumnus from "@/components/shared/alumnus-tag";
+import ConnectionCount from "@/components/shared/connection-count";
 import ImageLoader from "@/components/shared/image-loader";
 import UserAvatar from "@/components/shared/user-avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { UserProfile } from "@/types/models";
-import { useState } from "react";
-import { IoPeopleOutline } from "react-icons/io5";
+import ConnectionButton from "./connection-button";
 
 interface ProfileHeaderProps {
   user: UserProfile;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
-
   const fullName = user.full_name || "...";
   const avatar_url = user.avatar_url || "";
   const username = user.username || "...";
@@ -53,13 +50,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
                   )}
                 </div>
 
-                <div className="flex-center gap-2 text-sm sm:w-max">
-                  <IoPeopleOutline size={20} />
-                  48 Connections
-                </div>
+                <ConnectionCount userId={user.id} />
               </div>
 
-              <Button size="sm">Message</Button>
+              <div className="flex items-center gap-2">
+                <ConnectionButton userId={user.id} />
+              </div>
             </section>
           </div>
         </CardContent>

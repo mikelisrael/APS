@@ -1,10 +1,10 @@
 import {
-  UsersRound,
   BellIcon,
   BriefcaseBusiness,
   HomeIcon,
   MessageCircle,
   User2,
+  UsersRound
 } from "lucide-react";
 
 type NavigationItem = {
@@ -23,6 +23,11 @@ export const navigationItems: NavigationItem[] = [
     title: "Notifications",
     Icon: BellIcon,
     href: "/notifications"
+  },
+  {
+    title: "Connections",
+    Icon: UsersRound,
+    href: "/connections?tab=connections"
   },
   {
     title: "Chat",
