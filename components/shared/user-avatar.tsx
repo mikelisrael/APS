@@ -6,11 +6,12 @@ type Props = {
   alt?: string;
   className?: string;
   fallback?: string;
+  onClick?: () => void;
 };
 
-const UserAvatar = ({ className, src, alt, fallback }: Props) => {
+const UserAvatar = ({ className, src, alt, fallback, onClick }: Props) => {
   return (
-    <Avatar className={className}>
+    <Avatar className={className} onClick={onClick}>
       <AvatarImage src={src} alt={alt} />
       <AvatarFallback>
         {fallback ?? (

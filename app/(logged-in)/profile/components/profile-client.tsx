@@ -1,9 +1,9 @@
 "use client";
 
+import ProfileConnections from "@/components/shared/profile-connections";
 import { LoaderSpinner } from "@/components/ui/loaders";
 import { useAuth } from "@/hooks/use-query-resource";
 import ProfileAbout from "./profile-about";
-import ProfileConnections from "./profile-connections";
 import ProfileEducation from "./profile-education";
 import ProfileExperience from "./profile-experience";
 import ProfileHeader from "./profile-header";
@@ -31,7 +31,7 @@ const ProfileClient = () => {
 
         <section className="~space-y-4/5">
           <ProfileSkills skills={user?.user_metadata?.profile?.skills} />
-          <ProfileConnections />
+          <ProfileConnections userId={user?.id as string} />
         </section>
       </section>
     </main>

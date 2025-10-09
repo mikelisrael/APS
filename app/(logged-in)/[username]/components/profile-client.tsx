@@ -1,8 +1,8 @@
 "use client";
 
+import ProfileConnections from "@/components/shared/profile-connections";
 import { UserProfile } from "@/types/models";
 import ProfileAbout from "./profile-about";
-import ProfileConnections from "./profile-connections";
 import ProfileEducation from "./profile-education";
 import ProfileExperience from "./profile-experience";
 import ProfileHeader from "./profile-header";
@@ -26,7 +26,7 @@ const ProfileClient = ({ user }: ProfileClientProps) => {
 
         <section className="~space-y-4/5">
           <ProfileSkills user={user} />
-          <ProfileConnections />
+          <ProfileConnections userId={user?.id as string} />
         </section>
       </section>
     </main>
