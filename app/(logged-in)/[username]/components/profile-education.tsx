@@ -26,7 +26,7 @@ const ProfileEducation: React.FC<ProfileEducationProps> = ({ user }) => {
               <div key={index} className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <GraduationCap size={20} className="text-primary" />
+                    <GraduationCap size={23} className="text-primary" />
                   </div>
                 </div>
 
