@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -55,6 +55,33 @@ const SkillsEditForm: React.FC<SkillsEditFormProps> = ({
     name: "skills"
   });
 
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const prevFieldsLength = useRef(fields.length);
+  const initialRenderRef = useRef(true);
+
+  const adjustInputWidth = (index: number) => {
+    const input = inputRefs.current[index];
+    if (input) {
+      // Reset to min width first
+      input.style.width = "5rem";
+
+      const style = window.getComputedStyle(input);
+      const paddingLeft = parseFloat(style.paddingLeft);
+      const paddingRight = parseFloat(style.paddingRight);
+      const totalPadding = paddingLeft + paddingRight;
+
+      // Calculate new width based on content
+      const newWidth = Math.max(input.scrollWidth + totalPadding, 80);
+
+      // Get parent container width
+      const parentWidth =
+        input.parentElement?.parentElement?.parentElement?.offsetWidth || 0;
+
+      // Set width with max of 100% of parent
+      input.style.width = `${Math.min(newWidth, parentWidth)}px`;
+    }
+  };
+
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (onFormChange && value.skills) {
@@ -63,7 +90,28 @@ const SkillsEditForm: React.FC<SkillsEditFormProps> = ({
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, onFormChange]);
+  }, [form, onFormChange, setIsFormValid]);
+
+  useEffect(() => {
+    // Focus on newly added field
+    if (fields.length > prevFieldsLength.current) {
+      const newIndex = fields.length - 1;
+      inputRefs.current[newIndex]?.focus();
+    }
+    prevFieldsLength.current = fields.length;
+  }, [fields.length]);
+
+  useEffect(() => {
+    // Adjust all input widths on initial render
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false;
+      setTimeout(() => {
+        fields.forEach((_, index) => {
+          adjustInputWidth(index);
+        });
+      }, 0);
+    }
+  }, [fields]);
 
   const addSkillField = () => {
     append({ value: "" });
@@ -72,6 +120,12 @@ const SkillsEditForm: React.FC<SkillsEditFormProps> = ({
   const removeSkillField = (index: number) => {
     if (fields.length > 1) {
       remove(index);
+      // Focus previous input after removal
+      if (index > 0) {
+        setTimeout(() => {
+          inputRefs.current[index - 1]?.focus();
+        }, 0);
+      }
     }
   };
 
@@ -84,7 +138,7 @@ const SkillsEditForm: React.FC<SkillsEditFormProps> = ({
             your capabilities
           </FormDescription>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-start gap-3">
             {fields.map((field, index) => (
               <FormField
                 key={field.id}
@@ -96,8 +150,26 @@ const SkillsEditForm: React.FC<SkillsEditFormProps> = ({
                       <div className="relative">
                         <Input
                           placeholder={`Skill ${index + 1}`}
-                          className="w-32 rounded-full pr-12 text-sm"
+                          className="rounded-full text-sm"
+                          style={{ width: "5rem" }}
                           {...fieldProps}
+                          ref={(el) => {
+                            inputRefs.current[index] = el;
+                            if (el) {
+                              adjustInputWidth(index);
+                            }
+                          }}
+                          onInput={() => adjustInputWidth(index)}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "Backspace" &&
+                              fieldProps.value === "" &&
+                              fields.length > 1
+                            ) {
+                              e.preventDefault();
+                              removeSkillField(index);
+                            }
+                          }}
                         />
 
                         {fields.length > 1 && (
