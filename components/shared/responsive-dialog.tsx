@@ -38,6 +38,7 @@ interface ResponsiveDialogProps {
   submitButtonVariant?: VariantProps<typeof buttonVariants>["variant"];
   loading?: boolean;
   title: string;
+  noSubmitButton?: boolean;
 }
 
 const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
@@ -52,6 +53,7 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
   onSubmit,
   submitButtonText = "Save",
   submitButtonVariant = "default",
+  noSubmitButton = false,
   loading
 }) => {
   const isMobile = useIsMobile(mobileBreakpoint);
@@ -78,15 +80,17 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
               >
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button
-                className="flex-1 gap-1"
-                onClick={() => onSubmit?.()}
-                disabled={disabledSubmit || loading}
-                variant={submitButtonVariant}
-              >
-                {loading && <Spinner size={18} />}
-                {submitButtonText}
-              </Button>
+              {!noSubmitButton && (
+                <Button
+                  className="flex-1 gap-1"
+                  onClick={() => onSubmit?.()}
+                  disabled={disabledSubmit || loading}
+                  variant={submitButtonVariant}
+                >
+                  {loading && <Spinner size={18} />}
+                  {submitButtonText}
+                </Button>
+              )}
             </div>
           </DialogFooter>
         </DialogContent>
@@ -108,15 +112,17 @@ const ResponsiveDialog: React.FC<ResponsiveDialogProps> = ({
           <DrawerClose asChild className="w-full" onClick={() => onClose?.()}>
             <Button variant="outline">Cancel</Button>
           </DrawerClose>
-          <Button
-            className="w-full gap-1"
-            onClick={() => onSubmit?.()}
-            disabled={disabledSubmit || loading}
-            variant={submitButtonVariant}
-          >
-            {loading && <Spinner size={18} />}
-            {submitButtonText}
-          </Button>
+          {!noSubmitButton && (
+            <Button
+              className="w-full gap-1"
+              onClick={() => onSubmit?.()}
+              disabled={disabledSubmit || loading}
+              variant={submitButtonVariant}
+            >
+              {loading && <Spinner size={18} />}
+              {submitButtonText}
+            </Button>
+          )}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

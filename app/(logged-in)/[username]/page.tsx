@@ -1,3 +1,4 @@
+import { SuspenseLoader } from "@/components/ui/loaders";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import ProfileClient from "./components/profile-client";
@@ -48,7 +49,11 @@ const Profile = async ({ params }: { params: { username: string } }) => {
     redirect("/profile");
   }
 
-  return <ProfileClient user={user} />;
+  return (
+    <SuspenseLoader>
+      <ProfileClient user={user} />
+    </SuspenseLoader>
+  );
 };
 
 export default Profile;
