@@ -22,6 +22,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import useFormState from "@/hooks/use-form-state";
+import { usePageTitle } from "@/hooks/use-page-title";
 import {
   useAuth,
   useGetResource,
@@ -85,6 +86,8 @@ const EditJobForm = () => {
     fn: () => getJobBySlug(slug as string),
     enabled: !!slug
   });
+
+  usePageTitle(job ? `Edit: ${job.title}` : "Edit Job");
 
   useEffect(() => {
     if (job) {
