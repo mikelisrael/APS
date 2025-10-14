@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, badgeVariants } from "@/components/ui/badge";
+import TransitionLink from "@/components/shared/transition-link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,180 +10,65 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useAuth, useGetResource } from "@/hooks/use-query-resource";
 import emptyAnimation from "@/public/animations/emptyBusiness.json";
+import { getJobs } from "@/services/job.service";
+import { IJob } from "@/types/job";
 import Lottie from "lottie-react";
-import { Briefcase, Building, Filter, MapPin, Search } from "lucide-react";
-import moment from "moment";
-import { useRouter } from "next/navigation";
+import { Filter, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import SingleJob from "./single-job";
 
 const JobsClient = () => {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 500);
+  const [activeTab, setActiveTab] = useState("all");
+  const { user } = useAuth();
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const jobsPerPage = 5;
+  // Fetch jobs from database
+  const { data: jobs = [], isLoading } = useGetResource({
+    key: ["jobs"],
+    fn: getJobs
+  });
 
   const [selectedFilters, setSelectedFilters] = useState({
     "full-time": true,
     "part-time": true,
-    internship: true
+    internship: true,
+    contract: true
   });
 
-  const [jobs] = useState([
-    {
-      id: 1,
-      slug: "senior-product-manager-microsoft",
-      title: "Senior Product Manager",
-      company: "Microsoft",
-      location: "Seattle, WA",
-      type: "primary",
-      typeLabel: "Full-time",
-      salary: "$120k - $150k",
-      postedTime: "2025-09-28T09:00:00Z"
-    },
-    {
-      id: 2,
-      slug: "ux-designer-figma",
-      title: "UX Designer",
-      company: "Figma",
-      location: "San Francisco, CA",
-      type: "part-time",
-      typeLabel: "Part-time",
-      salary: "$80k - $95k",
-      postedTime: "2025-09-29T09:00:00Z"
-    },
-    {
-      id: 3,
-      slug: "data-science-intern-netflix",
-      title: "Data Science Intern",
-      company: "Netflix",
-      location: "Los Gatos, CA",
-      type: "internship",
-      typeLabel: "Internship",
-      salary: "$25/hour",
-      postedTime: "2025-09-27T09:00:00Z"
-    },
-    {
-      id: 4,
-      slug: "devops-engineer-amazon",
-      title: "DevOps Engineer",
-      company: "Amazon",
-      location: "Austin, TX",
-      type: "primary",
-      typeLabel: "Full-time",
-      salary: "$95k - $125k",
-      postedTime: "2025-09-25T09:00:00Z"
-    },
-    {
-      id: 5,
-      slug: "marketing-coordinator-shopify",
-      title: "Marketing Coordinator",
-      company: "Shopify",
-      location: "Remote",
-      type: "part-time",
-      typeLabel: "Part-time",
-      salary: "$45k - $55k",
-      postedTime: "2025-09-22T09:00:00Z"
-    },
-    {
-      id: 6,
-      slug: "mobile-app-developer-uber",
-      title: "Mobile App Developer",
-      company: "Uber",
-      location: "New York, NY",
-      type: "primary",
-      typeLabel: "Full-time",
-      salary: "$110k - $140k",
-      postedTime: "2025-09-26T09:00:00Z"
-    },
-    {
-      id: 7,
-      slug: "content-writer-medium",
-      title: "Content Writer",
-      company: "Medium",
-      location: "Remote",
-      type: "part-time",
-      typeLabel: "Part-time",
-      salary: "$35k - $45k",
-      postedTime: "2025-09-24T09:00:00Z"
-    },
-    {
-      id: 8,
-      slug: "software-engineering-intern-meta",
-      title: "Software Engineering Intern",
-      company: "Meta",
-      location: "Menlo Park, CA",
-      type: "internship",
-      typeLabel: "Internship",
-      salary: "$35/hour",
-      postedTime: "2025-09-27T09:00:00Z"
-    },
-    {
-      id: 9,
-      slug: "cybersecurity-analyst-crowdstrike",
-      title: "Cybersecurity Analyst",
-      company: "CrowdStrike",
-      location: "Denver, CO",
-      type: "primary",
-      typeLabel: "Full-time",
-      salary: "$75k - $90k",
-      postedTime: "2025-09-28T09:00:00Z"
-    },
-    {
-      id: 10,
-      slug: "sales-development-representative-salesforce",
-      title: "Sales Development Representative",
-      company: "Salesforce",
-      location: "Chicago, IL",
-      type: "primary",
-      typeLabel: "Full-time",
-      salary: "$55k - $70k",
-      postedTime: "2025-09-26T09:00:00Z"
-    }
-  ]);
-
   const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const jobTypeKey = job.typeLabel
-        .toLowerCase()
-        .replace(" ", "-") as keyof typeof selectedFilters;
+    return jobs.filter((job: IJob) => {
+      if (activeTab === "yours" && job.posted_by !== user?.id) {
+        return false;
+      }
 
-      const matchesFilter = selectedFilters[jobTypeKey];
+      const employmentTypeMap: Record<string, string> = {
+        "full-time": "full-time",
+        "part-time": "part-time",
+        internship: "internship",
+        contract: "contract"
+      };
+
+      const filterKey = employmentTypeMap[
+        job.employment_type
+      ] as keyof typeof selectedFilters;
+      const matchesFilter = selectedFilters[filterKey] ?? true;
 
       const matchesSearch =
         !debouncedQuery ||
         job.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
         job.company.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        job.location.toLowerCase().includes(debouncedQuery.toLowerCase());
+        (job.location?.toLowerCase().includes(debouncedQuery.toLowerCase()) ??
+          false);
 
       return matchesFilter && matchesSearch;
     });
-  }, [jobs, selectedFilters, debouncedQuery]);
-
-  // Pagination calculations
-  const totalJobs = filteredJobs.length;
-  const totalPages = Math.ceil(totalJobs / jobsPerPage);
-  const startIndex = (currentPage - 1) * jobsPerPage;
-  const endIndex = startIndex + jobsPerPage;
-  const currentJobs = filteredJobs.slice(startIndex, endIndex);
-
-  // Reset to first page when search or filters change
-  useMemo(() => {
-    setCurrentPage(1);
-  }, [debouncedQuery, selectedFilters]);
+  }, [jobs, selectedFilters, debouncedQuery, activeTab, user?.id]);
 
   const handleFilterChange = (
     filterKey: keyof typeof selectedFilters,
@@ -197,60 +82,25 @@ const JobsClient = () => {
 
   const activeFilterCount =
     Object.values(selectedFilters).filter(Boolean).length;
-  const hasActiveFilters = activeFilterCount < 3;
-
-  // Generate pagination items
-  const getPaginationItems = () => {
-    const items = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages are less than or equal to maxVisiblePages
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(i);
-      }
-    } else {
-      // Show first page
-      items.push(1);
-
-      // Calculate range around current page
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      // Add ellipsis after first page if needed
-      if (start > 2) {
-        items.push("ellipsis-start");
-      }
-
-      // Add pages around current page
-      for (let i = start; i <= end; i++) {
-        items.push(i);
-      }
-
-      // Add ellipsis before last page if needed
-      if (end < totalPages - 1) {
-        items.push("ellipsis-end");
-      }
-
-      // Show last page
-      if (totalPages > 1) {
-        items.push(totalPages);
-      }
-    }
-
-    return items;
-  };
-
-  const paginationItems = getPaginationItems();
+  const hasActiveFilters = activeFilterCount < 4;
 
   return (
     <main className="safe-area ~px-2/5">
       <section className="flex-between">
         <h1 className="page-title">Jobs</h1>
-        <Button>Post a Job</Button>
+        <Button asChild>
+          <TransitionLink href="/jobs/new">Post a Job</TransitionLink>
+        </Button>
       </section>
 
-      <section className="sticky top-0 z-10 flex items-stretch gap-4 bg-background py-7 dark:bg-[#121212]">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+          <TabsTrigger value="all">All Jobs</TabsTrigger>
+          <TabsTrigger value="yours">Your Jobs</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <section className="sticky top-0 z-10 flex items-stretch gap-4 bg-background pb-7 pt-4 dark:bg-[#121212]">
         <div className="flex flex-grow items-center gap-2 rounded-lg border bg-card px-4 py-2">
           <Search size={20} />
           <input
@@ -301,55 +151,43 @@ const JobsClient = () => {
             >
               Internship
             </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={selectedFilters["contract"]}
+              onCheckedChange={(checked) =>
+                handleFilterChange("contract", checked)
+              }
+            >
+              Contract
+            </DropdownMenuCheckboxItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </section>
 
       <ul className="overflow-hidden rounded-lg border bg-card">
-        {!!currentJobs.length ? (
-          currentJobs.map((job) => (
-            <li key={job.id}>
-              <button
-                className="flex-between w-full px-6 py-5 transition-colors duration-150 hover:bg-accent"
-                onClick={() => router.push(`/jobs/${job.slug}`)}
-              >
-                <div className="space-y-2">
-                  <h3 className="w-max font-semibold">{job.title}</h3>
-
-                  <div className="flex-center w-max gap-2 text-sm">
-                    <div className="flex-center gap-1">
-                      <Briefcase size={18} />
-                      <span className="text-muted-foreground">Mid-Level</span>
-                    </div>
-
-                    <div className="flex-center gap-1">
-                      <Building size={18} />
-                      <span className="text-muted-foreground">
-                        {job.company}
-                      </span>
-                    </div>
-
-                    <div className="flex-center gap-1">
-                      <MapPin size={18} />
-                      <span className="text-muted-foreground">
-                        {job.location}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex-center w-max gap-2">
-                    <Badge variant={job.type as keyof typeof badgeVariants}>
-                      {job.typeLabel}
-                    </Badge>
-                    <span>{job.salary}</span>
-                  </div>
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <li key={index} className="px-6 py-5">
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-64" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-32" />
                 </div>
-
-                <span className="text-xs text-muted-foreground">
-                  Posted {moment(job.postedTime).fromNow()}
-                </span>
-              </button>
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              </div>
             </li>
+          ))
+        ) : !!filteredJobs.length ? (
+          filteredJobs.map((job: IJob) => (
+            <SingleJob
+              key={job.id}
+              job={job}
+              isOwner={job.posted_by === user?.id}
+            />
           ))
         ) : (
           <section className="flex-center flex-col gap-3 px-5 py-10">
@@ -367,70 +205,14 @@ const JobsClient = () => {
                   ? "We couldn't find any jobs that match your search."
                   : hasActiveFilters
                     ? "No jobs match the selected filters."
-                    : "There are no jobs available at the moment."}
+                    : activeTab === "yours"
+                      ? "You haven't posted any jobs yet."
+                      : "There are no jobs available at the moment."}
               </p>
             </div>
           </section>
         )}
       </ul>
-
-      {/* Pagination */}
-      {totalJobs > 0 && totalPages > 1 && (
-        <Pagination className="mt-6">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage > 1) {
-                    setCurrentPage(currentPage - 1);
-                  }
-                }}
-                className={
-                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                }
-              />
-            </PaginationItem>
-
-            {paginationItems.map((item, index) => (
-              <PaginationItem key={index}>
-                {typeof item === "number" ? (
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(item);
-                    }}
-                    isActive={currentPage === item}
-                  >
-                    {item}
-                  </PaginationLink>
-                ) : (
-                  <PaginationEllipsis />
-                )}
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage < totalPages) {
-                    setCurrentPage(currentPage + 1);
-                  }
-                }}
-                className={
-                  currentPage === totalPages
-                    ? "pointer-events-none opacity-50"
-                    : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
     </main>
   );
 };

@@ -36,6 +36,10 @@
   .page-title {
     @apply mt-1 px-5 font-bold ~text-lg/xl;
   }
+
+  .capitalize-first::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 @layer base {
@@ -82,7 +86,7 @@
     --muted-foreground: 240 5% 64.9%;
     --accent: 12 6.5% 15.1%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
