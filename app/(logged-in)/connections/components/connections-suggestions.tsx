@@ -10,7 +10,9 @@ import {
   useConnectionSuggestions,
   useSendConnectionRequest
 } from "@/hooks/use-connections";
+import emptyAnimation from "@/public/animations/empty ghost.json";
 import { UserProfile } from "@/types/models";
+import Lottie from "lottie-react";
 import { ListFilter } from "lucide-react";
 import { useState } from "react";
 import { ConnectionCard } from "./connection-card";
@@ -61,7 +63,13 @@ const ConnectionsSuggestions = () => {
       </section>
 
       {suggestions.length === 0 ? (
-        <div className="py-10 text-center text-muted-foreground">
+        <div className="flex-col-center gap-1 py-10 text-center text-muted-foreground">
+          <Lottie
+            animationData={emptyAnimation}
+            loop={true}
+            autoplay={true}
+            style={{ width: 250, height: 250 }}
+          />
           No suggestions available
         </div>
       ) : (
