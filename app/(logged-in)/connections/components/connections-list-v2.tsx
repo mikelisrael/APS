@@ -1,3 +1,5 @@
+"use client";
+
 import Alumnus from "@/components/shared/alumnus-tag";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
 import UserAvatar from "@/components/shared/user-avatar";
@@ -6,15 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { LoaderSpinner } from "@/components/ui/loaders";
 import { useRemoveConnection } from "@/hooks/use-connections";
+import { useDebounce } from "@/hooks/use-debounce";
+import emptyAnimation from "@/public/animations/empty ghost.json";
 import { Connection } from "@/types/connection";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { ListFilter, MessageCircle, UserRoundX } from "lucide-react";
+import Lottie from "lottie-react";
+import { ListFilter, MessageCircle, Search, UserRoundX } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { filterConnections } from "@/lib/search-connections";
 
 interface SingleConnectionProps {
   connection: Connection;
@@ -101,11 +107,12 @@ type StatusFilter = "all" | "undergraduate" | "alumnus";
 
 const ConnectionListV2 = ({ connections, loading }: ConnectionListV2Props) => {
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 500);
 
-  const filteredConnections =
-    filter === "all"
-      ? connections
-      : connections.filter((conn) => conn.user.status === filter);
+  const filteredConnections = useMemo(() => {
+    return filterConnections(connections, debouncedQuery, filter);
+  }, [connections, debouncedQuery, filter]);
 
   if (loading) {
     return <LoaderSpinner text="Loading connections..." className="py-10" />;
@@ -116,37 +123,55 @@ const ConnectionListV2 = ({ connections, loading }: ConnectionListV2Props) => {
       <section className="flex-between sticky top-0 bg-background py-5 dark:bg-[#121212]">
         <h2>Your Connections ({connections.length})</h2>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <ListFilter className="mr-2 h-4 w-4" />
-              {filter === "all" ? "All" : filter}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setFilter("all")}>
-              All
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setFilter("alumnus")}>
-              Alumnus
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setFilter("undergraduate")}>
-              Undergraduate
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="Search connections..."
+            className="grow bg-card text-sm focus:outline-none"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <ListFilter className="mr-2 h-4 w-4" />
+                <span className="capitalize">
+                  {filter === "all" ? "All" : filter}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setFilter("all")}>
+                All
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilter("alumnus")}>
+                Alumnus
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilter("undergraduate")}>
+                Undergraduate
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </section>
 
       <Card>
         <CardContent className="pt-6">
           {filteredConnections.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="flex-col-center gap-1 py-10 text-center text-muted-foreground duration-300 animate-in fade-in">
+              <Lottie
+                animationData={emptyAnimation}
+                loop
+                autoplay
+                style={{ width: 250, height: 250 }}
+              />
               {connections.length === 0
                 ? "No connections yet"
-                : "No connections matching the selected filter"}
+                : "No connections matching the selected filter/search"}
             </div>
           ) : (
-            <ul className="divide-y">
+            <ul className="divide-y duration-300 animate-in fade-in">
               {filteredConnections.map((connection) => (
                 <SingleConnection key={connection.id} connection={connection} />
               ))}
