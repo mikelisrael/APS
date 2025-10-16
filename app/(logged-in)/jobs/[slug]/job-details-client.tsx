@@ -11,11 +11,17 @@ import {
   useGetResource,
   useModifyResource
 } from "@/hooks/use-query-resource";
+import {
+  useApplicationStatus,
+  useApplyForJob,
+  useJobApplicationCount
+} from "@/hooks/use-job-applications";
 import { deleteJob, getJobBySlug } from "@/services/job.service";
 import {
   ArrowLeft,
   Briefcase,
   Building,
+  CheckCircle,
   Clock,
   MapPin,
   Trash2
@@ -24,18 +30,30 @@ import moment from "moment";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import ApplicantsView from "./applicants-view";
 
 const JobDetailsClient = () => {
   const { user } = useAuth();
   const { slug } = useParams();
   const router = useRouter();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openApplyDialog, setOpenApplyDialog] = useState(false);
+  const [openApplicantsDialog, setOpenApplicantsDialog] = useState(false);
 
   const { data: job, isLoading } = useGetResource({
     key: ["job", slug as string],
     fn: () => getJobBySlug(slug as string),
     enabled: !!slug
   });
+
+  const { data: applicationStatus } = useApplicationStatus(
+    job?.id || "",
+    user?.id || ""
+  );
+
+  const { data: applicantCount } = useJobApplicationCount(job?.id || "");
+
+  const applyMutation = useApplyForJob();
 
   const deleteJobMutation = useModifyResource({
     key: ["jobs"],
@@ -50,6 +68,21 @@ const JobDetailsClient = () => {
   });
 
   const isOwner = user?.id === job?.posted_by;
+  const hasApplied = applicationStatus?.hasApplied;
+
+  const handleApplyForJob = () => {
+    setOpenApplyDialog(true);
+  };
+
+  const confirmApply = () => {
+    if (job?.id) {
+      applyMutation.mutate(job.id, {
+        onSuccess: () => {
+          setOpenApplyDialog(false);
+        }
+      });
+    }
+  };
 
   const handleDeleteJob = () => {
     setOpenDeleteDialog(true);
@@ -128,7 +161,12 @@ const JobDetailsClient = () => {
                   </TransitionLink>
                 </Button>
 
-                <Button className="flex-1">View Applicants (10+)</Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => setOpenApplicantsDialog(true)}
+                >
+                  View Applicants {applicantCount > 0 && `(${applicantCount})`}
+                </Button>
 
                 <Button
                   variant="destructive"
@@ -140,7 +178,20 @@ const JobDetailsClient = () => {
                 </Button>
               </div>
             ) : (
-              <Button className="w-full">Apply for Job</Button>
+              <Button
+                className="w-full"
+                onClick={handleApplyForJob}
+                disabled={hasApplied || applyMutation.isPending}
+              >
+                {hasApplied ? (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Applied
+                  </>
+                ) : (
+                  "Apply for Job"
+                )}
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -156,6 +207,21 @@ const JobDetailsClient = () => {
         </Card>
       </main>
 
+      {/* Apply Confirmation Dialog */}
+      <ResponsiveDialog
+        open={openApplyDialog}
+        onOpenChange={setOpenApplyDialog}
+        title="Apply for Job"
+        submitButtonText="Confirm Application"
+        onSubmit={confirmApply}
+        loading={applyMutation.isPending}
+        className="max-w-sm"
+      >
+        Are you sure you want to apply for
+        <span className="font-semibold"> {job.title}</span> at {job.company}?
+      </ResponsiveDialog>
+
+      {/* Delete Job Dialog */}
       <ResponsiveDialog
         open={openDeleteDialog}
         onOpenChange={setOpenDeleteDialog}
@@ -169,6 +235,17 @@ const JobDetailsClient = () => {
         Are you sure you want to delete
         <span className="font-semibold"> {job.title}</span>? This action cannot
         be undone and all applicants will lose access to this job posting.
+      </ResponsiveDialog>
+
+      {/* View Applicants Dialog */}
+      <ResponsiveDialog
+        open={openApplicantsDialog}
+        onOpenChange={setOpenApplicantsDialog}
+        title="Applicants"
+        noSubmitButton
+        className="max-w-xl"
+      >
+        <ApplicantsView jobId={job.id} currentUserId={user?.id || ""} />
       </ResponsiveDialog>
     </>
   );

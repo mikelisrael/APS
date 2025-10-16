@@ -113,7 +113,7 @@ const EditJobForm = () => {
 
   const { mutate: updateJobMutation } = useModifyResource({
     key: ["jobs", slug as string],
-    fn: async (values) => await updateJob(slug as string, { ...values }),
+    fn: async (values: JobFormData) => await updateJob(slug as string, { ...values }),
     onSuccess: () => {
       setSubmitted();
       toast.success("Job updated successfully!");

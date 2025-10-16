@@ -2,17 +2,27 @@ import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
-export async function applyForJob(application: any) {
+export async function applyForJob(jobId: string) {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not authenticated");
+
   const { data, error } = await supabase
     .from("job_applications")
-    .insert(application)
+    .insert({
+      job_id: jobId,
+      applicant_id: user.id,
+      status: "pending"
+    })
     .select(
       `*,
-      profiles:applicant_id (
+      applicant:applicant_id (
         id,
         username,
-        avatarUrl,
-        fullName
+        avatar_url,
+        full_name
       )`
     )
     .single();
@@ -27,11 +37,12 @@ export async function getJobApplications(jobId: string) {
     .from("job_applications")
     .select(
       `*,
-      profiles:applicant_id (
+      applicant:applicant_id (
         id,
         username,
-        avatarUrl,
-        fullName
+        avatar_url,
+        full_name,
+        status
       )`
     )
     .eq("job_id", jobId)
@@ -42,48 +53,26 @@ export async function getJobApplications(jobId: string) {
   return data;
 }
 
-export async function getUserApplications(userId: string) {
+export async function getUserApplicationStatus(jobId: string, userId: string) {
   const { data, error } = await supabase
     .from("job_applications")
-    .select(
-      `*,
-      jobs (
-        id,
-        title,
-        company,
-        slug
-      ),
-      profiles:applicant_id (
-        id,
-        username,
-        avatarUrl,
-        fullName
-      )`
-    )
+    .select("*")
+    .eq("job_id", jobId)
     .eq("applicant_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  return data as {
-    jobs: {
-      id: string;
-      title: string;
-      company: string;
-      slug: string;
-    };
-  }[];
-}
-
-export async function updateApplicationStatus(id: string, status: string) {
-  const { data, error } = await supabase
-    .from("job_applications")
-    .update({ status })
-    .eq("id", id)
-    .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
 
   return data;
+}
+
+export async function getJobApplicationCount(jobId: string) {
+  const { count, error } = await supabase
+    .from("job_applications")
+    .select("*", { count: "exact", head: true })
+    .eq("job_id", jobId);
+
+  if (error) throw error;
+
+  return count || 0;
 }
