@@ -28,7 +28,6 @@ const JobsClient = () => {
   const [activeTab, setActiveTab] = useState("all");
   const { user } = useAuth();
 
-  // Fetch jobs from database
   const { data: jobs = [], isLoading } = useGetResource({
     key: ["jobs"],
     fn: getJobs
