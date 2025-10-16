@@ -21,11 +21,16 @@ const Sidebar = () => {
   const { user, logout, isLoggingOut } = useAuth();
 
   const isActive = (href: string) => {
-    if (pathname === "/" && href === "/") {
-      return true;
-    } else if (pathname.includes(href) && href !== "/") {
+    const hrefPath = href.split("?")[0];
+
+    if (hrefPath === "/" && pathname === "/") {
       return true;
     }
+
+    if (hrefPath !== "/" && pathname.startsWith(hrefPath)) {
+      return true;
+    }
+
     return false;
   };
 
