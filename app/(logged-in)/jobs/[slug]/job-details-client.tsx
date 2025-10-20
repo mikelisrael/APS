@@ -7,15 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoaderSpinner } from "@/components/ui/loaders";
 import {
-  useAuth,
-  useGetResource,
-  useModifyResource
-} from "@/hooks/use-query-resource";
-import {
   useApplicationStatus,
   useApplyForJob,
   useJobApplicationCount
 } from "@/hooks/use-job-applications";
+import {
+  useAuth,
+  useGetResource,
+  useModifyResource
+} from "@/hooks/use-query-resource";
 import { deleteJob, getJobBySlug } from "@/services/job.service";
 import {
   ArrowLeft,
@@ -207,7 +207,6 @@ const JobDetailsClient = () => {
         </Card>
       </main>
 
-      {/* Apply Confirmation Dialog */}
       <ResponsiveDialog
         open={openApplyDialog}
         onOpenChange={setOpenApplyDialog}
@@ -221,7 +220,6 @@ const JobDetailsClient = () => {
         <span className="font-semibold"> {job.title}</span> at {job.company}?
       </ResponsiveDialog>
 
-      {/* Delete Job Dialog */}
       <ResponsiveDialog
         open={openDeleteDialog}
         onOpenChange={setOpenDeleteDialog}
@@ -237,13 +235,12 @@ const JobDetailsClient = () => {
         be undone and all applicants will lose access to this job posting.
       </ResponsiveDialog>
 
-      {/* View Applicants Dialog */}
       <ResponsiveDialog
         open={openApplicantsDialog}
         onOpenChange={setOpenApplicantsDialog}
         title="Applicants"
         noSubmitButton
-        className="max-w-xl"
+        className="max-w-2xl"
       >
         <ApplicantsView jobId={job.id} currentUserId={user?.id || ""} />
       </ResponsiveDialog>
