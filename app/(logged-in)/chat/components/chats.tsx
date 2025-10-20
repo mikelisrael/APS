@@ -63,7 +63,6 @@ const Chats = () => {
         <SingleChat />
         <SingleChat />
         <SingleChat />
-        <SingleChat />
       </ul>
 
       <div
