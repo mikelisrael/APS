@@ -40,6 +40,11 @@
   .capitalize-first::first-letter {
     text-transform: uppercase;
   }
+
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
 }
 
 @layer base {

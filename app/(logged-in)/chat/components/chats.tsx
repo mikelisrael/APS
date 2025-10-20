@@ -48,7 +48,7 @@ const Chats = () => {
         />
       </div>
 
-      <ul className="flex-1 overflow-y-auto pb-10 pt-3">
+      <ul className="thin-scrollbar flex-1 overflow-y-auto pb-10 pt-3">
         <SingleChat />
         <SingleChat />
         <SingleChat />
