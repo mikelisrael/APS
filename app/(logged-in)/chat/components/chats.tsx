@@ -66,7 +66,7 @@ const Chats = () => {
       </ul>
 
       <div
-        className="pointer-events-none absolute bottom-10 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent"
+        className="pointer-events-none absolute bottom-10 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent dark:from-[#121212]"
         aria-hidden="true"
       />
     </section>
