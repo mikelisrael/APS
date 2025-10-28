@@ -1,14 +1,25 @@
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 import { PaperclipIcon, SendHorizontal, Smile } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useState } from "react";
 
 interface ChatInputProps {
   onSend: (content: string) => void;
 }
 
 const ChatInput = ({ onSend }: ChatInputProps) => {
+  const { theme } = useTheme();
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -43,6 +54,13 @@ const ChatInput = ({ onSend }: ChatInputProps) => {
     }
   };
 
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    if (!editor) return;
+
+    editor.commands.insertContent(emojiData.emoji);
+    editor.commands.focus();
+  };
+
   return (
     <div className="mt-auto flex flex-col border-t">
       <style jsx global>{`
@@ -60,14 +78,32 @@ const ChatInput = ({ onSend }: ChatInputProps) => {
           <EditorContent editor={editor} />
         </div>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0"
-            type="button"
-          >
-            <Smile className="h-5 w-5" />
-          </Button>
+          <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                type="button"
+              >
+                <Smile className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-full border-0 p-0"
+              side="top"
+              align="end"
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+                width="100%"
+                height={400}
+                searchPlaceHolder="Search emoji..."
+                previewConfig={{ showPreview: false }}
+              />
+            </PopoverContent>
+          </Popover>
           <Button
             variant="ghost"
             size="icon"
