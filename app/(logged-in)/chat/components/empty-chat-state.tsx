@@ -5,7 +5,7 @@ import Lottie from "lottie-react";
 
 const EmptyChatState = () => {
   return (
-    <div className="flex h-full items-center justify-center bg-background px-4 text-sm">
+    <div className="flex h-full items-center justify-center border-l px-4 text-sm">
       <div className="flex max-w-md flex-col items-center text-center">
         <Lottie
           animationData={emptyAnimation}

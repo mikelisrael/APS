@@ -55,7 +55,7 @@ const ChatInput = ({ onSend }: ChatInputProps) => {
           user-select: none;
         }
       `}</style>
-      <div className="relative flex items-center gap-1 rounded-lg bg-background p-2">
+      <div className="relative flex items-center gap-1 rounded-lg bg-background p-2 dark:bg-[#121212]">
         <div className="min-h-[20px] w-full" onKeyDown={handleKeyDown}>
           <EditorContent editor={editor} />
         </div>

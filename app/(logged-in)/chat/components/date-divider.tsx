@@ -22,7 +22,7 @@ const DateDivider: React.FC<DateDividerProps> = ({ date, isSticky }) => {
 
   return (
     <div
-      className={`flex items-center justify-center py-4 ${isSticky ? "sticky top-0 z-10 bg-background" : ""}`}
+      className={`flex items-center justify-center py-4 ${isSticky ? "sticky top-0 z-10 bg-background dark:bg-[#121212]" : ""}`}
     >
       <div className="relative flex w-full items-center">
         <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
