@@ -175,7 +175,7 @@ const Chats = () => {
               key={chat.id}
               chat={chat}
               onClick={() =>
-                router.push(`/chat/${chat.id}`, {
+                router.replace(`/chat/${chat.id}`, {
                   scroll: false
                 })
               }
