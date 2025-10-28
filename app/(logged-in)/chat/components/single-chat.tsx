@@ -1,8 +1,10 @@
 "use client";
 
-import ResponsiveDialog from "@/components/shared/responsive-dialog";
 import UserAvatar from "@/components/shared/user-avatar";
-import { Button } from "@/components/ui/button";
+import ResponsiveDialog from "@/components/shared/responsive-dialog";
+import { cn } from "@/lib/utils";
+import { Chat } from "@/services/chats.service";
+import moment from "moment";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -15,12 +17,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useDeleteChat } from "@/hooks/use-chats";
-import { cn } from "@/lib/utils";
-import { Chat } from "@/services/chats.service";
-import { MessageSquare, MoreVertical, Trash2 } from "lucide-react";
-import moment from "moment";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, Trash2, MoreVertical } from "lucide-react";
 import { useState } from "react";
+import { useDeleteChat } from "@/hooks/use-chats";
 
 interface SingleChatProps {
   chat: Chat;
@@ -86,6 +86,8 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
     </>
   );
 
+  // No need to check for lastMessage here - parent component filters it out
+
   return (
     <>
       <ContextMenu>
@@ -108,9 +110,8 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
 
               <div className="grow text-sm">
                 <div className="flex-between mb-1">
-                  <h3 className="line-clamp-1 font-medium">
-                    {otherParticipant?.user?.full_name || "Unknown User"} de
-                    dede dedede dedde ede
+                  <h3 className="font-medium">
+                    {otherParticipant?.user?.full_name || "Unknown User"}
                   </h3>
                   <span className="text-xs text-muted-foreground">
                     {timeAgo}

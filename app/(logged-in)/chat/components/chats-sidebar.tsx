@@ -34,10 +34,13 @@ const Chats = () => {
   const filteredChats = useMemo(() => {
     if (!chats) return [];
 
-    if (!debouncedQuery) return chats;
+    // Filter out chats without last_message first
+    const chatsWithMessages = chats.filter((chat: Chat) => chat.last_message);
+
+    if (!debouncedQuery) return chatsWithMessages;
 
     const query = debouncedQuery.toLowerCase();
-    return chats.filter((chat: Chat) => {
+    return chatsWithMessages.filter((chat: Chat) => {
       const otherParticipant = chat.participants?.[0];
       const name = otherParticipant?.user?.full_name?.toLowerCase() || "";
       const lastMessageContent =
