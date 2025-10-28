@@ -1,68 +1,17 @@
 "use client";
 
-import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAllChatsSubscription, useUserChats } from "@/hooks/use-chats";
 import { useAcceptedConnections } from "@/hooks/use-connections";
 import { useDebounce } from "@/hooks/use-debounce";
-import { cn } from "@/lib/utils";
 import { Chat } from "@/services/chats.service";
 import { Search } from "lucide-react";
-import moment from "moment";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import { PiNotePencilThin } from "react-icons/pi";
 import ChatSkeleton from "./chat-skeleton";
 import NewConversationDialog from "./new-conversation-dialog";
-
-interface SingleChatProps {
-  chat: Chat;
-  onClick: () => void;
-  isActive?: boolean;
-}
-
-const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
-  const otherParticipant = chat.participants?.[0];
-  const lastMessage = chat.last_message;
-  const timeAgo = lastMessage && moment(lastMessage?.created_at).fromNow();
-
-  return (
-    <div
-      className={cn(
-        `relative flex w-full cursor-pointer items-center gap-3 rounded-md px-2 py-3 hover:bg-accent`,
-        {
-          "before:animate-stretch bg-accent/30 before:absolute before:left-0 before:top-1/2 before:h-2/5 before:w-[2px] before:-translate-y-1/2 before:rounded-full before:bg-primary before:content-['']":
-            isActive
-        }
-      )}
-      onClick={onClick}
-    >
-      <UserAvatar
-        src={otherParticipant?.user?.avatar_url}
-        alt={otherParticipant?.user?.full_name || "User"}
-      />
-
-      <div className="grow text-sm">
-        <div className="flex-between mb-1">
-          <h3 className="font-medium">
-            {otherParticipant?.user?.full_name || "Unknown User"}
-          </h3>
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
-        </div>
-        <div className="flex-between gap-2">
-          <span className="line-clamp-1 text-muted-foreground">
-            {lastMessage?.content || "No messages yet"}
-          </span>
-          {chat.unread_count && chat.unread_count > 0 ? (
-            <div className="flex-center h-5 min-w-5 rounded-full bg-primary p-1 text-xs text-primary-foreground">
-              {chat.unread_count > 99 ? "99+" : chat.unread_count}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-};
+import SingleChat from "./single-chat";
 
 const Chats = () => {
   const router = useRouter();

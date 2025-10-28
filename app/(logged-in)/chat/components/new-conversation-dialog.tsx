@@ -128,6 +128,7 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
                     size="sm"
                     onClick={() => handleStartChat(otherUserId)}
                     disabled={isCreatingChat || !otherUserId}
+                    className="text-primary"
                   >
                     <MessageCircle className="mr-1 size-4" />
                     Message

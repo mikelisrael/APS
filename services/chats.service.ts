@@ -368,3 +368,18 @@ export const getTotalUnreadCount = async (): Promise<number> => {
 
   return count || 0;
 };
+
+export const deleteChat = async (chatId: string): Promise<void> => {
+  const supabase = createClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not authenticated");
+
+  // Simply delete the chat - CASCADE will handle the rest
+  const { error } = await supabase.from("chats").delete().eq("id", chatId);
+
+  if (error) throw error;
+};

@@ -1,6 +1,7 @@
 import { useGetResource, useModifyResource } from "@/hooks/use-query-resource";
 import { createClient } from "@/lib/supabase/client";
 import {
+  deleteChat,
   deleteMessage,
   getChatMessages,
   getOrCreateChat,
@@ -26,7 +27,7 @@ export const useUserChats = () => {
 };
 
 // Hook for getting or creating a chat with another user
-export const useGetOrCreateChat = (props: any) => {
+export const useGetOrCreateChat = (props?: any) => {
   return useModifyResource({
     key: ["chats"],
     fn: (userId: string) => getOrCreateChat(userId),
@@ -270,4 +271,17 @@ export const useChat = (otherUserId: string) => {
     refetchMessages,
     unreadCount: chat?.unread_count || 0
   };
+};
+
+export const useDeleteChat = () => {
+  return useModifyResource({
+    key: ["chats"],
+    fn: (chatId: string) => deleteChat(chatId),
+    onSuccess: () => {
+      toast.success("Chat deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete chat");
+    }
+  });
 };
