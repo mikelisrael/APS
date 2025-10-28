@@ -1,6 +1,6 @@
+import fluid, { extract, fontSize, screens } from "fluid-tailwind";
 import type { Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
-import fluid, { extract, screens, fontSize } from "fluid-tailwind";
 
 const config: Config = {
   darkMode: ["class"],
@@ -62,6 +62,15 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)"
+      },
+      keyframes: {
+        stretch: {
+          "0%": { transform: "translateY(-50%) scaleY(0)", opacity: "0" },
+          "100%": { transform: "translateY(-50%) scaleY(1)", opacity: "1" }
+        }
+      },
+      animation: {
+        stretch: "stretch 0.2s ease-out forwards"
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans]

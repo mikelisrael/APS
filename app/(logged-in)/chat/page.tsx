@@ -1,10 +1,10 @@
 import { SuspenseLoader } from "@/components/ui/loaders";
-import ChatZone from "./components/chat-zone";
+import EmptyChatState from "./components/empty-chat-state";
 
 const Chat = () => {
   return (
     <SuspenseLoader fullPage>
-      <ChatZone />
+      <EmptyChatState />
     </SuspenseLoader>
   );
 };

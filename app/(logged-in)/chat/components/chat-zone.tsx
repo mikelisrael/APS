@@ -231,7 +231,7 @@ const ChatZone: React.FC = () => {
   const sortedDates = Object.keys(groupedMessages).sort();
 
   return (
-    <section className="flex flex-col overflow-hidden rounded-lg text-sm">
+    <section className="flex flex-col overflow-hidden rounded-lg bg-background text-sm">
       <div
         ref={scrollContainerRef}
         className="thin-scrollbar relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
