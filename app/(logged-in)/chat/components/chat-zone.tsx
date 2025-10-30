@@ -8,6 +8,7 @@ import {
   useSendMessage,
   useUserChats
 } from "@/hooks/use-chats";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { useAuth } from "@/hooks/use-query-resource";
 import { Chat, Message } from "@/services/chats.service";
 import { Loader2, MessageCircle } from "lucide-react";
@@ -73,7 +74,6 @@ const ChatZone: React.FC = () => {
     return chats?.find((chat: Chat) => chat.id === chatId);
   }, [chats, chatId]);
 
-  // Get receiver info from chat participants
   const receiver = useMemo(() => {
     if (!currentChat || !user) return null;
 
@@ -94,6 +94,8 @@ const ChatZone: React.FC = () => {
 
     return otherParticipant?.user_id || null;
   }, [currentChat, user]);
+
+  usePageTitle(receiver?.full_name || "Chat");
 
   // Subscribe to real-time updates
   useChatSubscription(chatId, () => {
