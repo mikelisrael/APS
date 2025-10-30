@@ -40,3 +40,49 @@ CREATE TABLE chat_participants (
     CONSTRAINT fk_chat FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+-- Add replied_to_id column to messages table
+ALTER TABLE messages 
+ADD COLUMN replied_to_id UUID,
+ADD CONSTRAINT fk_replied_to FOREIGN KEY (replied_to_id) 
+    REFERENCES messages(id) ON DELETE SET NULL;
+
+-- Create index for better query performance
+CREATE INDEX idx_messages_replied_to ON messages(replied_to_id);
+
+-------------------------------------------------
+--LATER AFTER SEEING THAT MESSAGE REFUSES TO SEND 
+-------------------------------------------------
+-- Drop existing foreign key constraints
+ALTER TABLE messages 
+DROP CONSTRAINT IF EXISTS fk_sender,
+DROP CONSTRAINT IF EXISTS fk_receiver,
+DROP CONSTRAINT IF EXISTS fk_replied_to;
+
+-- Add foreign key constraints with the correct naming convention
+ALTER TABLE messages 
+ADD CONSTRAINT messages_sender_id_fkey 
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+ADD CONSTRAINT messages_receiver_id_fkey 
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+ADD CONSTRAINT messages_replied_to_id_fkey 
+    FOREIGN KEY (replied_to_id) REFERENCES messages(id) ON DELETE SET NULL;
+
+-- Also fix the chat foreign key for consistency
+ALTER TABLE messages 
+DROP CONSTRAINT IF EXISTS fk_chat_message;
+
+ALTER TABLE messages 
+ADD CONSTRAINT messages_chat_id_fkey 
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE;
+
+
+-- Drop the foreign key from chats to messages temporarily
+ALTER TABLE chats 
+DROP CONSTRAINT IF EXISTS fk_last_message;
+
+-- Recreate it with the correct naming
+ALTER TABLE chats 
+ADD CONSTRAINT chats_last_message_id_fkey 
+    FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL;

@@ -6,7 +6,7 @@ import { LoaderSpinner } from "@/components/ui/loaders";
 import { useGetOrCreateChat } from "@/hooks/use-chats";
 import { Chat } from "@/services/chats.service";
 import { Connection } from "@/types/connection";
-import { MessageCircle, Search } from "lucide-react";
+import { LoaderCircle, MessageCircle, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import { IoPeopleOutline } from "react-icons/io5";
@@ -62,7 +62,13 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
       noSubmitButton
       className="max-w-xl"
     >
-      <div className="space-y-4">
+      <div className="relative space-y-4">
+        {isCreatingChat && (
+          <div className="flex-center absolute inset-0 bg-background/70">
+            <LoaderCircle size={30} className="animate-spin" />
+          </div>
+        )}
+
         <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
           <Search size={20} />
           <input

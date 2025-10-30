@@ -9,6 +9,7 @@ export interface Message {
   message_type: string;
   created_at: string;
   is_read: boolean;
+  replied_to_id?: string | null;
   sender?: {
     id: string;
     full_name: string;
@@ -20,6 +21,7 @@ export interface Message {
     avatar_url?: string;
   };
   attachments?: ChatAttachment[];
+  replied_to?: Message | null;
 }
 
 export interface Chat {
@@ -80,26 +82,71 @@ export const getUserChats = async (): Promise<Chat[]> => {
 
   if (error) throw error;
 
-  // Get other participants for each chat
-  const chatsWithParticipants = await Promise.all(
-    data.map(async (item: any) => {
-      const chat = item.chat;
+  // Get unique last_message_ids
+  const lastMessageIds = data
+    .map((item: any) => item.chat?.last_message_id)
+    .filter(Boolean);
 
-      // Get last message separately
-      const { data: lastMessage } = await supabase
+  // Fetch all last messages in one query
+  let lastMessagesMap: Record<string, any> = {};
+  if (lastMessageIds.length > 0) {
+    const { data: lastMessages } = await supabase
+      .from("messages")
+      .select(
+        `
+        id,
+        content,
+        message_type,
+        created_at,
+        is_read,
+        replied_to_id,
+        sender:users!messages_sender_id_fkey(id, full_name, avatar_url)
+      `
+      )
+      .in("id", lastMessageIds);
+
+    if (lastMessages) {
+      lastMessages.forEach((msg) => {
+        lastMessagesMap[msg.id] = msg;
+      });
+    }
+
+    // Get replied_to messages if any exist
+    const repliedToIds =
+      lastMessages
+        ?.filter((msg) => msg.replied_to_id)
+        .map((msg) => msg.replied_to_id) || [];
+
+    if (repliedToIds.length > 0) {
+      const { data: repliedMessages } = await supabase
         .from("messages")
         .select(
           `
           id,
           content,
-          message_type,
-          created_at,
-          is_read,
-          sender:users!messages_sender_id_fkey(id, full_name, avatar_url)
+          sender:users!messages_sender_id_fkey(full_name)
         `
         )
-        .eq("id", chat.last_message_id)
-        .single();
+        .in("id", repliedToIds);
+
+      if (repliedMessages) {
+        repliedMessages.forEach((replied) => {
+          // Find the parent message and attach the replied_to data
+          Object.values(lastMessagesMap).forEach((msg) => {
+            if (msg.replied_to_id === replied.id) {
+              msg.replied_to = replied;
+            }
+          });
+        });
+      }
+    }
+  }
+
+  // Get other participants for each chat
+  const chatsWithParticipants = await Promise.all(
+    data.map(async (item: any) => {
+      const chat = item.chat;
+      if (!chat) return null;
 
       const { data: participants } = await supabase
         .from("chat_participants")
@@ -123,17 +170,21 @@ export const getUserChats = async (): Promise<Chat[]> => {
 
       return {
         ...chat,
-        last_message: lastMessage,
+        last_message: chat.last_message_id
+          ? lastMessagesMap[chat.last_message_id]
+          : null,
         participants,
         unread_count: count || 0
       };
     })
   );
 
-  return chatsWithParticipants.sort(
-    (a, b) =>
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
+  return chatsWithParticipants
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
 };
 
 // Get or create a chat between two users
@@ -196,7 +247,7 @@ export const getOrCreateChat = async (otherUserId: string): Promise<Chat> => {
   return newChat;
 };
 
-// Get messages for a specific chat
+// Get messages for a specific chat with replied_to messages
 export const getChatMessages = async (
   chatId: string,
   limit = 50,
@@ -204,7 +255,8 @@ export const getChatMessages = async (
 ): Promise<Message[]> => {
   const supabase = createClient();
 
-  const { data, error } = await supabase
+  // First, get all messages
+  const { data: messages, error } = await supabase
     .from("messages")
     .select(
       `
@@ -215,20 +267,62 @@ export const getChatMessages = async (
     `
     )
     .eq("chat_id", chatId)
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: true })
     .range(offset, offset + limit - 1);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching messages:", error);
+    throw error;
+  }
 
-  return data.reverse();
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+
+  // Get all unique replied_to_ids
+  const repliedToIds = messages
+    .filter((msg) => msg.replied_to_id)
+    .map((msg) => msg.replied_to_id);
+
+  let repliedToMessages: Record<string, any> = {};
+
+  // Fetch replied_to messages separately if there are any
+  if (repliedToIds.length > 0) {
+    const { data: repliedMessages } = await supabase
+      .from("messages")
+      .select(
+        `
+        id,
+        content,
+        message_type,
+        sender:users!messages_sender_id_fkey(id, full_name, avatar_url)
+      `
+      )
+      .in("id", repliedToIds);
+
+    if (repliedMessages) {
+      repliedMessages.forEach((msg) => {
+        repliedToMessages[msg.id] = msg;
+      });
+    }
+  }
+
+  // Combine the data
+  const messagesWithReplies = messages.map((msg) => ({
+    ...msg,
+    replied_to: msg.replied_to_id ? repliedToMessages[msg.replied_to_id] : null
+  }));
+
+  return messagesWithReplies;
 };
-
-// Send a message
+// Send a message with optional reply and attachments
 export const sendMessage = async (
   chatId: string,
   receiverId: string,
   content: string,
-  messageType: string = "text"
+  messageType: string = "text",
+  repliedToId?: string | null,
+  attachments?: File[]
 ): Promise<Message> => {
   const supabase = createClient();
 
@@ -245,7 +339,8 @@ export const sendMessage = async (
       sender_id: user.id,
       receiver_id: receiverId,
       content,
-      message_type: messageType
+      message_type: messageType,
+      replied_to_id: repliedToId
     })
     .select(
       `
@@ -257,6 +352,13 @@ export const sendMessage = async (
     .single();
 
   if (messageError) throw messageError;
+
+  // Upload attachments if provided
+  if (attachments && attachments.length > 0) {
+    await Promise.all(
+      attachments.map((file) => uploadAttachment(message.id, file))
+    );
+  }
 
   // Update chat's last_message_id and updated_at
   await supabase

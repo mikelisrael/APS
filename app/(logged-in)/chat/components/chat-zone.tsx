@@ -1,7 +1,20 @@
 "use client";
 
+import {
+  useChatMessages,
+  useChatSubscription,
+  useDeleteMessage,
+  useMarkMessagesAsRead,
+  useSendMessage,
+  useUserChats
+} from "@/hooks/use-chats";
+import { useAuth } from "@/hooks/use-query-resource";
+import { Chat, Message } from "@/services/chats.service";
+import { Loader2, MessageCircle } from "lucide-react";
 import moment from "moment";
-import React, { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import ChatBubble from "./chat-bubble";
 import ChatInput from "./chat-input";
 import DateDivider from "./date-divider";
@@ -11,176 +24,164 @@ interface Sender {
   avatar: string;
 }
 
-interface Message {
-  id: number;
+interface TransformedMessage {
+  id: string;
   message: string;
   time: string;
   timestamp: string;
   sender: Sender;
   isOwn: boolean;
+  repliedTo?: {
+    id: string;
+    message: string;
+    sender: string;
+    isOwn?: boolean;
+  } | null;
 }
 
-const messages: Message[] = [
-  {
-    id: 1,
-    message: "Hey! Did you get a chance to review the latest designs?",
-    time: "10:32",
-    timestamp: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 2,
-    message:
-      "Yes! I just finished looking through them. The new color scheme is really clean.",
-    time: "10:35",
-    timestamp: moment().subtract(2, "days").format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 3,
-    message:
-      "That's awesome. I think our users will really appreciate the improvements.",
-    time: "10:36",
-    timestamp: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 4,
-    message:
-      "Agreed! Should we schedule a meeting to discuss the implementation timeline?",
-    time: "10:38",
-    timestamp: moment().subtract(1, "days").format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 5,
-    message: "Perfect idea. How about tomorrow at 2 PM?",
-    time: "10:40",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 6,
-    message: "Let's confirm after standup tomorrow.",
-    time: "10:41",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 7,
-    message: "Sounds good.",
-    time: "10:42",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 8,
-    message:
-      "By the way, have you checked the prototype on mobile? It looks a bit off on smaller screens.",
-    time: "10:45",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 9,
-    message:
-      "Oh, not yet. I'll test it right after lunch and push a fix if needed.",
-    time: "10:47",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 10,
-    message:
-      "Cool. Also, the animations feel smoother now. Did you tweak the easing curve?",
-    time: "10:49",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 11,
-    message:
-      "Yeah, I switched it to a cubic-bezier curve to make transitions feel more natural.",
-    time: "10:50",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 12,
-    message: "Nice touch! That subtle detail really improves the overall feel.",
-    time: "10:52",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 13,
-    message:
-      "Thanks! Once the responsive issue is fixed, I think we'll be ready for stakeholder review.",
-    time: "10:54",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 14,
-    message:
-      "True. I'll also update the presentation slides tonight so we can walk them through the flow tomorrow.",
-    time: "10:56",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 15,
-    message:
-      "Perfect. Let me know if you need help adding screenshots or user flow diagrams.",
-    time: "10:58",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  },
-  {
-    id: 16,
-    message: "Will do. Thanks! Talk later?",
-    time: "11:00",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "Sarah Chen", avatar: "" },
-    isOwn: false
-  },
-  {
-    id: 17,
-    message: "Sure thing. Catch you after standup tomorrow.",
-    time: "11:02",
-    timestamp: moment().format("YYYY-MM-DD HH:mm"),
-    sender: { name: "You", avatar: "" },
-    isOwn: true
-  }
-];
+interface ReplyingTo {
+  id: string;
+  message: string;
+  sender: string;
+}
 
 const ChatZone: React.FC = () => {
+  const { ["chat-id"]: activeChatId } = useParams();
+  const chatId = activeChatId as string;
+
   const [stickyDate, setStickyDate] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<ReplyingTo | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
-  // Scroll to bottom on initial load
+  const router = useRouter();
+  const { user } = useAuth();
+  const { data: chats } = useUserChats();
+  const {
+    data: messages,
+    isLoading,
+    refetch: refetchMessages
+  } = useChatMessages(chatId);
+  const { mutate: markAsRead } = useMarkMessagesAsRead();
+  const { mutate: sendMessageMutation, isPending: isSending } =
+    useSendMessage();
+  const { mutate: deleteMessageMutation } = useDeleteMessage();
+
+  // Get current chat to find receiver
+  const currentChat = useMemo(() => {
+    return chats?.find((chat: Chat) => chat.id === chatId);
+  }, [chats, chatId]);
+
+  // Get receiver info from chat participants
+  const receiver = useMemo(() => {
+    if (!currentChat || !user) return null;
+
+    const otherParticipant = currentChat.participants?.find(
+      (p: any) => p.user_id !== user.id
+    );
+
+    return otherParticipant?.user || null;
+  }, [currentChat, user]);
+
+  // Get receiver ID for sending messages
+  const receiverId = useMemo(() => {
+    if (!currentChat || !user) return null;
+
+    const otherParticipant = currentChat.participants?.find(
+      (p: any) => p.user_id !== user.id
+    );
+
+    return otherParticipant?.user_id || null;
+  }, [currentChat, user]);
+
+  // Subscribe to real-time updates
+  useChatSubscription(chatId, () => {
+    refetchMessages();
+  });
+
+  // Mark messages as read when chat opens or new messages arrive
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop =
-        scrollContainerRef.current.scrollHeight + 1000;
+    if (chatId && messages && messages.length > 0) {
+      const hasUnread = messages.some(
+        (msg: Message) => !msg.is_read && msg.receiver_id === user?.id
+      );
+      if (hasUnread) {
+        markAsRead(chatId);
+      }
     }
-  }, []);
+  }, [chatId, messages, user?.id, markAsRead]);
+
+  const transformedMessages: TransformedMessage[] = useMemo(() => {
+    if (!messages || !user) return [];
+
+    return messages.map((msg: Message) => ({
+      id: msg.id,
+      message: msg.content,
+      time: moment(msg.created_at).format("HH:mm"),
+      timestamp: msg.created_at,
+      sender: {
+        name: msg.sender?.full_name || "Unknown",
+        avatar: msg.sender?.avatar_url || ""
+      },
+      isOwn: msg.sender_id === user.id,
+      repliedTo: msg.replied_to
+        ? {
+            id: msg.replied_to.id,
+            message: msg.replied_to.content,
+            sender: msg.replied_to.sender?.full_name || "Unknown",
+            isOwn: msg.replied_to.sender?.id === user.id
+          }
+        : null
+    }));
+  }, [messages, user]);
+
+  // Scroll to bottom when chat loads, messages change, or chat changes
+  useEffect(() => {
+    if (scrollContainerRef.current && transformedMessages.length > 0) {
+      const scrollToBottom = () => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop =
+            scrollContainerRef.current.scrollHeight;
+          setHasScrolledToBottom(true);
+        }
+      };
+
+      // Use a slightly longer timeout to ensure DOM is fully rendered
+      const timer = setTimeout(scrollToBottom, 150);
+
+      return () => clearTimeout(timer);
+    } else if (scrollContainerRef.current && transformedMessages.length === 0) {
+      // Reset scroll state when no messages
+      setHasScrolledToBottom(false);
+    }
+  }, [transformedMessages, chatId]); // Added chatId dependency
+
+  // Also scroll to bottom when new messages are added (real-time updates)
+  useEffect(() => {
+    if (
+      scrollContainerRef.current &&
+      transformedMessages.length > 0 &&
+      hasScrolledToBottom
+    ) {
+      // Only auto-scroll if user is already near the bottom
+      const container = scrollContainerRef.current;
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        100;
+
+      if (isNearBottom) {
+        const timer = setTimeout(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop =
+              scrollContainerRef.current.scrollHeight;
+          }
+        }, 100);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [transformedMessages.length, hasScrolledToBottom]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -198,6 +199,17 @@ const ChatZone: React.FC = () => {
       }
 
       setStickyDate(dates[0]);
+
+      // Update scroll position state
+      const container = scrollContainerRef.current;
+      const isAtBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        10;
+      if (isAtBottom) {
+        setHasScrolledToBottom(true);
+      } else {
+        setHasScrolledToBottom(false);
+      }
     };
 
     const container = scrollContainerRef.current;
@@ -211,12 +223,12 @@ const ChatZone: React.FC = () => {
         container.removeEventListener("scroll", handleScroll);
       }
     };
-  }, []);
+  }, [transformedMessages]);
 
-  const groupMessagesByDate = (): Record<string, Message[]> => {
-    const grouped: Record<string, Message[]> = {};
+  const groupMessagesByDate = (): Record<string, TransformedMessage[]> => {
+    const grouped: Record<string, TransformedMessage[]> = {};
 
-    messages.forEach((msg) => {
+    transformedMessages.forEach((msg) => {
       const dateKey = moment(msg.timestamp).format("YYYY-MM-DD");
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -227,63 +239,171 @@ const ChatZone: React.FC = () => {
     return grouped;
   };
 
+  const handleReply = (message: TransformedMessage) => {
+    setReplyingTo({
+      id: message.id,
+      message: message.message,
+      sender: message.sender.name
+    });
+  };
+
+  const handleSend = (
+    content: string,
+    attachments?: File[],
+    replyToId?: string
+  ) => {
+    if (!chatId) {
+      console.error("No chatId available");
+      return;
+    }
+
+    if (!receiverId) {
+      console.error("Could not determine receiver ID. Chat:", currentChat);
+      return;
+    }
+
+    console.log("Sending message:", {
+      chatId,
+      receiverId,
+      content,
+      messageType: attachments && attachments.length > 0 ? "file" : "text",
+      repliedToId: replyToId || null,
+      hasAttachments: attachments && attachments.length > 0
+    });
+
+    sendMessageMutation(
+      {
+        chatId,
+        receiverId,
+        content,
+        messageType: attachments && attachments.length > 0 ? "file" : "text",
+        repliedToId: replyToId || null,
+        attachments
+      },
+      {
+        onSuccess: (data) => {
+          console.log("Message sent successfully:", data);
+          setReplyingTo(null);
+          refetchMessages();
+        },
+        onError: (error: any) => {
+          console.error("Failed to send message:", error);
+          toast.error(error.message || "Failed to send message");
+        }
+      }
+    );
+  };
+
+  const handleDelete = (messageId: string) => {
+    deleteMessageMutation(messageId, {
+      onSuccess: () => {
+        refetchMessages();
+      }
+    });
+  };
+
   const groupedMessages = groupMessagesByDate();
   const sortedDates = Object.keys(groupedMessages).sort();
 
+  if (isLoading) {
+    return (
+      <section className="flex-center h-full flex-col border-l text-sm">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <p className="mt-2 text-sm text-muted-foreground">
+          Loading messages...
+        </p>
+      </section>
+    );
+  }
+
+  if (!chatId) {
+    router.replace("/chat");
+    return null;
+  }
+
   return (
-    <section className="flex flex-col overflow-hidden rounded-lg border-l text-sm">
+    <section className="flex flex-col overflow-hidden border-l text-sm">
       <div
         ref={scrollContainerRef}
         className="thin-scrollbar relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
       >
         {stickyDate && <DateDivider date={stickyDate} isSticky={true} />}
 
-        <div className="space-y-2 p-4">
-          {sortedDates.map((date, dateIndex) => (
-            <div key={date}>
-              <div
-                ref={(el) => {
-                  dateRefs.current[date] = el;
-                }}
-                style={{
-                  opacity: stickyDate === date ? 0 : 1
-                }}
-              >
-                <DateDivider date={date} isSticky={false} />
+        <div className="h-full space-y-2 p-4">
+          {sortedDates.length === 0 ? (
+            <div className="flex-center h-full flex-col text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <MessageCircle className="h-8 w-8 text-muted-foreground" />
               </div>
-
-              {groupedMessages[date].map((msg, index) => {
-                const messagesOnDate = groupedMessages[date];
-                const prevMsg = messagesOnDate[index - 1];
-                const sameAsPrev =
-                  prevMsg &&
-                  prevMsg.sender.name === msg.sender.name &&
-                  prevMsg.isOwn === msg.isOwn;
-
-                const isGrouped = sameAsPrev;
-                const isFirstOfGroup = !sameAsPrev;
-
-                return (
-                  <ChatBubble
-                    key={msg.id}
-                    message={msg.message}
-                    time={msg.time}
-                    sender={msg.sender}
-                    isOwn={msg.isOwn}
-                    isGrouped={isGrouped}
-                    isFirstOfGroup={isFirstOfGroup}
-                  />
-                );
-              })}
+              <h3 className="mb-2 text-lg font-semibold">
+                Start chatting with {receiver?.full_name || "this user"}
+              </h3>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Send your first message to begin the conversation.
+                {receiver?.full_name &&
+                  ` Your messages with ${receiver.full_name} will appear here.`}
+              </p>
             </div>
-          ))}
+          ) : (
+            sortedDates.map((date) => (
+              <div key={date}>
+                <div
+                  ref={(el) => {
+                    dateRefs.current[date] = el;
+                  }}
+                  style={{
+                    opacity: stickyDate === date ? 0 : 1
+                  }}
+                >
+                  <DateDivider date={date} isSticky={false} />
+                </div>
+
+                <div className="pb-10">
+                  {groupedMessages[date].map((msg, index) => {
+                    const messagesOnDate = groupedMessages[date];
+                    const prevMsg = messagesOnDate[index - 1];
+
+                    const sameAsPrev =
+                      prevMsg &&
+                      prevMsg.sender.name === msg.sender.name &&
+                      prevMsg.isOwn === msg.isOwn &&
+                      moment(msg.timestamp).isSame(
+                        moment(prevMsg.timestamp),
+                        "minute"
+                      );
+
+                    const isGrouped = sameAsPrev;
+                    const isFirstOfGroup = !sameAsPrev;
+
+                    return (
+                      <ChatBubble
+                        key={msg.id}
+                        message={msg.message}
+                        time={msg.time}
+                        sender={msg.sender}
+                        isOwn={msg.isOwn}
+                        isGrouped={isGrouped}
+                        isFirstOfGroup={isFirstOfGroup}
+                        repliedTo={msg.repliedTo}
+                        onReply={() => handleReply(msg)}
+                        onDelete={
+                          msg.isOwn ? () => handleDelete(msg.id) : undefined
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
       <ChatInput
-        onSend={(content: string) => {
-          console.log("Message sent:", content);
-        }}
+        onSend={handleSend}
+        replyingTo={replyingTo}
+        onCancelReply={() => setReplyingTo(null)}
+        disabled={isSending || !receiverId}
       />
     </section>
   );

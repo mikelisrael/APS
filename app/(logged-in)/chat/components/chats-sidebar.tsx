@@ -34,13 +34,15 @@ const Chats = () => {
   const filteredChats = useMemo(() => {
     if (!chats) return [];
 
-    // Filter out chats without last_message first
-    const chatsWithMessages = chats.filter((chat: Chat) => chat.last_message);
+    // Include chats that either have a last_message OR are currently active
+    const chatsWithMessagesOrActive = chats.filter(
+      (chat: Chat) => chat.last_message || activeChatId === chat.id
+    );
 
-    if (!debouncedQuery) return chatsWithMessages;
+    if (!debouncedQuery) return chatsWithMessagesOrActive;
 
     const query = debouncedQuery.toLowerCase();
-    return chatsWithMessages.filter((chat: Chat) => {
+    return chatsWithMessagesOrActive.filter((chat: Chat) => {
       const otherParticipant = chat.participants?.[0];
       const name = otherParticipant?.user?.full_name?.toLowerCase() || "";
       const lastMessageContent =
@@ -48,7 +50,7 @@ const Chats = () => {
 
       return name.includes(query) || lastMessageContent.includes(query);
     });
-  }, [chats, debouncedQuery]);
+  }, [chats, debouncedQuery, activeChatId]);
 
   // Calculate total unread count
   const totalUnreadCount = useMemo(() => {

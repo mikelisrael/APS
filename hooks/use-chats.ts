@@ -51,7 +51,7 @@ export const useChatMessages = (chatId: string, limit = 50, offset = 0) => {
   });
 };
 
-// Hook for sending a message
+// Hook for sending a message with optional reply and attachments
 export const useSendMessage = () => {
   return useModifyResource({
     key: ["chats"],
@@ -59,13 +59,25 @@ export const useSendMessage = () => {
       chatId,
       receiverId,
       content,
-      messageType
+      messageType,
+      repliedToId,
+      attachments
     }: {
       chatId: string;
       receiverId: string;
       content: string;
       messageType?: string;
-    }) => sendMessage(chatId, receiverId, content, messageType),
+      repliedToId?: string | null;
+      attachments?: File[];
+    }) =>
+      sendMessage(
+        chatId,
+        receiverId,
+        content,
+        messageType,
+        repliedToId,
+        attachments
+      ),
     onError: (error) => {
       toast.error(error.message || "Failed to send message");
     }
@@ -233,7 +245,12 @@ export const useChat = (otherUserId: string) => {
     }
   };
 
-  const sendNewMessage = (content: string, messageType = "text") => {
+  const sendNewMessage = (
+    content: string,
+    messageType = "text",
+    repliedToId?: string | null,
+    attachments?: File[]
+  ) => {
     if (!chat?.id) return;
 
     const receiver = chat.participants?.find(
@@ -245,7 +262,9 @@ export const useChat = (otherUserId: string) => {
       chatId: chat.id,
       receiverId: receiver.user_id,
       content,
-      messageType
+      messageType,
+      repliedToId,
+      attachments
     });
   };
 

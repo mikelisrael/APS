@@ -12,11 +12,25 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Copy, Flag, Forward, MoreVertical, Reply, Trash2 } from "lucide-react";
+import { Copy, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
 
 interface Sender {
   name: string;
   avatar: string;
+}
+
+interface RepliedMessage {
+  id: string;
+  message: string;
+  sender: string;
+  isOwn?: boolean;
+}
+
+interface MenuItem {
+  label: string;
+  icon: React.ComponentType<any>;
+  action?: () => void;
+  className?: string;
 }
 
 interface ChatBubbleProps {
@@ -26,6 +40,9 @@ interface ChatBubbleProps {
   isOwn: boolean;
   isGrouped: boolean;
   isFirstOfGroup: boolean;
+  repliedTo?: RepliedMessage | null;
+  onReply?: () => void;
+  onDelete?: () => void;
 }
 
 const ChatBubble = ({
@@ -34,18 +51,35 @@ const ChatBubble = ({
   sender,
   isOwn,
   isGrouped,
-  isFirstOfGroup
+  isFirstOfGroup,
+  repliedTo,
+  onReply,
+  onDelete
 }: ChatBubbleProps) => {
   const showAvatar = !isGrouped;
   const showName = isFirstOfGroup;
 
-  const menuItems = [
-    { label: "Reply", icon: Reply, className: "" },
-    { label: "Forward", icon: Forward, className: "" },
-    { label: "Copy", icon: Copy, className: "" },
-    { label: "Report", icon: Flag, className: "" },
-    { label: "Delete", icon: Trash2, className: "text-destructive" }
+  const baseMenuItems: MenuItem[] = [
+    { label: "Reply", icon: Reply, action: onReply },
+    {
+      label: "Copy",
+      icon: Copy,
+      action: () => navigator.clipboard.writeText(message)
+    },
+    { label: "Report", icon: Flag, action: () => {} }
   ];
+
+  const menuItems: MenuItem[] = isOwn
+    ? [
+        ...baseMenuItems,
+        {
+          label: "Delete",
+          icon: Trash2,
+          className: "text-destructive",
+          action: onDelete
+        }
+      ]
+    : baseMenuItems;
 
   return (
     <div
@@ -56,95 +90,118 @@ const ChatBubble = ({
       )}
     >
       <UserAvatar
-        className={cn(
-          "h-8 w-8 transition-opacity duration-200",
-          !showAvatar && "opacity-0"
-        )}
+        className={cn("h-8 w-8 transition-opacity", !showAvatar && "opacity-0")}
         src={sender.avatar}
         alt={sender.name}
       />
 
-      <div className={cn("flex max-w-[320px] flex-col", isOwn && "items-end")}>
-        <ContextMenu>
-          <ContextMenuTrigger>
-            <div
-              className={cn(
-                "leading-1.5 relative p-4 transition-all",
-                isOwn
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white",
-                isFirstOfGroup
-                  ? isOwn
-                    ? "rounded-bl-xl rounded-br-xl rounded-tl-xl"
-                    : "rounded-bl-xl rounded-br-xl rounded-tr-xl"
-                  : "rounded-xl"
-              )}
-            >
-              {showName && (
-                <div className="mb-1 flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "text-sm font-semibold",
-                      isOwn ? "text-primary-foreground" : "text-foreground"
-                    )}
-                  >
-                    {sender.name}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-xs",
-                      isOwn
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {time}
-                  </span>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="ml-auto rounded p-0.5 opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10">
-                        <MoreVertical className="h-3.5 w-3.5" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align={isOwn ? "end" : "start"}
-                      className="w-40"
-                    >
-                      {menuItems.map((item) => (
-                        <DropdownMenuItem
-                          key={item.label}
-                          className={item.className}
-                        >
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
-
-              <p
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <>
+            {repliedTo && (
+              <div
                 className={cn(
-                  "text-sm",
-                  isOwn ? "text-primary-foreground" : "text-foreground"
+                  "mb-1 flex w-full max-w-[320px] items-start gap-2 border-l-4 px-2",
+                  isOwn && "flex-row-reverse border-l-0 border-r-4"
                 )}
               >
-                {message}
-              </p>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-0.5 flex items-center gap-2">
+                    <Reply className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {repliedTo.isOwn ? "You" : repliedTo.sender}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {repliedTo.message}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div
+              className={cn(
+                "flex max-w-[320px] flex-col",
+                isOwn ? "ml-auto items-end" : "mr-auto items-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "relative p-4 transition-all",
+                  isOwn
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground",
+                  isFirstOfGroup
+                    ? isOwn
+                      ? "rounded-bl-xl rounded-br-xl rounded-tl-xl"
+                      : "rounded-bl-xl rounded-br-xl rounded-tr-xl"
+                    : "rounded-xl"
+                )}
+              >
+                {showName && (
+                  <div className="mb-1 flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "text-sm font-semibold",
+                        isOwn ? "text-primary-foreground" : "text-foreground"
+                      )}
+                    >
+                      {isOwn ? "You" : sender.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-xs font-medium",
+                        isOwn
+                          ? "text-primary-foreground/70"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {time}
+                    </span>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="ml-auto rounded p-0.5 opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10">
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align={isOwn ? "end" : "start"}
+                        className="w-40"
+                      >
+                        {menuItems.map((item) => (
+                          <DropdownMenuItem
+                            key={item.label}
+                            className={item.className}
+                            onClick={item.action}
+                          >
+                            <item.icon className="mr-2 h-4 w-4" />
+                            {item.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+
+                <p className="text-sm font-medium">{message}</p>
+              </div>
             </div>
-          </ContextMenuTrigger>
-          <ContextMenuContent className="w-40">
-            {menuItems.map((item) => (
-              <ContextMenuItem key={item.label} className={item.className}>
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.label}
-              </ContextMenuItem>
-            ))}
-          </ContextMenuContent>
-        </ContextMenu>
-      </div>
+          </>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-40">
+          {menuItems.map((item) => (
+            <ContextMenuItem
+              key={item.label}
+              className={item.className}
+              onClick={item.action}
+            >
+              <item.icon className="mr-2 h-4 w-4" />
+              {item.label}
+            </ContextMenuItem>
+          ))}
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   );
 };
