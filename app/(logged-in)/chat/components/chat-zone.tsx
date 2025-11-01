@@ -35,6 +35,7 @@ interface TransformedMessage {
   isOwn: boolean;
   isEdited: boolean;
   editedAt?: string | null;
+  isOptimistic?: boolean; // NEW
   repliedTo?: {
     id: string;
     message: string;
@@ -71,11 +72,7 @@ const ChatZone: React.FC = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { data: chats } = useUserChats();
-  const {
-    data: messages,
-    isLoading,
-    refetch: refetchMessages
-  } = useChatMessages(chatId);
+  const { data: messages, isLoading } = useChatMessages(chatId);
   const { mutate: markAsRead } = useMarkMessagesAsRead();
   const { mutate: sendMessageMutation, isPending: isSending } =
     useSendMessage();
@@ -111,10 +108,8 @@ const ChatZone: React.FC = () => {
 
   usePageTitle(receiver?.full_name || "Chat");
 
-  // Subscribe to real-time updates
-  useChatSubscription(chatId, () => {
-    refetchMessages();
-  });
+  // Subscribe to real-time updates (now with instant cache updates)
+  useChatSubscription(chatId);
 
   // Mark messages as read when chat opens or new messages arrive
   useEffect(() => {
@@ -131,7 +126,7 @@ const ChatZone: React.FC = () => {
   const transformedMessages: TransformedMessage[] = useMemo(() => {
     if (!messages || !user) return [];
 
-    return messages.map((msg: Message) => ({
+    return messages.map((msg: any) => ({
       id: msg.id,
       message: msg.content,
       time: moment(msg.created_at).format("HH:mm"),
@@ -143,6 +138,7 @@ const ChatZone: React.FC = () => {
       isOwn: msg.sender_id === user.id,
       isEdited: msg.is_edited || false,
       editedAt: msg.edited_at,
+      isOptimistic: msg._optimistic || false, // NEW: Pass optimistic flag
       repliedTo: msg.replied_to
         ? {
             id: msg.replied_to.id,
@@ -285,7 +281,6 @@ const ChatZone: React.FC = () => {
         {
           onSuccess: () => {
             setEditingMessage(null);
-            refetchMessages();
           },
           onError: (error: any) => {
             console.error("Failed to edit message:", error);
@@ -301,15 +296,6 @@ const ChatZone: React.FC = () => {
       return;
     }
 
-    console.log("Sending message:", {
-      chatId,
-      receiverId,
-      content,
-      messageType: attachments && attachments.length > 0 ? "file" : "text",
-      repliedToId: replyToId || null,
-      hasAttachments: attachments && attachments.length > 0
-    });
-
     sendMessageMutation(
       {
         chatId,
@@ -320,10 +306,8 @@ const ChatZone: React.FC = () => {
         attachments
       },
       {
-        onSuccess: (data) => {
-          console.log("Message sent successfully:", data);
+        onSuccess: () => {
           setReplyingTo(null);
-          refetchMessages();
         },
         onError: (error: any) => {
           console.error("Failed to send message:", error);
@@ -334,11 +318,7 @@ const ChatZone: React.FC = () => {
   };
 
   const handleDelete = (messageId: string) => {
-    deleteMessageMutation(messageId, {
-      onSuccess: () => {
-        refetchMessages();
-      }
-    });
+    deleteMessageMutation(messageId);
   };
 
   const handleCancelEdit = () => {
@@ -430,6 +410,7 @@ const ChatZone: React.FC = () => {
                         isEdited={msg.isEdited}
                         editedAt={msg.editedAt}
                         repliedTo={msg.repliedTo}
+                        isOptimistic={msg.isOptimistic} // NEW: Pass optimistic flag
                         onReply={() => handleReply(msg)}
                         onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
                         onDelete={

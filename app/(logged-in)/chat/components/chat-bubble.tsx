@@ -46,6 +46,7 @@ interface ChatBubbleProps {
   onReply?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
+  isOptimistic?: boolean; // NEW: For optimistic updates
 }
 
 const ChatBubble = ({
@@ -60,7 +61,8 @@ const ChatBubble = ({
   repliedTo,
   onReply,
   onDelete,
-  onEdit
+  onEdit,
+  isOptimistic = false // NEW
 }: ChatBubbleProps) => {
   const showAvatar = !isGrouped;
   const showName = isFirstOfGroup;
@@ -91,9 +93,10 @@ const ChatBubble = ({
   return (
     <div
       className={cn(
-        "group flex items-start gap-2.5",
+        "group flex items-start gap-2.5 transition-opacity",
         isOwn && "flex-row-reverse",
-        isGrouped ? "mt-[5px]" : "mt-4"
+        isGrouped ? "mt-[5px]" : "mt-4",
+        isOptimistic && "opacity-60" // Fade optimistic messages
       )}
     >
       <UserAvatar
@@ -166,28 +169,30 @@ const ChatBubble = ({
                       {time}
                     </span>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="ml-auto rounded p-0.5 opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10">
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align={isOwn ? "end" : "start"}
-                        className="w-40"
-                      >
-                        {menuItems.map((item) => (
-                          <DropdownMenuItem
-                            key={item.label}
-                            className={item.className}
-                            onClick={item.action}
-                          >
-                            <item.icon className="mr-2 h-4 w-4" />
-                            {item.label}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {!isOptimistic && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="ml-auto rounded p-0.5 opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align={isOwn ? "end" : "start"}
+                          className="w-40"
+                        >
+                          {menuItems.map((item) => (
+                            <DropdownMenuItem
+                              key={item.label}
+                              className={item.className}
+                              onClick={item.action}
+                            >
+                              <item.icon className="mr-2 h-4 w-4" />
+                              {item.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 )}
 
@@ -196,7 +201,7 @@ const ChatBubble = ({
                 </p>
 
                 {/* Edited Indicator */}
-                {isEdited && (
+                {isEdited && !isOptimistic && (
                   <div className="mt-1 flex items-center gap-1">
                     <span
                       className={cn(
@@ -215,16 +220,17 @@ const ChatBubble = ({
           </>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-40">
-          {menuItems.map((item) => (
-            <ContextMenuItem
-              key={item.label}
-              className={item.className}
-              onClick={item.action}
-            >
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.label}
-            </ContextMenuItem>
-          ))}
+          {!isOptimistic &&
+            menuItems.map((item) => (
+              <ContextMenuItem
+                key={item.label}
+                className={item.className}
+                onClick={item.action}
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.label}
+              </ContextMenuItem>
+            ))}
         </ContextMenuContent>
       </ContextMenu>
     </div>

@@ -123,7 +123,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                   )}
                 </div>
                 <div className="flex-between gap-2">
-                  <span className="line-clamp-1 font-medium text-muted-foreground">
+                  <span className="line-clamp-1 font-normal text-muted-foreground">
                     {lastMessage?.content || "No messages yet"}
                   </span>
                   {chat.unread_count && chat.unread_count > 0 ? (

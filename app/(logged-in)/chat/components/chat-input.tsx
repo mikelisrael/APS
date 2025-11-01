@@ -106,10 +106,7 @@ const ChatInput = ({
       editor.commands.setContent(editingMessage.message);
       editor.commands.focus();
     } else if (editor && !editingMessage) {
-      // Clear content when not editing
-      if (editor.getText().trim() === editingMessage?.message) {
-        editor.commands.clearContent();
-      }
+      editor.commands.clearContent();
     }
   }, [editingMessage, editor]);
 

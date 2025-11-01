@@ -30,8 +30,8 @@ interface MutationOptionsProps<T, Variables = any>
   > {
   key: string[];
   fn: (variables: Variables) => Promise<any>;
-  onSuccess?: (data: any) => void;
-  onError?: (e: any) => void;
+  onSuccess?: (data: any, variables?: Variables, context?: any) => void;
+  onError?: (error: any, variables?: Variables, context?: any) => void;
   invalidateAll?: boolean;
 }
 
