@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Copy, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
+import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
 
 interface Sender {
   name: string;
@@ -40,9 +40,12 @@ interface ChatBubbleProps {
   isOwn: boolean;
   isGrouped: boolean;
   isFirstOfGroup: boolean;
+  isEdited?: boolean;
+  editedAt?: string | null;
   repliedTo?: RepliedMessage | null;
   onReply?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
 const ChatBubble = ({
@@ -52,9 +55,12 @@ const ChatBubble = ({
   isOwn,
   isGrouped,
   isFirstOfGroup,
+  isEdited = false,
+  editedAt,
   repliedTo,
   onReply,
-  onDelete
+  onDelete,
+  onEdit
 }: ChatBubbleProps) => {
   const showAvatar = !isGrouped;
   const showName = isFirstOfGroup;
@@ -71,6 +77,7 @@ const ChatBubble = ({
 
   const menuItems: MenuItem[] = isOwn
     ? [
+        { label: "Edit", icon: Edit, action: onEdit },
         ...baseMenuItems,
         {
           label: "Delete",
@@ -184,7 +191,25 @@ const ChatBubble = ({
                   </div>
                 )}
 
-                <p className="text-sm font-medium">{message}</p>
+                <p className="whitespace-pre-wrap break-words text-sm">
+                  {message}
+                </p>
+
+                {/* Edited Indicator */}
+                {isEdited && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <span
+                      className={cn(
+                        "text-[10px] italic",
+                        isOwn
+                          ? "text-primary-foreground/60"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      Edited
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </>

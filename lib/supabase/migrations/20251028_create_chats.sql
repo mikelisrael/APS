@@ -86,3 +86,11 @@ DROP CONSTRAINT IF EXISTS fk_last_message;
 ALTER TABLE chats 
 ADD CONSTRAINT chats_last_message_id_fkey 
     FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL;
+
+-- Add is_edited column to messages table
+ALTER TABLE messages 
+ADD COLUMN is_edited BOOLEAN DEFAULT FALSE,
+ADD COLUMN edited_at TIMESTAMPTZ;
+
+-- Create index for better query performance
+CREATE INDEX idx_messages_is_edited ON messages(is_edited);

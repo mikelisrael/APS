@@ -90,6 +90,7 @@ const Chats = () => {
           className="grow bg-card text-sm focus:outline-none"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          autoComplete="off"
         />
       </div>
 

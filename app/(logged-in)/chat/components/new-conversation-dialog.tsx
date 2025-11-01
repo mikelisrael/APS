@@ -64,7 +64,7 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
     >
       <div className="relative space-y-4">
         {isCreatingChat && (
-          <div className="flex-center absolute inset-0 bg-background/70">
+          <div className="flex-center absolute inset-0 z-30 bg-background/20 backdrop-blur-[2px]">
             <LoaderCircle size={30} className="animate-spin" />
           </div>
         )}

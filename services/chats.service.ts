@@ -9,6 +9,8 @@ export interface Message {
   message_type: string;
   created_at: string;
   is_read: boolean;
+  is_edited: boolean;
+  edited_at?: string | null;
   replied_to_id?: string | null;
   sender?: {
     id: string;
@@ -484,4 +486,52 @@ export const deleteChat = async (chatId: string): Promise<void> => {
   const { error } = await supabase.from("chats").delete().eq("id", chatId);
 
   if (error) throw error;
+};
+
+// Edit a message
+export const editMessage = async (
+  messageId: string,
+  newContent: string
+): Promise<Message> => {
+  const supabase = createClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not authenticated");
+
+  // First, verify the user owns this message
+  const { data: existingMessage, error: fetchError } = await supabase
+    .from("messages")
+    .select("sender_id")
+    .eq("id", messageId)
+    .single();
+
+  if (fetchError) throw fetchError;
+  if (existingMessage.sender_id !== user.id) {
+    throw new Error("You can only edit your own messages");
+  }
+
+  // Update the message
+  const { data: message, error: updateError } = await supabase
+    .from("messages")
+    .update({
+      content: newContent,
+      is_edited: true,
+      edited_at: new Date().toISOString()
+    })
+    .eq("id", messageId)
+    .select(
+      `
+      *,
+      sender:users!messages_sender_id_fkey(id, full_name, avatar_url),
+      receiver:users!messages_receiver_id_fkey(id, full_name, avatar_url)
+    `
+    )
+    .single();
+
+  if (updateError) throw updateError;
+
+  return message;
 };

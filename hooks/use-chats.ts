@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   deleteChat,
   deleteMessage,
+  editMessage,
   getChatMessages,
   getOrCreateChat,
   getTotalUnreadCount,
@@ -84,6 +85,21 @@ export const useSendMessage = () => {
   });
 };
 
+// Hook for editing a message
+export const useEditMessage = () => {
+  return useModifyResource({
+    key: ["chats"],
+    fn: ({ messageId, content }: { messageId: string; content: string }) =>
+      editMessage(messageId, content),
+    onSuccess: () => {
+      toast.success("Message updated");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to edit message");
+    }
+  });
+};
+
 // Hook for marking messages as read
 export const useMarkMessagesAsRead = () => {
   return useModifyResource({
@@ -134,6 +150,7 @@ export const useTotalUnreadCount = () => {
 };
 
 // Hook for real-time chat updates using Supabase subscriptions
+// FIXED: Now listens for both INSERT and UPDATE events
 export const useChatSubscription = (
   chatId: string,
   onNewMessage?: (message: any) => void
@@ -154,8 +171,39 @@ export const useChatSubscription = (
           filter: `chat_id=eq.${chatId}`
         },
         (payload) => {
+          console.log("New message received:", payload.new);
           if (onNewMessage) {
             onNewMessage(payload.new);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `chat_id=eq.${chatId}`
+        },
+        (payload) => {
+          console.log("Message updated:", payload.new);
+          if (onNewMessage) {
+            onNewMessage(payload.new);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "messages",
+          filter: `chat_id=eq.${chatId}`
+        },
+        (payload) => {
+          console.log("Message deleted:", payload.old);
+          if (onNewMessage) {
+            onNewMessage(payload.old);
           }
         }
       )
@@ -194,6 +242,20 @@ export const useAllChatsSubscription = (onChatUpdate?: () => void) => {
           (payload) => {
             // Only trigger update if current user is receiver
             if (payload.new.receiver_id === userId && onChatUpdate) {
+              onChatUpdate();
+            }
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages"
+          },
+          (payload) => {
+            // Trigger update for any message update in user's chats
+            if (onChatUpdate) {
               onChatUpdate();
             }
           }
