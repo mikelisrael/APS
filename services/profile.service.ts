@@ -60,26 +60,28 @@ export async function updateCoverPhoto(file: string) {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
+    // Delete previous cover photo if it exists
+    const { data: existingFiles } = await supabase.storage
+      .from("covers")
+      .list(user.id);
+
+    if (existingFiles && existingFiles.length > 0) {
+      const filesToDelete = existingFiles.map(
+        (file) => `${user.id}/${file.name}`
+      );
+      await supabase.storage.from("covers").remove(filesToDelete);
+    }
+
     const base64Data = file.split(",")[1];
     const blob = Buffer.from(base64Data, "base64");
 
     const fileExt = file.split(";")[0].split("/")[1];
     const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = fileName;
-
-    const { data: existingFile } = await supabase.storage
-      .from("covers")
-      .list(user.id);
-
-    if (existingFile && existingFile.length > 0) {
-      await supabase.storage
-        .from("covers")
-        .remove([`${user.id}/${existingFile[0].name}`]);
-    }
+    const filePath = `${user.id}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("covers")
-      .upload(`${user.id}/${fileName}`, blob, {
+      .upload(filePath, blob, {
         contentType: `image/${fileExt}`,
         upsert: true
       });
@@ -89,7 +91,7 @@ export async function updateCoverPhoto(file: string) {
     const { data: signedUrlData, error: signedUrlError } =
       await supabase.storage
         .from("covers")
-        .createSignedUrl(`${user.id}/${fileName}`, 60 * 60 * 24 * 365);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365);
 
     if (signedUrlError) throw signedUrlError;
 
