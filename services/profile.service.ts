@@ -15,9 +15,33 @@ export async function updateProfilePicture(file: string) {
     const blob = Buffer.from(base64Data, "base64");
 
     const fileExt = file.split(";")[0].split("/")[1];
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = fileName;
+    const fileName = `avatar.${fileExt}`; // Use consistent filename
+    const filePath = `${user.id}/${fileName}`;
 
+    // Delete previous profile picture if it exists
+    const { data: existingFiles } = await supabase.storage
+      .from("avatars")
+      .list(user.id);
+
+    if (existingFiles && existingFiles.length > 0) {
+      // Filter out any directory entries (just in case)
+      const actualFiles = existingFiles.filter(
+        (f) => f.name && f.name !== ".emptyFolderPlaceholder"
+      );
+
+      if (actualFiles.length > 0) {
+        const filesToDelete = actualFiles.map((f) => `${user.id}/${f.name}`);
+        const { error: deleteError } = await supabase.storage
+          .from("avatars")
+          .remove(filesToDelete);
+
+        if (deleteError) {
+          console.error("Delete error:", deleteError);
+        }
+      }
+    }
+
+    // Upload new file with upsert (will overwrite if exists)
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, blob, {
@@ -47,6 +71,7 @@ export async function updateProfilePicture(file: string) {
     console.log("Generated signed URL:", avatarUrl);
     return { success: true, avatarUrl };
   } catch (error: any) {
+    console.error("Profile picture update error:", error);
     return { error: error.message };
   }
 }
