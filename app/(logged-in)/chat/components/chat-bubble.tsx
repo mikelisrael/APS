@@ -46,7 +46,7 @@ interface ChatBubbleProps {
   onReply?: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
-  isOptimistic?: boolean; // NEW: For optimistic updates
+  isOptimistic?: boolean;
 }
 
 const ChatBubble = ({
@@ -62,7 +62,7 @@ const ChatBubble = ({
   onReply,
   onDelete,
   onEdit,
-  isOptimistic = false // NEW
+  isOptimistic = false
 }: ChatBubbleProps) => {
   const showAvatar = !isGrouped;
   const showName = isFirstOfGroup;
@@ -96,7 +96,7 @@ const ChatBubble = ({
         "group flex items-start gap-2.5 transition-opacity",
         isOwn && "flex-row-reverse",
         isGrouped ? "mt-[5px]" : "mt-4",
-        isOptimistic && "opacity-60" // Fade optimistic messages
+        isOptimistic && "opacity-60"
       )}
     >
       <UserAvatar

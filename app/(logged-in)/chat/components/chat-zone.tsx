@@ -410,7 +410,7 @@ const ChatZone: React.FC = () => {
                         isEdited={msg.isEdited}
                         editedAt={msg.editedAt}
                         repliedTo={msg.repliedTo}
-                        isOptimistic={msg.isOptimistic} // NEW: Pass optimistic flag
+                        isOptimistic={msg.isOptimistic}
                         onReply={() => handleReply(msg)}
                         onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
                         onDelete={
