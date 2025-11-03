@@ -498,25 +498,35 @@ export const useChatSubscription = (
           filter: `chat_id=eq.${chatId}`
         },
         (payload) => {
-          console.log("Message deleted:", payload.old);
+          console.log("Message deleted (real-time):", payload.old);
 
-          // Instantly update cache
+          // Instantly update cache - remove the deleted message
           queryClient.setQueryData(
             ["chats", chatId, "messages", "50", "0"],
             (old: any) => {
               if (!old) return old;
-              return old.filter((msg: any) => msg.id !== payload.old.id);
+              const filtered = old.filter((msg: any) => msg.id !== payload.old.id);
+              console.log(`Removed message ${payload.old.id} from cache. Before: ${old.length}, After: ${filtered.length}`);
+              return filtered;
             }
           );
+
+          // Also invalidate to ensure consistency
+          queryClient.invalidateQueries({ 
+            queryKey: ["chats", chatId, "messages"] 
+          });
 
           if (onNewMessage) {
             onNewMessage(payload.old);
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Subscription status for chat ${chatId}:`, status);
+      });
 
     return () => {
+      console.log(`Unsubscribing from chat ${chatId}`);
       supabase.removeChannel(channel);
     };
   }, [chatId, onNewMessage, queryClient]);

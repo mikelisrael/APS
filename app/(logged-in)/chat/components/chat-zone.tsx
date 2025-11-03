@@ -161,15 +161,25 @@ const ChatZone: React.FC = () => {
       if (isNewMessage) {
         const scrollToBottom = () => {
           if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollTop =
-              scrollContainerRef.current.scrollHeight;
-            setHasScrolledToBottom(true);
+            // Use smooth scroll ONLY if we've already scrolled to bottom once
+            // (meaning this is a new message after initial load)
+            if (hasScrolledToBottom) {
+              scrollContainerRef.current.scrollTo({
+                top: scrollContainerRef.current.scrollHeight,
+                behavior: "smooth"
+              });
+            } else {
+              // Instant scroll on first load
+              scrollContainerRef.current.scrollTop =
+                scrollContainerRef.current.scrollHeight;
+              setHasScrolledToBottom(true);
+            }
           }
         };
 
-        const timer = setTimeout(scrollToBottom, 150);
+        // No delay for instant scroll, small delay for smooth scroll
+        const timer = setTimeout(scrollToBottom, hasScrolledToBottom ? 100 : 0);
         previousMessageCountRef.current = currentMessageCount;
-
         return () => clearTimeout(timer);
       }
 
@@ -180,7 +190,7 @@ const ChatZone: React.FC = () => {
       setHasScrolledToBottom(false);
       previousMessageCountRef.current = 0;
     }
-  }, [transformedMessages]);
+  }, [transformedMessages, hasScrolledToBottom]);
 
   // Reset message count when chat changes
   useEffect(() => {

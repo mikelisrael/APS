@@ -13,7 +13,7 @@ import ChatSkeleton from "./chat-skeleton";
 import NewConversationDialog from "./new-conversation-dialog";
 import SingleChat from "./single-chat";
 
-const Chats = () => {
+const ChatsSidebar = () => {
   const router = useRouter();
   const { ["chat-id"]: activeChatId } = useParams();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -158,4 +158,4 @@ const Chats = () => {
   );
 };
 
-export default Chats;
+export default ChatsSidebar;
