@@ -5,11 +5,14 @@ import {
   PopoverContent,
   PopoverTrigger
 } from "@/components/ui/popover";
+import { useUserChats } from "@/hooks/use-chats";
 import { useAuth } from "@/hooks/use-query-resource";
 import { cn } from "@/lib/utils";
 import Logo from "@/public/main-logo.svg";
+import { Chat } from "@/services/chats.service";
 import { Ellipsis } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import TransitionLink from "../shared/transition-link";
 import UserAvatar from "../shared/user-avatar";
 import { Button } from "../ui/button";
@@ -19,6 +22,7 @@ import { navigationItems } from "./navigation-items";
 const Sidebar = () => {
   const pathname = usePathname();
   const { user, logout, isLoggingOut } = useAuth();
+  const { data: chats } = useUserChats();
 
   const isActive = (href: string) => {
     const hrefPath = href.split("?")[0];
@@ -34,6 +38,26 @@ const Sidebar = () => {
     return false;
   };
 
+  // Calculate badge counts for different navigation items
+  const badgeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+
+    // Calculate unread chats count
+    const unreadChatsCount =
+      chats?.reduce(
+        (total: number, chat: Chat) => total + (chat.unread_count || 0),
+        0
+      ) || 0;
+
+    counts["/chat"] = unreadChatsCount;
+
+    // Add more badge counts here for other routes as needed
+    // counts["/connections"] = someConnectionCount;
+    // counts["/notifications"] = someNotificationCount;
+
+    return counts;
+  }, [chats]);
+
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";
   const username = user?.user_metadata?.username || "";
@@ -48,23 +72,32 @@ const Sidebar = () => {
       </div>
       <ul className="mt-5">
         {navigationItems.map((item, index) => {
-          const { Icon, title, href } = item;
+          const { Icon, title, href, showBadge } = item;
           const isLinkActive = isActive(href);
           const Component = isLinkActive ? "span" : TransitionLink;
+          const badgeCount = badgeCounts[href] || 0;
+          const shouldShowBadge = showBadge && badgeCount > 0 && !isLinkActive;
 
           return (
             <li key={index}>
               <Component
                 className={cn(
-                  "flex-center w-full !justify-start gap-4 rounded-full px-5 py-3 text-lg font-normal transition-colors duration-200 hover:bg-accent hover:text-accent-foreground",
+                  "flex-center relative w-full !justify-start gap-4 rounded-full px-5 py-3 text-lg font-normal transition-colors duration-200 hover:bg-accent hover:text-accent-foreground",
                   isLinkActive &&
                     "cursor-default font-medium text-primary hover:bg-transparent hover:text-primary"
                 )}
                 href={href}
               >
-                <Icon
-                  fill={isLinkActive ? "hsl(var(--primary))" : "transparent"}
-                />
+                <div className="relative">
+                  <Icon
+                    fill={isLinkActive ? "hsl(var(--primary))" : "transparent"}
+                  />
+                  {shouldShowBadge && (
+                    <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
+                </div>
                 <span className="hidden xl:inline-block">{title}</span>
               </Component>
             </li>
