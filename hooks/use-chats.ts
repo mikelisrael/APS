@@ -273,7 +273,17 @@ export const useDeleteMessage = () => {
 
   return useModifyResource({
     key: ["chats"],
-    fn: (messageId: string) => deleteMessage(messageId),
+    fn: async (messageId: string) => {
+      try {
+        await deleteMessage(messageId);
+      } catch (error: any) {
+        // Log the error for debugging
+        console.error("Error deleting message:", error);
+        throw new Error(
+          error.message || "Failed to delete message and attachments"
+        );
+      }
+    },
     onMutate: async (messageId) => {
       // Find which chat this message belongs to
       const chatsData = queryClient.getQueriesData({
@@ -303,7 +313,7 @@ export const useDeleteMessage = () => {
         queryKey: ["chats", chatId, "messages"]
       });
 
-      // Optimistically remove message (SIMPLIFIED KEY)
+      // Optimistically remove message
       queryClient.setQueryData(["chats", chatId, "messages"], (old: any) => {
         if (!old) return old;
         return old.filter((msg: any) => msg.id !== messageId);
@@ -312,7 +322,7 @@ export const useDeleteMessage = () => {
       return { chatId, previousMessages };
     },
     onError: (error, messageId, context: any) => {
-      // Rollback on error (SIMPLIFIED KEY)
+      // Rollback on error
       if (context?.chatId && context?.previousMessages) {
         queryClient.setQueryData(
           ["chats", context.chatId, "messages"],
@@ -322,7 +332,7 @@ export const useDeleteMessage = () => {
       toast.error(error.message || "Failed to delete message");
     },
     onSuccess: (data, messageId, context: any) => {
-      toast.success("Message deleted");
+      toast.success("Message and attachments deleted");
       // Refetch chats list to update last message
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     }
@@ -387,8 +397,6 @@ export const useChatSubscription = (
           filter: `chat_id=eq.${chatId}`
         },
         async (payload) => {
-          console.log("New message received:", payload.new);
-
           // Fetch full message with relations
           const { data: fullMessage } = await supabase
             .from("messages")
@@ -446,8 +454,6 @@ export const useChatSubscription = (
           filter: `chat_id=eq.${chatId}`
         },
         async (payload) => {
-          console.log("Message updated:", payload.new);
-
           // Fetch full message with relations
           const { data: fullMessage } = await supabase
             .from("messages")
@@ -489,8 +495,6 @@ export const useChatSubscription = (
           filter: `chat_id=eq.${chatId}`
         },
         (payload) => {
-          console.log("Message deleted (real-time):", payload.old);
-
           // Instantly update cache - remove the deleted message (SIMPLIFIED KEY)
           queryClient.setQueryData(
             ["chats", chatId, "messages"],
@@ -499,9 +503,7 @@ export const useChatSubscription = (
               const filtered = old.filter(
                 (msg: any) => msg.id !== payload.old.id
               );
-              console.log(
-                `Removed message ${payload.old.id} from cache. Before: ${old.length}, After: ${filtered.length}`
-              );
+
               return filtered;
             }
           );
@@ -521,7 +523,6 @@ export const useChatSubscription = (
       });
 
     return () => {
-      console.log(`Unsubscribing from chat ${chatId}`);
       supabase.removeChannel(channel);
     };
   }, [chatId, onNewMessage, queryClient]);
@@ -670,14 +671,46 @@ export const useAllChatsSubscription = (onChatUpdate?: () => void) => {
 };
 
 export const useDeleteChat = () => {
+  const queryClient = useQueryClient();
+
   return useModifyResource({
     key: ["chats"],
-    fn: (chatId: string) => deleteChat(chatId),
-    onSuccess: () => {
-      toast.success("Chat deleted successfully");
+    fn: async (chatId: string) => {
+      try {
+        await deleteChat(chatId);
+      } catch (error: any) {
+        console.error("Error deleting chat:", error);
+        throw new Error(
+          error.message || "Failed to delete chat and attachments"
+        );
+      }
     },
-    onError: (error) => {
+    onMutate: async (chatId: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["chats"] });
+
+      // Snapshot the previous value
+      const previousChats = queryClient.getQueryData(["chats"]);
+
+      // Optimistically remove the chat
+      queryClient.setQueryData(["chats"], (old: any) => {
+        if (!old) return old;
+        return old.filter((chat: any) => chat.id !== chatId);
+      });
+
+      return { previousChats };
+    },
+    onError: (error, chatId, context: any) => {
+      // Rollback on error
+      if (context?.previousChats) {
+        queryClient.setQueryData(["chats"], context.previousChats);
+      }
       toast.error(error.message || "Failed to delete chat");
+    },
+    onSuccess: () => {
+      toast.success("Chat and all attachments deleted successfully");
+      // Invalidate to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     }
   });
 };

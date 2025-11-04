@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatDeletedEmptyState } from "@/app/(logged-in)/chat/components/chat-deleted";
 import {
   useChatMessages,
   useChatSubscription,
@@ -11,7 +12,7 @@ import {
 } from "@/hooks/use-chats";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useAuth } from "@/hooks/use-query-resource";
-import { Chat, Message } from "@/services/chats.service";
+import { Chat, ChatAttachment, Message } from "@/services/chats.service";
 import { Loader2, MessageCircle } from "lucide-react";
 import moment from "moment";
 import { useParams, useRouter } from "next/navigation";
@@ -35,7 +36,8 @@ interface TransformedMessage {
   isOwn: boolean;
   isEdited: boolean;
   editedAt?: string | null;
-  isOptimistic?: boolean; // NEW
+  isOptimistic?: boolean;
+  attachments?: ChatAttachment[];
   repliedTo?: {
     id: string;
     message: string;
@@ -55,6 +57,12 @@ interface EditingMessage {
   message: string;
 }
 
+interface ReceiverInfo {
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
 const ChatZone: React.FC = () => {
   const { ["chat-id"]: activeChatId } = useParams();
   const chatId = activeChatId as string;
@@ -64,6 +72,9 @@ const ChatZone: React.FC = () => {
   const [editingMessage, setEditingMessage] = useState<EditingMessage | null>(
     null
   );
+  const [cachedReceiver, setCachedReceiver] = useState<ReceiverInfo | null>(
+    null
+  );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
@@ -71,7 +82,7 @@ const ChatZone: React.FC = () => {
 
   const router = useRouter();
   const { user } = useAuth();
-  const { data: chats } = useUserChats();
+  const { data: chats, isLoading: isLoadingChats } = useUserChats();
   const { data: messages, isLoading } = useChatMessages(chatId);
   const { mutate: markAsRead } = useMarkMessagesAsRead();
   const { mutate: sendMessageMutation, isPending: isSending } =
@@ -106,9 +117,29 @@ const ChatZone: React.FC = () => {
     return otherParticipant?.user_id || null;
   }, [currentChat, user]);
 
-  usePageTitle(receiver?.full_name || "Chat");
+  // Cache receiver info when it's available
+  useEffect(() => {
+    if (receiver) {
+      setCachedReceiver({
+        id: receiverId!,
+        full_name: receiver.full_name,
+        avatar_url: receiver.avatar_url
+      });
+    }
+  }, [receiver, receiverId]);
 
-  // Subscribe to real-time updates (now with instant cache updates)
+  const chatWasDeleted = useMemo(() => {
+    if (!chatId || !chats || isLoadingChats || isLoading) return false;
+    return !currentChat;
+  }, [chatId, chats, currentChat, isLoadingChats, isLoading]);
+
+  // Use cached receiver if current one is undefined (chat was deleted)
+  const displayReceiver = receiver || cachedReceiver;
+  const displayReceiverId = receiverId || cachedReceiver?.id;
+
+  usePageTitle(displayReceiver?.full_name || "Chat");
+
+  // Subscribe to real-time updates
   useChatSubscription(chatId);
 
   // Mark messages as read when chat opens or new messages arrive
@@ -138,7 +169,8 @@ const ChatZone: React.FC = () => {
       isOwn: msg.sender_id === user.id,
       isEdited: msg.is_edited || false,
       editedAt: msg.edited_at,
-      isOptimistic: msg._optimistic || false, // NEW: Pass optimistic flag
+      isOptimistic: msg._optimistic || false,
+      attachments: msg.attachments || [],
       repliedTo: msg.replied_to
         ? {
             id: msg.replied_to.id,
@@ -157,19 +189,15 @@ const ChatZone: React.FC = () => {
       const isNewMessage =
         currentMessageCount > previousMessageCountRef.current;
 
-      // Only scroll if it's a new message (count increased)
       if (isNewMessage) {
         const scrollToBottom = () => {
           if (scrollContainerRef.current) {
-            // Use smooth scroll ONLY if we've already scrolled to bottom once
-            // (meaning this is a new message after initial load)
             if (hasScrolledToBottom) {
               scrollContainerRef.current.scrollTo({
                 top: scrollContainerRef.current.scrollHeight,
                 behavior: "smooth"
               });
             } else {
-              // Instant scroll on first load
               scrollContainerRef.current.scrollTop =
                 scrollContainerRef.current.scrollHeight;
               setHasScrolledToBottom(true);
@@ -177,16 +205,13 @@ const ChatZone: React.FC = () => {
           }
         };
 
-        // No delay for instant scroll, small delay for smooth scroll
         const timer = setTimeout(scrollToBottom, hasScrolledToBottom ? 100 : 0);
         previousMessageCountRef.current = currentMessageCount;
         return () => clearTimeout(timer);
       }
 
-      // Update the count even if we didn't scroll
       previousMessageCountRef.current = currentMessageCount;
     } else if (scrollContainerRef.current && transformedMessages.length === 0) {
-      // Reset scroll state when no messages
       setHasScrolledToBottom(false);
       previousMessageCountRef.current = 0;
     }
@@ -215,7 +240,6 @@ const ChatZone: React.FC = () => {
 
       setStickyDate(dates[0]);
 
-      // Update scroll position state
       const container = scrollContainerRef.current;
       const isAtBottom =
         container.scrollHeight - container.scrollTop - container.clientHeight <
@@ -260,7 +284,7 @@ const ChatZone: React.FC = () => {
       message: message.message,
       sender: message.sender.name
     });
-    setEditingMessage(null); // Clear edit mode when replying
+    setEditingMessage(null);
   };
 
   const handleEdit = (message: TransformedMessage) => {
@@ -268,7 +292,7 @@ const ChatZone: React.FC = () => {
       id: message.id,
       message: message.message
     });
-    setReplyingTo(null); // Clear reply mode when editing
+    setReplyingTo(null);
   };
 
   const handleSend = (
@@ -281,7 +305,6 @@ const ChatZone: React.FC = () => {
       return;
     }
 
-    // If editing, handle edit instead of send
     if (editingMessage) {
       editMessageMutation(
         {
@@ -301,7 +324,7 @@ const ChatZone: React.FC = () => {
       return;
     }
 
-    if (!receiverId) {
+    if (!displayReceiverId) {
       console.error("Could not determine receiver ID. Chat:", currentChat);
       return;
     }
@@ -309,7 +332,7 @@ const ChatZone: React.FC = () => {
     sendMessageMutation(
       {
         chatId,
-        receiverId,
+        receiverId: displayReceiverId,
         content,
         messageType: attachments && attachments.length > 0 ? "file" : "text",
         repliedToId: replyToId || null,
@@ -338,7 +361,7 @@ const ChatZone: React.FC = () => {
   const groupedMessages = groupMessagesByDate();
   const sortedDates = Object.keys(groupedMessages).sort();
 
-  if (isLoading) {
+  if (isLoading || isLoadingChats) {
     return (
       <section className="flex-center h-full flex-col border-l text-sm">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -352,6 +375,10 @@ const ChatZone: React.FC = () => {
   if (!chatId) {
     router.replace("/chat");
     return null;
+  }
+
+  if (chatWasDeleted) {
+    return <ChatDeletedEmptyState />;
   }
 
   return (
@@ -369,12 +396,12 @@ const ChatZone: React.FC = () => {
                 <MessageCircle className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="mb-2 text-lg font-semibold">
-                Start chatting with {receiver?.full_name || "this user"}
+                Start chatting with {displayReceiver?.full_name || "this user"}
               </h3>
               <p className="max-w-sm text-sm text-muted-foreground">
                 Send your first message to begin the conversation.
-                {receiver?.full_name &&
-                  ` Your messages with ${receiver.full_name} will appear here.`}
+                {displayReceiver?.full_name &&
+                  ` Your messages with ${displayReceiver.full_name} will appear here.`}
               </p>
             </div>
           ) : (
@@ -425,6 +452,7 @@ const ChatZone: React.FC = () => {
                           editedAt={msg.editedAt}
                           repliedTo={msg.repliedTo}
                           isOptimistic={msg.isOptimistic}
+                          attachments={msg.attachments}
                           onReply={() => handleReply(msg)}
                           onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
                           onDelete={
@@ -447,7 +475,9 @@ const ChatZone: React.FC = () => {
         editingMessage={editingMessage}
         onCancelReply={() => setReplyingTo(null)}
         onCancelEdit={handleCancelEdit}
-        disabled={isSending || isEditing || (!receiverId && !editingMessage)}
+        disabled={
+          isSending || isEditing || (!displayReceiverId && !editingMessage)
+        }
       />
     </section>
   );

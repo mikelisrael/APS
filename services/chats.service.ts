@@ -57,6 +57,49 @@ export interface ChatParticipant {
   };
 }
 
+// Helper function to delete attachments from storage
+const deleteAttachmentsFromStorage = async (
+  attachments: ChatAttachment[]
+): Promise<void> => {
+  if (!attachments || attachments.length === 0) return;
+
+  const supabase = createClient();
+
+  // Extract file paths from URLs
+  const filePaths = attachments
+    .map((attachment) => {
+      try {
+        const url = new URL(attachment.file_url);
+        const pathParts = url.pathname.split("/chat-attachments/");
+        return pathParts[1]; // Gets the path after the bucket name
+      } catch (error) {
+        console.error(
+          "Error parsing attachment URL:",
+          attachment.file_url,
+          error
+        );
+        return null;
+      }
+    })
+    .filter(Boolean) as string[];
+
+  if (filePaths.length === 0) return;
+
+  // Delete files from storage bucket
+  const { error } = await supabase.storage
+    .from("chat-attachments")
+    .remove(filePaths);
+
+  if (error) {
+    console.error("Error deleting attachments from storage:", error);
+    throw error;
+  }
+
+  console.log(
+    `Successfully deleted ${filePaths.length} attachment(s) from storage`
+  );
+};
+
 // Get all chats for the current user
 export const getUserChats = async (): Promise<Chat[]> => {
   const supabase = createClient();
@@ -390,16 +433,36 @@ export const markMessagesAsRead = async (chatId: string): Promise<void> => {
   if (error) throw error;
 };
 
-// Delete a message
+// Delete a message with attachments
 export const deleteMessage = async (messageId: string): Promise<void> => {
   const supabase = createClient();
 
-  const { error } = await supabase
+  // First, fetch the message with its attachments
+  const { data: message, error: fetchError } = await supabase
+    .from("messages")
+    .select(
+      `
+      id,
+      attachments:chat_attachments(*)
+    `
+    )
+    .eq("id", messageId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // Delete attachments from storage if they exist
+  if (message?.attachments && message.attachments.length > 0) {
+    await deleteAttachmentsFromStorage(message.attachments);
+  }
+
+  // Delete the message (CASCADE will delete chat_attachments records)
+  const { error: deleteError } = await supabase
     .from("messages")
     .delete()
     .eq("id", messageId);
 
-  if (error) throw error;
+  if (deleteError) throw deleteError;
 };
 
 // Upload attachment
@@ -469,6 +532,7 @@ export const getTotalUnreadCount = async (): Promise<number> => {
   return count || 0;
 };
 
+// Delete a chat with all its messages and attachments
 export const deleteChat = async (chatId: string): Promise<void> => {
   const supabase = createClient();
 
@@ -478,10 +542,41 @@ export const deleteChat = async (chatId: string): Promise<void> => {
 
   if (!user) throw new Error("Not authenticated");
 
-  // Simply delete the chat - CASCADE will handle the rest
-  const { error } = await supabase.from("chats").delete().eq("id", chatId);
+  // Fetch all messages with their attachments for this chat
+  const { data: messages, error: fetchError } = await supabase
+    .from("messages")
+    .select(
+      `
+      id,
+      attachments:chat_attachments(*)
+    `
+    )
+    .eq("chat_id", chatId);
 
-  if (error) throw error;
+  if (fetchError) throw fetchError;
+
+  // Collect all attachments from all messages
+  const allAttachments: ChatAttachment[] = [];
+  if (messages) {
+    messages.forEach((message) => {
+      if (message.attachments) {
+        allAttachments.push(...message.attachments);
+      }
+    });
+  }
+
+  // Delete all attachments from storage
+  if (allAttachments.length > 0) {
+    await deleteAttachmentsFromStorage(allAttachments);
+  }
+
+  // Delete the chat - CASCADE will handle messages and chat_attachments records
+  const { error: deleteError } = await supabase
+    .from("chats")
+    .delete()
+    .eq("id", chatId);
+
+  if (deleteError) throw deleteError;
 };
 
 // Edit a message
@@ -530,4 +625,31 @@ export const editMessage = async (
   if (updateError) throw updateError;
 
   return message;
+};
+
+// Optional: Delete a specific attachment
+export const deleteAttachment = async (attachmentId: string): Promise<void> => {
+  const supabase = createClient();
+
+  // Fetch the attachment details
+  const { data: attachment, error: fetchError } = await supabase
+    .from("chat_attachments")
+    .select("*")
+    .eq("id", attachmentId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // Delete from storage
+  if (attachment) {
+    await deleteAttachmentsFromStorage([attachment]);
+  }
+
+  // Delete the attachment record
+  const { error: deleteError } = await supabase
+    .from("chat_attachments")
+    .delete()
+    .eq("id", attachmentId);
+
+  if (deleteError) throw deleteError;
 };

@@ -68,7 +68,6 @@ export async function updateProfilePicture(file: string) {
 
     if (updateError) throw updateError;
 
-    console.log("Generated signed URL:", avatarUrl);
     return { success: true, avatarUrl };
   } catch (error: any) {
     console.error("Profile picture update error:", error);

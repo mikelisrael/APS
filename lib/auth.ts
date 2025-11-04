@@ -11,8 +11,6 @@ export async function checkEmailExists(email: string) {
     .eq("email", email.toLowerCase())
     .maybeSingle();
 
-  console.log("User data from users:", userData, userError);
-
   if (userError && userError.code !== "PGRST116") {
     throw new Error("Error checking email in users table");
   }

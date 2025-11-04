@@ -12,7 +12,9 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { ChatAttachment } from "@/services/chats.service";
 import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
+import { AttachmentPreview } from "./attachment-preview";
 
 interface Sender {
   name: string;
@@ -47,6 +49,7 @@ interface ChatBubbleProps {
   onDelete?: () => void;
   onEdit?: () => void;
   isOptimistic?: boolean;
+  attachments?: ChatAttachment[];
 }
 
 const ChatBubble = ({
@@ -62,7 +65,8 @@ const ChatBubble = ({
   onReply,
   onDelete,
   onEdit,
-  isOptimistic = false
+  isOptimistic = false,
+  attachments = []
 }: ChatBubbleProps) => {
   const showAvatar = !isGrouped;
   const showName = isFirstOfGroup;
@@ -196,9 +200,25 @@ const ChatBubble = ({
                   </div>
                 )}
 
-                <p className="whitespace-pre-wrap break-words text-sm">
-                  {message}
-                </p>
+                {/* Attachments - placed before message text */}
+                {attachments && attachments.length > 0 && (
+                  <div className="mb-3 space-y-2">
+                    {attachments.map((attachment) => (
+                      <AttachmentPreview
+                        key={attachment.id}
+                        attachment={attachment}
+                        isOwn={isOwn}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Message text */}
+                {message && (
+                  <p className="whitespace-pre-wrap break-words text-sm">
+                    {message}
+                  </p>
+                )}
 
                 {/* Edited Indicator */}
                 {isEdited && !isOptimistic && (
