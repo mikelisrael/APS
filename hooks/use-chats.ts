@@ -280,7 +280,7 @@ export const useDeleteMessage = () => {
         // Log the error for debugging
         console.error("Error deleting message:", error);
         throw new Error(
-          error.message || "Failed to delete message and attachments"
+          error.message || "Failed to delete message"
         );
       }
     },
@@ -332,7 +332,7 @@ export const useDeleteMessage = () => {
       toast.error(error.message || "Failed to delete message");
     },
     onSuccess: (data, messageId, context: any) => {
-      toast.success("Message and attachments deleted");
+      toast.success("Message deleted");
       // Refetch chats list to update last message
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     }
@@ -681,7 +681,7 @@ export const useDeleteChat = () => {
       } catch (error: any) {
         console.error("Error deleting chat:", error);
         throw new Error(
-          error.message || "Failed to delete chat and attachments"
+          error.message || "Failed to delete chat"
         );
       }
     },
