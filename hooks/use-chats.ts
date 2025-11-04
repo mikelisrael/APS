@@ -41,10 +41,10 @@ export const useGetOrCreateChat = (props?: any) => {
 };
 
 // Hook for fetching messages in a specific chat
-export const useChatMessages = (chatId: string, limit = 50, offset = 0) => {
+export const useChatMessages = (chatId: string) => {
   return useGetResource({
-    key: ["chats", chatId, "messages", `${limit}`, `${offset}`],
-    fn: () => getChatMessages(chatId, limit, offset),
+    key: ["chats", chatId, "messages"],
+    fn: () => getChatMessages(chatId),
     select: (data) => data || [],
     enabled: !!chatId,
     onError: (error) => {
@@ -99,13 +99,11 @@ export const useSendMessage = () => {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Snapshot previous value
+      // Snapshot previous value (SIMPLIFIED KEY)
       const previousMessages = queryClient.getQueryData([
         "chats",
         chatId,
-        "messages",
-        "50",
-        "0"
+        "messages"
       ]);
 
       // Get replied_to message if exists
@@ -142,32 +140,32 @@ export const useSendMessage = () => {
               sender: repliedToMessage.sender
             }
           : null,
-        _optimistic: true // Mark as optimistic
+        _optimistic: true
       };
 
-      // Optimistically update messages
-      queryClient.setQueryData(
-        ["chats", chatId, "messages", "50", "0"],
-        (old: any) => [...(old || []), optimisticMessage]
-      );
+      // Optimistically update messages (SIMPLIFIED KEY)
+      queryClient.setQueryData(["chats", chatId, "messages"], (old: any) => [
+        ...(old || []),
+        optimisticMessage
+      ]);
 
       return { previousMessages, optimisticMessage };
     },
     onError: (error, variables: any, context: any) => {
-      // Rollback on error
+      // Rollback on error (SIMPLIFIED KEY)
       if (context?.previousMessages && variables?.chatId) {
         queryClient.setQueryData(
-          ["chats", variables.chatId, "messages", "50", "0"],
+          ["chats", variables.chatId, "messages"],
           context.previousMessages
         );
       }
       toast.error(error.message || "Failed to send message");
     },
     onSuccess: (data, variables: any, context: any) => {
-      // Replace optimistic message with real one
+      // Replace optimistic message with real one (SIMPLIFIED KEY)
       if (variables?.chatId) {
         queryClient.setQueryData(
-          ["chats", variables.chatId, "messages", "50", "0"],
+          ["chats", variables.chatId, "messages"],
           (old: any) => {
             if (!old) return [data];
             return old.map((msg: any) =>
@@ -183,7 +181,6 @@ export const useSendMessage = () => {
   });
 };
 
-// Hook for editing a message with OPTIMISTIC UPDATES
 export const useEditMessage = () => {
   const queryClient = useQueryClient();
 
@@ -224,42 +221,39 @@ export const useEditMessage = () => {
         queryKey: ["chats", chatId, "messages"]
       });
 
-      // Optimistically update message
-      queryClient.setQueryData(
-        ["chats", chatId, "messages", "50", "0"],
-        (old: any) => {
-          if (!old) return old;
-          return old.map((msg: any) =>
-            msg.id === messageId
-              ? {
-                  ...msg,
-                  content,
-                  is_edited: true,
-                  edited_at: new Date().toISOString(),
-                  _optimistic: true
-                }
-              : msg
-          );
-        }
-      );
+      // Optimistically update message (SIMPLIFIED KEY)
+      queryClient.setQueryData(["chats", chatId, "messages"], (old: any) => {
+        if (!old) return old;
+        return old.map((msg: any) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                content,
+                is_edited: true,
+                edited_at: new Date().toISOString(),
+                _optimistic: true
+              }
+            : msg
+        );
+      });
 
       return { chatId, previousMessages };
     },
     onError: (error, variables, context: any) => {
-      // Rollback on error
+      // Rollback on error (SIMPLIFIED KEY)
       if (context?.chatId && context?.previousMessages) {
         queryClient.setQueryData(
-          ["chats", context.chatId, "messages", "50", "0"],
+          ["chats", context.chatId, "messages"],
           context.previousMessages
         );
       }
       toast.error(error.message || "Failed to edit message");
     },
     onSuccess: (data, variables, context: any) => {
-      // Replace optimistic message with real one
+      // Replace optimistic message with real one (SIMPLIFIED KEY)
       if (context?.chatId) {
         queryClient.setQueryData(
-          ["chats", context.chatId, "messages", "50", "0"],
+          ["chats", context.chatId, "messages"],
           (old: any) => {
             if (!old) return old;
             return old.map((msg: any) =>
@@ -309,22 +303,19 @@ export const useDeleteMessage = () => {
         queryKey: ["chats", chatId, "messages"]
       });
 
-      // Optimistically remove message
-      queryClient.setQueryData(
-        ["chats", chatId, "messages", "50", "0"],
-        (old: any) => {
-          if (!old) return old;
-          return old.filter((msg: any) => msg.id !== messageId);
-        }
-      );
+      // Optimistically remove message (SIMPLIFIED KEY)
+      queryClient.setQueryData(["chats", chatId, "messages"], (old: any) => {
+        if (!old) return old;
+        return old.filter((msg: any) => msg.id !== messageId);
+      });
 
       return { chatId, previousMessages };
     },
     onError: (error, messageId, context: any) => {
-      // Rollback on error
+      // Rollback on error (SIMPLIFIED KEY)
       if (context?.chatId && context?.previousMessages) {
         queryClient.setQueryData(
-          ["chats", context.chatId, "messages", "50", "0"],
+          ["chats", context.chatId, "messages"],
           context.previousMessages
         );
       }
@@ -418,9 +409,9 @@ export const useChatSubscription = (
             .single();
 
           if (fullMessage) {
-            // Instantly update cache
+            // Instantly update cache (SIMPLIFIED KEY)
             queryClient.setQueryData(
-              ["chats", chatId, "messages", "50", "0"],
+              ["chats", chatId, "messages"],
               (old: any) => {
                 if (!old) return [fullMessage];
 
@@ -472,9 +463,9 @@ export const useChatSubscription = (
             .single();
 
           if (fullMessage) {
-            // Instantly update cache
+            // Instantly update cache (SIMPLIFIED KEY)
             queryClient.setQueryData(
-              ["chats", chatId, "messages", "50", "0"],
+              ["chats", chatId, "messages"],
               (old: any) => {
                 if (!old) return [fullMessage];
                 return old.map((msg: any) =>
@@ -500,20 +491,24 @@ export const useChatSubscription = (
         (payload) => {
           console.log("Message deleted (real-time):", payload.old);
 
-          // Instantly update cache - remove the deleted message
+          // Instantly update cache - remove the deleted message (SIMPLIFIED KEY)
           queryClient.setQueryData(
-            ["chats", chatId, "messages", "50", "0"],
+            ["chats", chatId, "messages"],
             (old: any) => {
               if (!old) return old;
-              const filtered = old.filter((msg: any) => msg.id !== payload.old.id);
-              console.log(`Removed message ${payload.old.id} from cache. Before: ${old.length}, After: ${filtered.length}`);
+              const filtered = old.filter(
+                (msg: any) => msg.id !== payload.old.id
+              );
+              console.log(
+                `Removed message ${payload.old.id} from cache. Before: ${old.length}, After: ${filtered.length}`
+              );
               return filtered;
             }
           );
 
           // Also invalidate to ensure consistency
-          queryClient.invalidateQueries({ 
-            queryKey: ["chats", chatId, "messages"] 
+          queryClient.invalidateQueries({
+            queryKey: ["chats", chatId, "messages"]
           });
 
           if (onNewMessage) {
@@ -530,6 +525,76 @@ export const useChatSubscription = (
       supabase.removeChannel(channel);
     };
   }, [chatId, onNewMessage, queryClient]);
+};
+
+// Combined hook for a complete chat interface
+export const useChat = (otherUserId: string) => {
+  const { data: chats } = useUserChats();
+  const { mutate: getOrCreateChat, isPending: isCreatingChat } =
+    useGetOrCreateChat();
+
+  const chat = chats?.find((c: any) =>
+    c.participants?.some((p: any) => p.user_id === otherUserId)
+  );
+
+  const {
+    data: messages,
+    isLoading: isLoadingMessages,
+    refetch: refetchMessages
+  } = useChatMessages(chat?.id || ""); // Removed pagination params
+
+  const { mutate: sendMsg, isPending: isSending } = useSendMessage();
+  const { mutate: markAsRead } = useMarkMessagesAsRead();
+
+  const initializeChat = () => {
+    if (!chat && otherUserId) {
+      getOrCreateChat(otherUserId);
+    }
+  };
+
+  const sendNewMessage = (
+    content: string,
+    messageType = "text",
+    repliedToId?: string | null,
+    attachments?: File[]
+  ) => {
+    if (!chat?.id) return;
+
+    const receiver = chat.participants?.find(
+      (p: any) => p.user_id === otherUserId
+    );
+    if (!receiver) return;
+
+    sendMsg({
+      chatId: chat.id,
+      receiverId: receiver.user_id,
+      content,
+      messageType,
+      repliedToId,
+      attachments
+    });
+  };
+
+  const markChatAsRead = () => {
+    if (chat?.id) {
+      markAsRead(chat.id);
+    }
+  };
+
+  // Subscribe to new messages
+  useChatSubscription(chat?.id || "");
+
+  return {
+    chat,
+    messages: messages || [],
+    isLoading: isLoadingMessages || isCreatingChat,
+    isSending,
+    initializeChat,
+    sendMessage: sendNewMessage,
+    markAsRead: markChatAsRead,
+    refetchMessages,
+    unreadCount: chat?.unread_count || 0
+  };
 };
 
 // Hook for real-time updates across all user chats
@@ -602,76 +667,6 @@ export const useAllChatsSubscription = (onChatUpdate?: () => void) => {
       };
     });
   }, [onChatUpdate, queryClient]);
-};
-
-// Combined hook for a complete chat interface
-export const useChat = (otherUserId: string) => {
-  const { data: chats } = useUserChats();
-  const { mutate: getOrCreateChat, isPending: isCreatingChat } =
-    useGetOrCreateChat();
-
-  const chat = chats?.find((c: any) =>
-    c.participants?.some((p: any) => p.user_id === otherUserId)
-  );
-
-  const {
-    data: messages,
-    isLoading: isLoadingMessages,
-    refetch: refetchMessages
-  } = useChatMessages(chat?.id || "", 50, 0);
-
-  const { mutate: sendMsg, isPending: isSending } = useSendMessage();
-  const { mutate: markAsRead } = useMarkMessagesAsRead();
-
-  const initializeChat = () => {
-    if (!chat && otherUserId) {
-      getOrCreateChat(otherUserId);
-    }
-  };
-
-  const sendNewMessage = (
-    content: string,
-    messageType = "text",
-    repliedToId?: string | null,
-    attachments?: File[]
-  ) => {
-    if (!chat?.id) return;
-
-    const receiver = chat.participants?.find(
-      (p: any) => p.user_id === otherUserId
-    );
-    if (!receiver) return;
-
-    sendMsg({
-      chatId: chat.id,
-      receiverId: receiver.user_id,
-      content,
-      messageType,
-      repliedToId,
-      attachments
-    });
-  };
-
-  const markChatAsRead = () => {
-    if (chat?.id) {
-      markAsRead(chat.id);
-    }
-  };
-
-  // Subscribe to new messages
-  useChatSubscription(chat?.id || "");
-
-  return {
-    chat,
-    messages: messages || [],
-    isLoading: isLoadingMessages || isCreatingChat,
-    isSending,
-    initializeChat,
-    sendMessage: sendNewMessage,
-    markAsRead: markChatAsRead,
-    refetchMessages,
-    unreadCount: chat?.unread_count || 0
-  };
 };
 
 export const useDeleteChat = () => {

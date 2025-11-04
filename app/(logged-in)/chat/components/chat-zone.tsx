@@ -378,60 +378,65 @@ const ChatZone: React.FC = () => {
               </p>
             </div>
           ) : (
-            sortedDates.map((date) => (
-              <div key={date}>
-                <div
-                  ref={(el) => {
-                    dateRefs.current[date] = el;
-                  }}
-                  style={{
-                    opacity: stickyDate === date ? 0 : 1
-                  }}
-                >
-                  <DateDivider date={date} isSticky={false} />
-                </div>
+            <>
+              <p className="mb-4 text-center text-xs text-muted-foreground">
+                ● Welcome to ground zero of this conversation ●
+              </p>
+              {sortedDates.map((date) => (
+                <div key={date}>
+                  <div
+                    ref={(el) => {
+                      dateRefs.current[date] = el;
+                    }}
+                    style={{
+                      opacity: stickyDate === date ? 0 : 1
+                    }}
+                  >
+                    <DateDivider date={date} isSticky={false} />
+                  </div>
 
-                <div className="pb-10">
-                  {groupedMessages[date].map((msg, index) => {
-                    const messagesOnDate = groupedMessages[date];
-                    const prevMsg = messagesOnDate[index - 1];
+                  <div className="pb-10">
+                    {groupedMessages[date].map((msg, index) => {
+                      const messagesOnDate = groupedMessages[date];
+                      const prevMsg = messagesOnDate[index - 1];
 
-                    const sameAsPrev =
-                      prevMsg &&
-                      prevMsg.sender.name === msg.sender.name &&
-                      prevMsg.isOwn === msg.isOwn &&
-                      moment(msg.timestamp).isSame(
-                        moment(prevMsg.timestamp),
-                        "minute"
+                      const sameAsPrev =
+                        prevMsg &&
+                        prevMsg.sender.name === msg.sender.name &&
+                        prevMsg.isOwn === msg.isOwn &&
+                        moment(msg.timestamp).isSame(
+                          moment(prevMsg.timestamp),
+                          "minute"
+                        );
+
+                      const isGrouped = sameAsPrev;
+                      const isFirstOfGroup = !sameAsPrev;
+
+                      return (
+                        <ChatBubble
+                          key={msg.id}
+                          message={msg.message}
+                          time={msg.time}
+                          sender={msg.sender}
+                          isOwn={msg.isOwn}
+                          isGrouped={isGrouped}
+                          isFirstOfGroup={isFirstOfGroup}
+                          isEdited={msg.isEdited}
+                          editedAt={msg.editedAt}
+                          repliedTo={msg.repliedTo}
+                          isOptimistic={msg.isOptimistic}
+                          onReply={() => handleReply(msg)}
+                          onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
+                          onDelete={
+                            msg.isOwn ? () => handleDelete(msg.id) : undefined
+                          }
+                        />
                       );
-
-                    const isGrouped = sameAsPrev;
-                    const isFirstOfGroup = !sameAsPrev;
-
-                    return (
-                      <ChatBubble
-                        key={msg.id}
-                        message={msg.message}
-                        time={msg.time}
-                        sender={msg.sender}
-                        isOwn={msg.isOwn}
-                        isGrouped={isGrouped}
-                        isFirstOfGroup={isFirstOfGroup}
-                        isEdited={msg.isEdited}
-                        editedAt={msg.editedAt}
-                        repliedTo={msg.repliedTo}
-                        isOptimistic={msg.isOptimistic}
-                        onReply={() => handleReply(msg)}
-                        onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
-                        onDelete={
-                          msg.isOwn ? () => handleDelete(msg.id) : undefined
-                        }
-                      />
-                    );
-                  })}
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </>
           )}
         </div>
       </div>

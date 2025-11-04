@@ -250,14 +250,10 @@ export const getOrCreateChat = async (otherUserId: string): Promise<Chat> => {
 };
 
 // Get messages for a specific chat with replied_to messages
-export const getChatMessages = async (
-  chatId: string,
-  limit = 50,
-  offset = 0
-): Promise<Message[]> => {
+export const getChatMessages = async (chatId: string): Promise<Message[]> => {
   const supabase = createClient();
 
-  // First, get all messages
+  // Get ALL messages (no pagination)
   const { data: messages, error } = await supabase
     .from("messages")
     .select(
@@ -269,8 +265,7 @@ export const getChatMessages = async (
     `
     )
     .eq("chat_id", chatId)
-    .order("created_at", { ascending: true })
-    .range(offset, offset + limit - 1);
+    .order("created_at", { ascending: true });
 
   if (error) {
     console.error("Error fetching messages:", error);
@@ -317,6 +312,7 @@ export const getChatMessages = async (
 
   return messagesWithReplies;
 };
+
 // Send a message with optional reply and attachments
 export const sendMessage = async (
   chatId: string,

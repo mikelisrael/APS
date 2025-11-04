@@ -11,6 +11,7 @@ type NavigationItem = {
   title: string;
   Icon: typeof HomeIcon;
   href: string;
+  showBadge?: boolean; // Add this to identify which items should show badges
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -32,7 +33,8 @@ export const navigationItems: NavigationItem[] = [
   {
     title: "Chat",
     Icon: MessageCircle,
-    href: "/chat"
+    href: "/chat",
+    showBadge: true // Mark chat to show badge
   },
   {
     title: "Communities",
