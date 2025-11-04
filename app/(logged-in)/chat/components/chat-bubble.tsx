@@ -52,6 +52,40 @@ interface ChatBubbleProps {
   attachments?: ChatAttachment[];
 }
 
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+
+// Message text component with clickable links
+const MessageText = ({ text, isOwn }: { text: string; isOwn: boolean }) => {
+  const parts = text.split(URL_REGEX);
+
+  return (
+    <p className="whitespace-pre-wrap break-words text-sm">
+      {parts.map((part, index) => {
+        if (part.match(URL_REGEX)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "underline transition-colors hover:no-underline",
+                isOwn
+                  ? "text-primary-foreground/90 hover:text-primary-foreground"
+                  : "text-primary hover:text-primary/80"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {part}
+            </a>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </p>
+  );
+};
+
 const ChatBubble = ({
   message,
   time,
@@ -213,12 +247,8 @@ const ChatBubble = ({
                   </div>
                 )}
 
-                {/* Message text */}
-                {message && (
-                  <p className="whitespace-pre-wrap break-words text-sm">
-                    {message}
-                  </p>
-                )}
+                {/* Message text with clickable links */}
+                {message && <MessageText text={message} isOwn={isOwn} />}
 
                 {/* Edited Indicator */}
                 {isEdited && !isOptimistic && (
