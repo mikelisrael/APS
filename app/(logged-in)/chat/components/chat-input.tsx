@@ -69,7 +69,11 @@ const ChatInput = ({
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        hardBreak: {
+          keepMarks: true
+        }
+      }),
       Placeholder.configure({
         placeholder: editingMessage
           ? "Edit message..."
@@ -83,24 +87,31 @@ const ChatInput = ({
       attributes: {
         class:
           "prose dark:prose-invert prose-sm p-4 focus:outline-none max-h-[120px] overflow-y-auto thin-scrollbar"
+      },
+
+      handleKeyDown: (view, event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          return true;
+        }
+
+        return false;
       }
     },
     onUpdate: ({ editor }) => {
-      // Check if editor has actual text content (not just empty paragraphs)
       const textContent = editor.getText().trim();
       setHasContent(textContent.length > 0);
     }
   });
 
-  // Initialize hasContent based on editor state
   useEffect(() => {
     if (editor) {
+      editor.commands.focus();
       const textContent = editor.getText().trim();
       setHasContent(textContent.length > 0);
     }
   }, [editor]);
 
-  // Load message content when editing
   useEffect(() => {
     if (editor && editingMessage) {
       editor.commands.setContent(editingMessage.message);
