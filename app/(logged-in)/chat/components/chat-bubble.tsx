@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { ChatAttachment } from "@/services/chats.service";
 import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
 import { AttachmentPreview } from "./attachment-preview";
+import LinkPreview from "./link-preview";
 
 interface Sender {
   name: string;
@@ -54,6 +55,12 @@ interface ChatBubbleProps {
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
+// Extract first URL from text
+const extractFirstUrl = (text: string): string | null => {
+  const match = text.match(URL_REGEX);
+  return match ? match[0] : null;
+};
+
 // Message text component with clickable links
 const MessageText = ({ text, isOwn }: { text: string; isOwn: boolean }) => {
   const parts = text.split(URL_REGEX);
@@ -69,7 +76,7 @@ const MessageText = ({ text, isOwn }: { text: string; isOwn: boolean }) => {
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
-                "underline transition-colors hover:no-underline",
+                "break-all underline transition-colors hover:no-underline",
                 isOwn
                   ? "text-primary-foreground/90 hover:text-primary-foreground"
                   : "text-primary hover:text-primary/80"
@@ -247,8 +254,18 @@ const ChatBubble = ({
                   </div>
                 )}
 
-                {/* Message text with clickable links */}
-                {message && <MessageText text={message} isOwn={isOwn} />}
+                {/* Link Preview */}
+                {message && (
+                  <>
+                    {!isOptimistic && extractFirstUrl(message) && (
+                      <LinkPreview
+                        url={extractFirstUrl(message)!}
+                        isOwn={isOwn}
+                      />
+                    )}
+                    <MessageText text={message} isOwn={isOwn} />
+                  </>
+                )}
 
                 {/* Edited Indicator */}
                 {isEdited && !isOptimistic && (
