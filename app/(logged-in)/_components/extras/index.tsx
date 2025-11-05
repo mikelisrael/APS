@@ -4,6 +4,7 @@ import suggestedUsers from "./data.json";
 import Search from "./search";
 import SuggestedUser from "./suggested-user";
 import TrendingTopics from "./trending-topics";
+import Link from "next/link";
 
 const footerItems = [
   "About",
@@ -31,8 +32,8 @@ const Extras = () => {
             <SuggestedUser key={user.username} user={user} />
           ))}
         </ul>
-        <Button variant="link" className="px-0">
-          See More
+        <Button variant="link" className="px-0" asChild>
+          <Link href="/connections?tab=suggestions">See More</Link>
         </Button>
       </section>
 

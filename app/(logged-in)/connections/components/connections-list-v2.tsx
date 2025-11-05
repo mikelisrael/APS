@@ -12,15 +12,24 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { LoaderSpinner } from "@/components/ui/loaders";
+import { useGetOrCreateChat } from "@/hooks/use-chats";
 import { useRemoveConnection } from "@/hooks/use-connections";
 import { useDebounce } from "@/hooks/use-debounce";
+import { filterConnections } from "@/lib/search-connections";
 import emptyAnimation from "@/public/animations/empty ghost.json";
+import { Chat } from "@/services/chats.service";
 import { Connection } from "@/types/connection";
 import Lottie from "lottie-react";
-import { ListFilter, MessageCircle, Search, UserRoundX } from "lucide-react";
+import {
+  ListFilter,
+  LoaderCircle,
+  MessageCircle,
+  Search,
+  UserRoundX
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { filterConnections } from "@/lib/search-connections";
 
 interface SingleConnectionProps {
   connection: Connection;
@@ -29,6 +38,14 @@ interface SingleConnectionProps {
 const SingleConnection = ({ connection }: SingleConnectionProps) => {
   const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
   const removeConnectionMutation = useRemoveConnection();
+
+  const router = useRouter();
+  const { mutate: handleStartChat, isPending: isCreatingChat } =
+    useGetOrCreateChat({
+      onSuccess: (chat: Chat) => {
+        router.push(`/chat/${chat.id}`);
+      }
+    });
 
   const handleRemove = () => {
     removeConnectionMutation.mutate(connection.id, {
@@ -61,11 +78,19 @@ const SingleConnection = ({ connection }: SingleConnectionProps) => {
           </div>
         </div>
         <div className="flex-center">
-          <Button variant="link" className="text-xs" size="sm" asChild>
-            <Link href={`/chat/${connection.user.username}`}>
+          <Button
+            variant="link"
+            className="text-xs"
+            size="sm"
+            onClick={() => handleStartChat(connection.user.id)}
+            disabled={isCreatingChat}
+          >
+            {isCreatingChat ? (
+              <LoaderCircle size={20} className="mr-2 size-4 animate-spin" />
+            ) : (
               <MessageCircle className="mr-1 size-4" />
-              Message
-            </Link>
+            )}
+            Message
           </Button>
           <Button
             className="text-xs text-red-500 dark:text-red-600"

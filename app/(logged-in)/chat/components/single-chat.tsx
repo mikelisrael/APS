@@ -124,9 +124,9 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                   )}
                 </div>
                 <div className="flex-between gap-2">
-                  <div className="flex items-center grow">
+                  <div className="flex grow items-center">
                     {isFileType && (
-                      <File className="mr-1.5 size-4 text-muted-foreground" />
+                      <File className="size-4.5 mr-1 text-muted-foreground" />
                     )}
                     <span className="line-clamp-1 break-all font-normal text-muted-foreground">
                       {lastMessage?.content || "No messages yet"}
