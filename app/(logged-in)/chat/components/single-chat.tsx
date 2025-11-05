@@ -13,7 +13,7 @@ import { useDeleteChat } from "@/hooks/use-chats";
 import { formatChatTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { Chat } from "@/services/chats.service";
-import { CircleOff, MessageSquare, Trash2 } from "lucide-react";
+import { CircleOff, File, MessageSquare, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -31,6 +31,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
     ? formatChatTime(lastMessage.created_at)
     : null;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const isFileType = lastMessage?.message_type === "file";
 
   const { mutate: deleteChatMutation, isPending } = useDeleteChat();
 
@@ -123,9 +124,14 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                   )}
                 </div>
                 <div className="flex-between gap-2">
-                  <span className="line-clamp-1 break-all font-normal text-muted-foreground">
-                    {lastMessage?.content || "No messages yet"}
-                  </span>
+                  <div className="flex-center grow">
+                    {isFileType && (
+                      <File className="mr-1.5 size-4 text-muted-foreground" />
+                    )}
+                    <span className="line-clamp-1 break-all font-normal text-muted-foreground">
+                      {lastMessage?.content || "No messages yet"}
+                    </span>
+                  </div>
                   {chat.unread_count && chat.unread_count > 0 ? (
                     <div className="flex-center h-5 min-w-5 rounded-full bg-primary p-1 text-xs font-semibold text-primary-foreground">
                       {chat.unread_count > 99 ? "99+" : chat.unread_count}
