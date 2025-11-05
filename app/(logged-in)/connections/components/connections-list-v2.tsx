@@ -99,7 +99,11 @@ const SingleConnection = ({ connection }: SingleConnectionProps) => {
             onClick={() => setOpenRemoveDialog(true)}
             disabled={removeConnectionMutation.isPending}
           >
-            <UserRoundX className="mr-1 size-4" />
+            {removeConnectionMutation.isPending ? (
+              <LoaderCircle size={20} className="mr-1 size-4 animate-spin" />
+            ) : (
+              <UserRoundX className="mr-1 size-4" />
+            )}
             {removeConnectionMutation.isPending ? "Removing..." : "Remove"}
           </Button>
         </div>
