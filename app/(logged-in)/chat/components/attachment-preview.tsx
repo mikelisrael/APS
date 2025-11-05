@@ -76,6 +76,51 @@ const AttachmentPreview: React.FC<{
     );
   }
 
+  const isPdf =
+    attachment.file_type.includes("pdf") ||
+    attachment.file_url?.toLowerCase().endsWith(".pdf");
+
+  if (isPdf) {
+    return (
+      <div className="overflow-hidden rounded-lg">
+        <div className="relative h-52 w-full overflow-hidden rounded-lg border">
+          <object
+            data={attachment.file_url}
+            type="application/pdf"
+            className="h-full w-full"
+          >
+            <div className="flex h-full w-full flex-col items-center justify-center p-4">
+              <FileText className="mb-2 h-8 w-8 text-muted-foreground" />
+              <p className="text-sm">
+                {attachment.file_url.split("/").pop()?.split("?")[0] ||
+                  "Document.pdf"}
+              </p>
+              <a
+                href={attachment.file_url}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 text-xs underline"
+              >
+                Download PDF
+              </a>
+            </div>
+          </object>
+
+          <a
+            href={attachment.file_url}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-2 top-2 rounded-full bg-black/50 p-2 opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
+          >
+            <Download className="h-4 w-4 text-white" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   // File attachment card
   return (
     <a

@@ -116,7 +116,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                   </h3>
                   {formattedTime && (
                     <div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {formattedTime}
                       </span>
                     </div>
