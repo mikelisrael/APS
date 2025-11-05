@@ -94,10 +94,6 @@ const deleteAttachmentsFromStorage = async (
     console.error("Error deleting attachments from storage:", error);
     throw error;
   }
-
-  console.log(
-    `Successfully deleted ${filePaths.length} attachment(s) from storage`
-  );
 };
 
 // Get all chats for the current user

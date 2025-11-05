@@ -517,7 +517,7 @@ export const useChatSubscription = (
         }
       )
       .subscribe((status) => {
-        console.log(`Subscription status for chat ${chatId}:`, status);
+        return `Subscription status for chat ${chatId}: ${status}`;
       });
 
     return () => {
