@@ -124,7 +124,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                   )}
                 </div>
                 <div className="flex-between gap-2">
-                  <div className="flex-center grow">
+                  <div className="flex items-center grow">
                     {isFileType && (
                       <File className="mr-1.5 size-4 text-muted-foreground" />
                     )}
