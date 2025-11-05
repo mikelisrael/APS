@@ -1,5 +1,6 @@
 import moment from "moment";
 import React from "react";
+
 interface DateDividerProps {
   date: string;
   isSticky: boolean;
@@ -9,20 +10,29 @@ const DateDivider: React.FC<DateDividerProps> = ({ date, isSticky }) => {
   const formatDate = (dateStr: string): string => {
     const msgDate = moment(dateStr);
     const today = moment().startOf("day");
-    const yesterday = moment().subtract(1, "days").startOf("day");
+    const yesterday = moment().subtract(1, "day").startOf("day");
+    const oneWeekAgo = moment().subtract(7, "days").startOf("day");
 
     if (msgDate.isSame(today, "day")) {
       return "Today";
-    } else if (msgDate.isSame(yesterday, "day")) {
-      return "Yesterday";
-    } else {
-      return msgDate.format("dddd, MMMM D");
     }
+
+    if (msgDate.isSame(yesterday, "day")) {
+      return "Yesterday";
+    }
+
+    if (msgDate.isAfter(oneWeekAgo)) {
+      return msgDate.format("dddd");
+    }
+
+    return msgDate.format("dddd, MMMM D");
   };
 
   return (
     <div
-      className={`flex items-center justify-center py-4 ${isSticky ? "sticky top-0 z-10 bg-background dark:bg-[#121212]" : ""}`}
+      className={`flex items-center justify-center py-4 ${
+        isSticky ? "sticky top-0 z-10 bg-background dark:bg-[#121212]" : ""
+      }`}
     >
       <div className="relative flex w-full items-center">
         <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>

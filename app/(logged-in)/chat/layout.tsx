@@ -10,7 +10,7 @@ export const metadata = {
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SuspenseLoader fullPage>
-      <main className="grid h-svh grid-cols-[280px,1fr] px-2">
+      <main className="grid h-svh grid-cols-[300px,1fr] px-2">
         <ChatsSidebar />
         {children}
       </main>

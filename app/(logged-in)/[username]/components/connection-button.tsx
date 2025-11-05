@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useGetOrCreateChat } from "@/hooks/use-chats";
 import { useConnectionStatus } from "@/hooks/use-connections";
+import { Chat } from "@/services/chats.service";
 import {
   Check,
   Clock,
@@ -10,6 +12,7 @@ import {
   UserRoundPlus,
   X
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const ConnectionButton = ({ userId }: { userId: string }) => {
   const {
@@ -22,14 +25,30 @@ const ConnectionButton = ({ userId }: { userId: string }) => {
     rejectConnectionRequest
   } = useConnectionStatus(userId);
 
+  const router = useRouter();
+  const { mutate: handleStartChat, isPending: isCreatingChat } =
+    useGetOrCreateChat({
+      onSuccess: (chat: Chat) => {
+        router.push(`/chat/${chat.id}`);
+      }
+    });
+
   if (isLoading) {
     return <LoaderCircle size={20} className="animate-spin" />;
   }
 
   if (status === "accepted") {
     return (
-      <Button size="sm">
-        <MessageCircle className="mr-2 h-4 w-4" />
+      <Button
+        size="sm"
+        disabled={isCreatingChat}
+        onClick={() => handleStartChat(userId)}
+      >
+        {isCreatingChat ? (
+          <LoaderCircle size={20} className="mr-2 size-4 animate-spin" />
+        ) : (
+          <MessageCircle className="mr-2 h-4 w-4" />
+        )}
         Message
       </Button>
     );

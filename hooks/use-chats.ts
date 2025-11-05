@@ -279,9 +279,7 @@ export const useDeleteMessage = () => {
       } catch (error: any) {
         // Log the error for debugging
         console.error("Error deleting message:", error);
-        throw new Error(
-          error.message || "Failed to delete message"
-        );
+        throw new Error(error.message || "Failed to delete message");
       }
     },
     onMutate: async (messageId) => {
@@ -680,9 +678,7 @@ export const useDeleteChat = () => {
         await deleteChat(chatId);
       } catch (error: any) {
         console.error("Error deleting chat:", error);
-        throw new Error(
-          error.message || "Failed to delete chat"
-        );
+        throw new Error(error.message || "Failed to delete chat");
       }
     },
     onMutate: async (chatId: string) => {
@@ -708,7 +704,7 @@ export const useDeleteChat = () => {
       toast.error(error.message || "Failed to delete chat");
     },
     onSuccess: () => {
-      toast.success("Chat and all attachments deleted successfully");
+      toast.success("Chat deleted successfully");
       // Invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     }
