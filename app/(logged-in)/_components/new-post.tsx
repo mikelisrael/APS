@@ -1,8 +1,10 @@
 "use client";
 
+import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-query-resource";
+import { getInitials } from "@/lib/utils";
 import { PostKind } from "@/services/posts.service";
 import {
   BriefcaseBusiness,
@@ -12,7 +14,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import PostComposer from "./post-composer";
-import {getInitials} from '@/lib/utils';
 
 const NewPost = () => {
   const { user } = useAuth();
@@ -53,13 +54,30 @@ const NewPost = () => {
         </div>
 
         <div className="flex-center mt-2 w-full">
-          {quickActions.map((action, index) => {
-            const { icon: Icon, text, color, type } = action;
+          {quickActions.map((action) => {
+            const { icon: Icon, text, color, type, href } = action;
+
+            if (href) {
+              return (
+                <Button
+                  variant="ghost"
+                  className="w-full whitespace-normal"
+                  key={text}
+                  asChild
+                >
+                  <TransitionLink href={href}>
+                    <Icon className={`mr-2 ${color}`} />
+                    <span className="hidden sm:inline-block">{text}</span>
+                  </TransitionLink>
+                </Button>
+              );
+            }
+
             return (
               <Button
                 variant="ghost"
                 className="w-full whitespace-normal"
-                key={index}
+                key={text}
                 onClick={() => handleQuickAction(type)}
               >
                 <Icon className={`mr-2 ${color}`} />
@@ -92,7 +110,8 @@ const quickActions = [
     icon: BriefcaseBusiness,
     text: "Job",
     color: "text-red-400",
-    type: "post" as PostKind
+    type: "post" as PostKind,
+    href: "/jobs/new"
   },
   {
     icon: CalendarPlus,
