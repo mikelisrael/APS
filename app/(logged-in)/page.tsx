@@ -1,3 +1,5 @@
+"use client";
+
 import Feed from "@/app/(logged-in)/_components/feed";
 import NewPost from "@/app/(logged-in)/_components/new-post";
 import Extras from "./_components/extras";
