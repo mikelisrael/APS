@@ -178,7 +178,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
 
           {/* Post Content */}
           {post.content && (
-            <p className="line-clamp-4 whitespace-pre-wrap ~text-xs/sm">
+            <p className="line-clamp-4 whitespace-pre-wrap text-sm">
               {post.content}
             </p>
           )}
@@ -194,7 +194,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         </div>
 
         <footer
-          className="flex-between py-5"
+          className="flex items-center gap-6 py-5"
           onClick={(e) => e.stopPropagation()}
         >
           <motion.div
