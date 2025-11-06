@@ -13,8 +13,8 @@ import {
   Post,
   PostKind,
   removeRsvp,
-  rsvpToEvent,
   RsvpStatus,
+  rsvpToEvent,
   toggleInteraction,
   updateComment,
   updatePost,
@@ -86,7 +86,8 @@ export const useCreatePost = () => {
         author: {
           id: user.id,
           full_name: user.user_metadata?.full_name || "You",
-          avatar_url: user.user_metadata?.avatar_url || ""
+          avatar_url: user.user_metadata?.avatar_url || "",
+          username: user.user_metadata?.username || "you"
         },
         user_interaction: { liked: false, reposted: false, shared: false },
         user_rsvp: null,
@@ -94,7 +95,7 @@ export const useCreatePost = () => {
       } as any;
 
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages?.[0]) return old;
 
         return {
           ...old,
@@ -113,7 +114,7 @@ export const useCreatePost = () => {
     onError: (error, variables, context: any) => {
       if (context?.optimisticPost) {
         queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-          if (!old) return old;
+          if (!old?.pages) return old;
 
           return {
             ...old,
@@ -135,7 +136,7 @@ export const useCreatePost = () => {
     },
     onSuccess: (data, variables, context: any) => {
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -174,9 +175,8 @@ export const useUpdatePost = () => {
       });
       const previousSingle = queryClient.getQueryData(["posts", postId]);
 
-      // Update in infinite queries
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -189,7 +189,6 @@ export const useUpdatePost = () => {
         };
       });
 
-      // Update single post
       queryClient.setQueryData(["posts", postId], (old: any) => {
         if (!old) return old;
         return { ...old, ...data, _optimistic: true };
@@ -213,7 +212,7 @@ export const useUpdatePost = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -245,7 +244,7 @@ export const useDeletePost = () => {
       const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -296,7 +295,7 @@ export const useToggleInteraction = () => {
         });
 
         queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-          if (!old) return old;
+          if (!old?.pages) return old;
 
           return {
             ...old,
@@ -345,8 +344,8 @@ export const useToggleInteraction = () => {
       }
       toast.error(error.message || "Failed to update interaction");
     },
-    onSuccess: (data, variables) => {
-      // Silent success, counts already updated optimistically
+    onSuccess: () => {
+      // Silent success - optimistic update already applied
     }
   });
 };
@@ -364,7 +363,7 @@ export const usePostComments = (postId: string) => {
   });
 };
 
-// Hook for creating a comment
+// Hook for creating a comment - simplified without optimistic updates
 export const useCreateComment = () => {
   const queryClient = useQueryClient();
 
@@ -379,87 +378,26 @@ export const useCreateComment = () => {
       content: string;
       parentCommentId?: string;
     }) => createComment(postId, content, parentCommentId),
-    onMutate: async ({ postId, content, parentCommentId }) => {
-      await queryClient.cancelQueries({
-        queryKey: ["posts", postId, "comments"]
-      });
-
-      const supabase = createClient();
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const previousComments = queryClient.getQueryData([
-        "posts",
-        postId,
-        "comments"
-      ]);
-
-      const optimisticComment = {
-        id: `temp-${Date.now()}`,
-        post_id: postId,
-        parent_comment_id: parentCommentId || null,
-        created_by: user.id,
-        content,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        depth: 0,
-        like_count: 0,
-        reply_count: 0,
-        author: {
-          id: user.id,
-          full_name: user.user_metadata?.full_name || "You",
-          avatar_url: user.user_metadata?.avatar_url || ""
-        },
-        user_liked: false,
-        replies: [],
-        _optimistic: true
-      };
-
-      queryClient.setQueryData(["posts", postId, "comments"], (old: any) =>
-        old ? [...old, optimisticComment] : [optimisticComment]
-      );
-
-      // Update comment count in posts
-      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            posts: page.posts.map((p: Post) =>
-              p.id === postId ? { ...p, comment_count: p.comment_count + 1 } : p
-            )
-          }))
-        };
-      });
-
-      return { previousComments, optimisticComment, postId };
-    },
-    onError: (error, variables, context: any) => {
-      if (context?.previousComments) {
-        queryClient.setQueryData(
-          ["posts", context.postId, "comments"],
-          context.previousComments
-        );
+    onSuccess: (data) => {
+      if (!data?.post_id) {
+        console.error("No post_id found in comment data");
+        return;
       }
-      toast.error(error.message || "Failed to create comment");
-    },
-    onSuccess: (data, variables, context: any) => {
-      queryClient.setQueryData(
-        ["posts", variables.postId, "comments"],
-        (old: any) => {
-          if (!old) return [data];
-          return old.map((c: any) =>
-            c.id === context?.optimisticComment?.id ? data : c
-          );
-        }
-      );
+
+      // Invalidate queries to refetch fresh data
       queryClient.invalidateQueries({
-        queryKey: ["posts", variables.postId, "comments"]
+        queryKey: ["posts", data.post_id, "comments"]
       });
+
+      // Also invalidate the posts query to update comment count
+      queryClient.invalidateQueries({
+        queryKey: ["posts"]
+      });
+
+      toast.success("Comment posted");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create comment");
     }
   });
 };
@@ -473,7 +411,6 @@ export const useUpdateComment = () => {
     fn: ({ commentId, content }: { commentId: string; content: string }) =>
       updateComment(commentId, content),
     onSuccess: (data) => {
-      // Find and update the comment in any post's comments
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       toast.success("Comment updated");
     },
@@ -519,7 +456,7 @@ export const useRsvpToEvent = () => {
       const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -568,7 +505,7 @@ export const useRemoveRsvp = () => {
       const previousData = queryClient.getQueriesData({ queryKey: ["posts"] });
 
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old) return old;
+        if (!old?.pages) return old;
 
         return {
           ...old,
@@ -604,15 +541,21 @@ export const useRemoveRsvp = () => {
   });
 };
 
-// Real-time subscription for posts
+// Real-time subscription for posts - PROPERLY FIXED
 export const usePostsSubscription = (kind?: PostKind) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const supabase = createClient();
 
+    // Get current user for filtering interactions
+    let currentUserId: string | null = null;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      currentUserId = user?.id || null;
+    });
+
     const channel = supabase
-      .channel("posts-changes")
+      .channel("posts-realtime")
       .on(
         "postgres_changes",
         {
@@ -628,17 +571,43 @@ export const usePostsSubscription = (kind?: PostKind) => {
             .select(
               `
               *,
-              author:users!posts_created_by_fkey(id, full_name, avatar_url)
+              author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
             `
             )
             .eq("id", payload.new.id)
             .single();
 
-          if (fullPost) {
+          if (fullPost && currentUserId) {
+            // Get user interactions
+            const { data: interactions } = await supabase
+              .from("interactions")
+              .select("kind")
+              .eq("user_id", currentUserId)
+              .eq("target_type", "post")
+              .eq("target_id", fullPost.id);
+
+            const userInteraction = {
+              liked: false,
+              reposted: false,
+              shared: false
+            };
+
+            interactions?.forEach((int) => {
+              if (int.kind === "like") userInteraction.liked = true;
+              if (int.kind === "repost") userInteraction.reposted = true;
+              if (int.kind === "share") userInteraction.shared = true;
+            });
+
+            const postWithInteraction = {
+              ...fullPost,
+              user_interaction: userInteraction,
+              user_rsvp: null
+            };
+
             queryClient.setQueriesData(
               { queryKey: ["posts", kind] },
               (old: any) => {
-                if (!old) return old;
+                if (!old?.pages?.[0]) return old;
 
                 const firstPage = old.pages[0];
                 const postExists = firstPage.posts.some(
@@ -651,7 +620,7 @@ export const usePostsSubscription = (kind?: PostKind) => {
                   ...old,
                   pages: [
                     {
-                      posts: [fullPost, ...firstPage.posts],
+                      posts: [postWithInteraction, ...firstPage.posts],
                       hasMore: firstPage.hasMore
                     },
                     ...old.pages.slice(1)
@@ -670,33 +639,65 @@ export const usePostsSubscription = (kind?: PostKind) => {
           table: "posts"
         },
         async (payload) => {
+          if (!currentUserId) return;
+
           const { data: fullPost } = await supabase
             .from("posts")
             .select(
               `
               *,
-              author:users!posts_created_by_fkey(id, full_name, avatar_url)
+              author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
             `
             )
             .eq("id", payload.new.id)
             .single();
 
           if (fullPost) {
+            // Get user interactions
+            const { data: interactions } = await supabase
+              .from("interactions")
+              .select("kind")
+              .eq("user_id", currentUserId)
+              .eq("target_type", "post")
+              .eq("target_id", fullPost.id);
+
+            const userInteraction = {
+              liked: false,
+              reposted: false,
+              shared: false
+            };
+
+            interactions?.forEach((int) => {
+              if (int.kind === "like") userInteraction.liked = true;
+              if (int.kind === "repost") userInteraction.reposted = true;
+              if (int.kind === "share") userInteraction.shared = true;
+            });
+
+            const postWithInteraction = {
+              ...fullPost,
+              user_interaction: userInteraction,
+              user_rsvp: fullPost.kind === "event" ? null : undefined
+            };
+
+            // Update all posts queries
             queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-              if (!old) return old;
+              if (!old?.pages) return old;
 
               return {
                 ...old,
                 pages: old.pages.map((page: any) => ({
                   ...page,
                   posts: page.posts.map((p: Post) =>
-                    p.id === fullPost.id ? fullPost : p
+                    p.id === fullPost.id ? postWithInteraction : p
                   )
                 }))
               };
             });
 
-            queryClient.setQueryData(["posts", fullPost.id], fullPost);
+            queryClient.setQueryData(
+              ["posts", fullPost.id],
+              postWithInteraction
+            );
           }
         }
       )
@@ -709,7 +710,7 @@ export const usePostsSubscription = (kind?: PostKind) => {
         },
         (payload) => {
           queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-            if (!old) return old;
+            if (!old?.pages) return old;
 
             return {
               ...old,

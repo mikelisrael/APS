@@ -22,6 +22,7 @@ export interface Post {
     id: string;
     full_name: string;
     avatar_url?: string;
+    username: string;
   };
   user_interaction?: {
     liked: boolean;
@@ -46,6 +47,7 @@ export interface Comment {
     id: string;
     full_name: string;
     avatar_url?: string;
+    username: string;
   };
   user_liked?: boolean;
   replies?: Comment[];
@@ -97,7 +99,7 @@ export const getPosts = async (
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
     `,
       { count: "exact" }
     )
@@ -119,7 +121,7 @@ export const getPosts = async (
   let userRsvps: Record<string, RsvpStatus> = {};
 
   if (postIds.length > 0) {
-    // Fetch interactions
+    // Fetch interactions - ONLY for current user
     const { data: interactions } = await supabase
       .from("interactions")
       .select("target_id, kind")
@@ -136,6 +138,7 @@ export const getPosts = async (
             shared: false
           };
         }
+        // Only mark as true if THIS user has that interaction
         if (int.kind === "like") userInteractions[int.target_id].liked = true;
         if (int.kind === "repost")
           userInteractions[int.target_id].reposted = true;
@@ -164,6 +167,7 @@ export const getPosts = async (
   const postsWithInteractions =
     posts?.map((post) => ({
       ...post,
+      // Always default to false - only true if current user has interacted
       user_interaction: userInteractions[post.id] || {
         liked: false,
         reposted: false,
@@ -193,7 +197,7 @@ export const getPost = async (postId: string): Promise<Post> => {
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
     `
     )
     .eq("id", postId)
@@ -201,7 +205,7 @@ export const getPost = async (postId: string): Promise<Post> => {
 
   if (error) throw error;
 
-  // Get user interactions
+  // Get user interactions - ONLY for current user
   const { data: interactions } = await supabase
     .from("interactions")
     .select("kind")
@@ -215,6 +219,7 @@ export const getPost = async (postId: string): Promise<Post> => {
     shared: false
   };
 
+  // Only set to true if THIS user has the interaction
   interactions?.forEach((int) => {
     if (int.kind === "like") userInteraction.liked = true;
     if (int.kind === "repost") userInteraction.reposted = true;
@@ -371,7 +376,7 @@ export const toggleInteraction = async (
   }
 };
 
-// Get comments for a post
+// Get comments for a post - nested structure sorted by most recent activity
 export const getPostComments = async (postId: string): Promise<Comment[]> => {
   const supabase = createClient();
 
@@ -390,7 +395,7 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     `
     )
     .eq("post_id", postId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false }); // Newest first
 
   if (error) throw error;
 
@@ -412,6 +417,7 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
   const commentMap: Record<string, Comment> = {};
   const topLevelComments: Comment[] = [];
 
+  // First pass: Create all comment objects with user_liked flag
   comments.forEach((comment) => {
     const commentWithLike = {
       ...comment,
@@ -421,6 +427,7 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     commentMap[comment.id] = commentWithLike;
   });
 
+  // Second pass: Build the nested structure
   comments.forEach((comment) => {
     if (comment.parent_comment_id) {
       const parent = commentMap[comment.parent_comment_id];
@@ -431,6 +438,42 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
       topLevelComments.push(commentMap[comment.id]);
     }
   });
+
+  // Helper function to get the most recent timestamp in a comment thread
+  const getMostRecentTimestamp = (comment: Comment): number => {
+    let mostRecent = new Date(comment.created_at).getTime();
+
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies.forEach((reply) => {
+        const replyTimestamp = getMostRecentTimestamp(reply);
+        if (replyTimestamp > mostRecent) {
+          mostRecent = replyTimestamp;
+        }
+      });
+    }
+
+    return mostRecent;
+  };
+
+  // Sort top-level comments by most recent activity (including nested replies)
+  topLevelComments.sort((a, b) => {
+    return getMostRecentTimestamp(b) - getMostRecentTimestamp(a);
+  });
+
+  // Sort replies within each parent (newest first)
+  const sortReplies = (comment: Comment) => {
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies.sort((a, b) => {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
+      // Recursively sort nested replies
+      comment.replies.forEach(sortReplies);
+    }
+  };
+
+  topLevelComments.forEach(sortReplies);
 
   return topLevelComments;
 };

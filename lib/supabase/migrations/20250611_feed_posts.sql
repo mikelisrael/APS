@@ -217,3 +217,226 @@ $$;
 create trigger interactions_before_insert_trg
 before insert on interactions
 for each row execute function interactions_before_insert();
+
+
+
+-------------------------------------
+---------------RLS-------------------
+-------------------------------------
+
+-- -- Enable RLS on all tables
+-- alter table posts enable row level security;
+-- alter table comments enable row level security;
+-- alter table interactions enable row level security;
+-- alter table event_rsvps enable row level security;
+
+-- -- ============================================
+-- -- POSTS TABLE POLICIES
+-- -- ============================================
+
+-- -- Anyone can view posts
+-- create policy "Posts are viewable by everyone"
+--   on posts for select
+--   using (true);
+
+-- -- Authenticated users can create posts
+-- create policy "Authenticated users can create posts"
+--   on posts for insert
+--   to authenticated
+--   with check (auth.uid() = created_by);
+
+-- -- Users can update their own posts
+-- create policy "Users can update their own posts"
+--   on posts for update
+--   to authenticated
+--   using (auth.uid() = created_by)
+--   with check (auth.uid() = created_by);
+
+-- -- Users can delete their own posts
+-- create policy "Users can delete their own posts"
+--   on posts for delete
+--   to authenticated
+--   using (auth.uid() = created_by);
+
+-- -- ============================================
+-- -- COMMENTS TABLE POLICIES
+-- -- ============================================
+
+-- -- Anyone can view comments
+-- create policy "Comments are viewable by everyone"
+--   on comments for select
+--   using (true);
+
+-- -- Authenticated users can create comments
+-- create policy "Authenticated users can create comments"
+--   on comments for insert
+--   to authenticated
+--   with check (auth.uid() = created_by);
+
+-- -- Users can update their own comments
+-- create policy "Users can update their own comments"
+--   on comments for update
+--   to authenticated
+--   using (auth.uid() = created_by)
+--   with check (auth.uid() = created_by);
+
+-- -- Users can delete their own comments
+-- create policy "Users can delete their own comments"
+--   on comments for delete
+--   to authenticated
+--   using (auth.uid() = created_by);
+
+-- -- ============================================
+-- -- INTERACTIONS TABLE POLICIES
+-- -- ============================================
+
+-- -- Users can view all interactions (for displaying likes, reposts, etc.)
+-- create policy "Interactions are viewable by everyone"
+--   on interactions for select
+--   using (true);
+
+-- -- Users can create their own interactions
+-- create policy "Users can create their own interactions"
+--   on interactions for insert
+--   to authenticated
+--   with check (auth.uid() = user_id);
+
+-- -- Users can delete their own interactions (unlike, unrepost, etc.)
+-- create policy "Users can delete their own interactions"
+--   on interactions for delete
+--   to authenticated
+--   using (auth.uid() = user_id);
+
+-- -- Note: No update policy needed - interactions are created or deleted, not updated
+
+-- -- ============================================
+-- -- EVENT RSVPS TABLE POLICIES
+-- -- ============================================
+
+-- -- Anyone can view RSVPs (to see who's attending events)
+-- create policy "RSVPs are viewable by everyone"
+--   on event_rsvps for select
+--   using (true);
+
+-- -- Authenticated users can create their own RSVPs
+-- create policy "Users can create their own RSVPs"
+--   on event_rsvps for insert
+--   to authenticated
+--   with check (auth.uid() = user_id);
+
+-- -- Users can update their own RSVPs (change status)
+-- create policy "Users can update their own RSVPs"
+--   on event_rsvps for update
+--   to authenticated
+--   using (auth.uid() = user_id)
+--   with check (auth.uid() = user_id);
+
+-- -- Users can delete their own RSVPs
+-- create policy "Users can delete their own RSVPs"
+--   on event_rsvps for delete
+--   to authenticated
+--   using (auth.uid() = user_id);
+
+-- -- ============================================
+-- -- OPTIONAL: MORE RESTRICTIVE POLICIES
+-- -- ============================================
+-- -- Uncomment these if you want additional restrictions
+
+-- /*
+-- -- Only allow viewing published posts (if you add a published column)
+-- create policy "Only view published posts"
+--   on posts for select
+--   using (
+--     published = true 
+--     or auth.uid() = created_by  -- owners can see their own drafts
+--   );
+
+-- -- Prevent editing posts after a certain time (e.g., 24 hours)
+-- create policy "Users can edit posts within 24 hours"
+--   on posts for update
+--   to authenticated
+--   using (
+--     auth.uid() = created_by 
+--     and created_at > now() - interval '24 hours'
+--   )
+--   with check (auth.uid() = created_by);
+
+-- -- Limit comment depth (if needed)
+-- create policy "Limit comment depth"
+--   on comments for insert
+--   to authenticated
+--   with check (
+--     auth.uid() = created_by 
+--     and (
+--       parent_comment_id is null 
+--       or (
+--         select depth from comments where id = parent_comment_id
+--       ) < 5  -- max depth of 5 levels
+--     )
+--   );
+
+-- -- Only allow RSVP to event posts
+-- create policy "Only RSVP to events"
+--   on event_rsvps for insert
+--   to authenticated
+--   with check (
+--     auth.uid() = user_id 
+--     and exists (
+--       select 1 from posts 
+--       where id = event_post_id 
+--       and kind = 'event'
+--     )
+--   );
+-- */
+
+-- ============================================
+-- HELPER FUNCTIONS (Optional but useful)
+-- ============================================
+
+-- Function to check if user owns a post
+create or replace function user_owns_post(post_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1 from posts
+    where id = post_id
+    and created_by = auth.uid()
+  );
+$$;
+
+-- Function to check if user owns a comment
+create or replace function user_owns_comment(comment_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1 from comments
+    where id = comment_id
+    and created_by = auth.uid()
+  );
+$$;
+
+-- Function to check if user has already interacted with a target
+create or replace function user_has_interaction(
+  p_target_type text,
+  p_target_id uuid,
+  p_kind interaction_kind
+)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1 from interactions
+    where user_id = auth.uid()
+    and target_type = p_target_type
+    and target_id = p_target_id
+    and kind = p_kind
+  );
+$$;

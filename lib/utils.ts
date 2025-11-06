@@ -58,3 +58,46 @@ export const formatDateRange = (
 
   return `${start} - ${end}`;
 };
+
+// Format numbers like Twitter (1.5K, 2.3M, etc.)
+export const formatCount = (count: number): string => {
+  if (count < 1000) {
+    return count.toString();
+  }
+
+  if (count < 1000000) {
+    const thousands = count / 1000;
+    return `${thousands % 1 === 0 ? thousands : thousands.toFixed(1)}K`;
+  }
+
+  const millions = count / 1000000;
+  return `${millions % 1 === 0 ? millions : millions.toFixed(1)}M`;
+};
+
+// Format relative time (like Twitter)
+export const formatRelativeTime = (date: string | Date): string => {
+  const now = moment();
+  const post = moment(date);
+
+  // If date is invalid, return empty string
+  if (!post.isValid()) return "";
+
+  const seconds = now.diff(post, "seconds");
+  if (seconds < 60) return `${seconds}s`;
+
+  const minutes = now.diff(post, "minutes");
+  if (minutes < 60) return `${minutes}m`;
+
+  const hours = now.diff(post, "hours");
+  if (hours < 24) return `${hours}h`;
+
+  const days = now.diff(post, "days");
+  if (days < 7) return `${days}d`;
+
+  const weeks = now.diff(post, "weeks");
+  if (weeks < 4) return `${weeks}w`;
+
+  // Older than ~4 weeks: show short date, include year if not current year
+  const sameYear = now.year() === post.year();
+  return post.format(sameYear ? "MMM D" : "MMM D, YYYY");
+};
