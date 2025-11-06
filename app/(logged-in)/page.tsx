@@ -2,6 +2,7 @@
 
 import Feed from "@/app/(logged-in)/_components/feed";
 import NewPost from "@/app/(logged-in)/_components/new-post";
+import { SuspenseLoader } from "@/components/ui/loaders";
 import Extras from "./_components/extras";
 
 const Home = () => {
@@ -10,7 +11,9 @@ const Home = () => {
       <div className="grid lg:grid-cols-[1fr,350px] xl:grid-cols-[1fr,350px]">
         <section className="safe-area">
           <NewPost />
-          <Feed />
+          <SuspenseLoader>
+            <Feed />
+          </SuspenseLoader>
         </section>
         <Extras />
       </div>
