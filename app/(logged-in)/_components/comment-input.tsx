@@ -1,5 +1,6 @@
 "use client";
 
+import EmojiPickerButton from "@/components/shared/emoji-picker-button";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-query-resource";
@@ -75,6 +76,14 @@ const CommentInput = ({
     }
   }, [editor, autoFocus]);
 
+  useEffect(() => {
+    if (editor && replyingTo) {
+      setTimeout(() => {
+        editor.commands.focus("end");
+      }, 0);
+    }
+  }, [replyingTo, editor]);
+
   const handleSubmit = () => {
     if (!editor || !hasContent || isPending) return;
 
@@ -94,6 +103,15 @@ const CommentInput = ({
       e.preventDefault();
       handleSubmit();
     }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    if (!editor) return;
+    editor.commands.insertContent(emoji);
+    editor.commands.focus();
+    // Update content state after inserting emoji
+    const textContent = editor.getText().trim();
+    setHasContent(textContent.length > 0);
   };
 
   return (
@@ -163,11 +181,17 @@ const CommentInput = ({
           className="h-10 w-10"
         />
 
-        <div className="bg-background" onKeyDown={handleKeyDown}>
+        <div className="relative bg-background" onKeyDown={handleKeyDown}>
           <EditorContent editor={editor} />
         </div>
 
-        <div className="flex h-full items-end justify-end">
+        <div className="flex h-full items-end justify-end gap-1">
+          {/* Emoji Picker Button */}
+          <EmojiPickerButton
+            onEmojiSelect={handleEmojiSelect}
+            disabled={isPending}
+          />
+
           <Button onClick={handleSubmit} disabled={!hasContent || isPending}>
             {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}{" "}
             Reply

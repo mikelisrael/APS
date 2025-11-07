@@ -1,13 +1,8 @@
+import EmojiPickerButton from "@/components/shared/emoji-picker-button";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from "@/components/ui/popover";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Edit,
@@ -16,11 +11,9 @@ import {
   Loader2,
   PaperclipIcon,
   SendHorizontal,
-  Smile,
   Video,
   X
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -55,8 +48,6 @@ const ChatInput = ({
   onCancelEdit,
   disabled = false
 }: ChatInputProps) => {
-  const { theme } = useTheme();
-  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [hasContent, setHasContent] = useState(false);
@@ -243,9 +234,9 @@ const ChatInput = ({
     }
   };
 
-  const handleEmojiClick = (emojiData: EmojiClickData) => {
+  const handleEmojiSelect = (emoji: string) => {
     if (!editor) return;
-    editor.commands.insertContent(emojiData.emoji);
+    editor.commands.insertContent(emoji);
     editor.commands.focus();
     // Update content state after inserting emoji
     const textContent = editor.getText().trim();
@@ -506,53 +497,11 @@ const ChatInput = ({
         </div>
 
         <div className="flex items-center gap-1">
-          <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
-            <PopoverTrigger asChild>
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0"
-                  type="button"
-                  disabled={disabled}
-                >
-                  <motion.div
-                    animate={
-                      isEmojiPickerOpen ? { rotate: 180 } : { rotate: 0 }
-                    }
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Smile className="h-5 w-5" />
-                  </motion.div>
-                </Button>
-              </motion.div>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-full border-0 p-0"
-              side="top"
-              align="end"
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <EmojiPicker
-                  onEmojiClick={handleEmojiClick}
-                  theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
-                  width="100%"
-                  height={400}
-                  searchPlaceHolder="Search emoji..."
-                  previewConfig={{ showPreview: false }}
-                />
-              </motion.div>
-            </PopoverContent>
-          </Popover>
+          {/* Emoji Picker Button */}
+          <EmojiPickerButton
+            onEmojiSelect={handleEmojiSelect}
+            disabled={disabled}
+          />
 
           {/* Hide attachment button when editing */}
           {!editingMessage && (
