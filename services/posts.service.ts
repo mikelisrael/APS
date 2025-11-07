@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 
 export type PostKind = "post" | "article" | "event";
-export type InteractionKind = "like" | "repost" | "share";
+export type InteractionKind = "like" | "share";
 export type RsvpStatus = "attending" | "interested" | "not_going";
 
 export interface Post {
@@ -16,7 +16,6 @@ export interface Post {
   updated_at: string;
   like_count: number;
   comment_count: number;
-  repost_count: number;
   share_count: number;
   author?: {
     id: string;
@@ -26,7 +25,6 @@ export interface Post {
   };
   user_interaction?: {
     liked: boolean;
-    reposted: boolean;
     shared: boolean;
   };
   user_rsvp?: RsvpStatus | null;
@@ -265,7 +263,7 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
     `
     )
     .single();

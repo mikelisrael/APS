@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { ChatAttachment } from "@/services/chats.service";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -207,7 +207,7 @@ const ChatBubble = ({
   const stableKey = useMemo(() => uuidv4(), []);
 
   return (
-    <motion.div
+    <m.div
       variants={bubbleVariants}
       initial="hidden"
       animate="visible"
@@ -221,9 +221,9 @@ const ChatBubble = ({
         isOptimistic && "!opacity-60"
       )}
     >
-      <motion.div variants={avatarVariants} key={stableKey}>
+      <m.div variants={avatarVariants} key={stableKey}>
         <UserAvatar className="h-8 w-8" src={sender.avatar} alt={sender.name} />
-      </motion.div>
+      </m.div>
 
       <ContextMenu>
         <ContextMenuTrigger>
@@ -252,7 +252,7 @@ const ChatBubble = ({
               )}
             </AnimatePresence>
 
-            <motion.div
+            <m.div
               variants={contentVariants}
               key={stableKey}
               className={cn(
@@ -260,7 +260,7 @@ const ChatBubble = ({
                 isOwn ? "ml-auto items-end" : "mr-auto items-start"
               )}
             >
-              <motion.div
+              <m.div
                 className={cn(
                   "relative p-4 transition-all",
                   isOwn
@@ -276,7 +276,7 @@ const ChatBubble = ({
                 transition={{ duration: 0.2 }}
               >
                 {showName && (
-                  <motion.div
+                  <m.div
                     variants={itemVariants}
                     key={stableKey}
                     className="mb-1 flex items-center gap-2"
@@ -303,13 +303,13 @@ const ChatBubble = ({
                     {!isOptimistic && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <motion.button
+                          <m.button
                             className="ml-auto rounded p-0.5 opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                           >
                             <MoreVertical className="h-3.5 w-3.5" />
-                          </motion.button>
+                          </m.button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align={isOwn ? "end" : "start"}
@@ -328,19 +328,19 @@ const ChatBubble = ({
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
-                  </motion.div>
+                  </m.div>
                 )}
 
                 {/* Attachments - placed before message text */}
                 <AnimatePresence>
                   {attachments && attachments.length > 0 && (
-                    <motion.div
+                    <m.div
                       variants={itemVariants}
                       key={stableKey}
                       className="mb-3 space-y-2"
                     >
                       {attachments.map((attachment, index) => (
-                        <motion.div
+                        <m.div
                           key={attachment.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -350,17 +350,17 @@ const ChatBubble = ({
                             attachment={attachment}
                             isOwn={isOwn}
                           />
-                        </motion.div>
+                        </m.div>
                       ))}
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
 
                 {/* Link Preview */}
                 {message && (
-                  <motion.div variants={itemVariants} key={stableKey}>
+                  <m.div variants={itemVariants} key={stableKey}>
                     {!isOptimistic && extractFirstUrl(message) && (
-                      <motion.div
+                      <m.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         transition={{ delay: 0.2 }}
@@ -369,16 +369,16 @@ const ChatBubble = ({
                           url={extractFirstUrl(message)!}
                           isOwn={isOwn}
                         />
-                      </motion.div>
+                      </m.div>
                     )}
                     <MessageText text={message} isOwn={isOwn} />
-                  </motion.div>
+                  </m.div>
                 )}
 
                 {/* Edited Indicator */}
                 <AnimatePresence>
                   {isEdited && !isOptimistic && (
-                    <motion.div
+                    <m.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
@@ -394,11 +394,11 @@ const ChatBubble = ({
                       >
                         Edited
                       </span>
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
-            </motion.div>
+              </m.div>
+            </m.div>
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-40">
@@ -415,7 +415,7 @@ const ChatBubble = ({
             ))}
         </ContextMenuContent>
       </ContextMenu>
-    </motion.div>
+    </m.div>
   );
 };
 

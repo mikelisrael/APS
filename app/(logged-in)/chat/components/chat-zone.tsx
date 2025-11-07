@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import ChatBubble from "./chat-bubble";
 import ChatInput from "./chat-input";
 import DateDivider from "./date-divider";
+import { domAnimation, LazyMotion, AnimatePresence } from "framer-motion";
 
 interface Sender {
   name: string;
@@ -382,104 +383,113 @@ const ChatZone: React.FC = () => {
   }
 
   return (
-    <section className="flex flex-col overflow-hidden border-l text-sm">
-      <div
-        ref={scrollContainerRef}
-        className="thin-scrollbar relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
-      >
-        {stickyDate && <DateDivider date={stickyDate} isSticky={true} />}
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence mode="popLayout">
+        <section className="flex flex-col overflow-hidden border-l text-sm">
+          <div
+            ref={scrollContainerRef}
+            className="thin-scrollbar relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
+          >
+            {stickyDate && <DateDivider date={stickyDate} isSticky={true} />}
 
-        <div className="h-full space-y-2 p-4">
-          {sortedDates.length === 0 ? (
-            <div className="flex-center h-full flex-col text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                <MessageCircle className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold">
-                Start chatting with {displayReceiver?.full_name || "this user"}
-              </h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                Send your first message to begin the conversation.
-                {displayReceiver?.full_name &&
-                  ` Your messages with ${displayReceiver.full_name} will appear here.`}
-              </p>
-            </div>
-          ) : (
-            <>
-              <p className="mb-4 text-center text-xs text-muted-foreground">
-                ● Welcome to ground zero of this conversation ●
-              </p>
-              {sortedDates.map((date) => (
-                <div key={date}>
-                  <div
-                    ref={(el) => {
-                      dateRefs.current[date] = el;
-                    }}
-                    style={{
-                      opacity: stickyDate === date ? 0 : 1
-                    }}
-                  >
-                    <DateDivider date={date} isSticky={false} />
+            <div className="h-full space-y-2 p-4">
+              {sortedDates.length === 0 ? (
+                <div className="flex-center h-full flex-col text-center">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground" />
                   </div>
-
-                  <div className="pb-10">
-                    {groupedMessages[date].map((msg, index) => {
-                      const messagesOnDate = groupedMessages[date];
-                      const prevMsg = messagesOnDate[index - 1];
-
-                      const sameAsPrev =
-                        prevMsg &&
-                        prevMsg.sender.name === msg.sender.name &&
-                        prevMsg.isOwn === msg.isOwn &&
-                        moment(msg.timestamp).isSame(
-                          moment(prevMsg.timestamp),
-                          "minute"
-                        );
-
-                      const isGrouped = sameAsPrev;
-                      const isFirstOfGroup = !sameAsPrev;
-
-                      return (
-                        <ChatBubble
-                          key={msg.id}
-                          message={msg.message}
-                          time={msg.time}
-                          sender={msg.sender}
-                          isOwn={msg.isOwn}
-                          isGrouped={isGrouped}
-                          isFirstOfGroup={isFirstOfGroup}
-                          isEdited={msg.isEdited}
-                          editedAt={msg.editedAt}
-                          repliedTo={msg.repliedTo}
-                          isOptimistic={msg.isOptimistic}
-                          attachments={msg.attachments}
-                          onReply={() => handleReply(msg)}
-                          onEdit={msg.isOwn ? () => handleEdit(msg) : undefined}
-                          onDelete={
-                            msg.isOwn ? () => handleDelete(msg.id) : undefined
-                          }
-                        />
-                      );
-                    })}
-                  </div>
+                  <h3 className="mb-2 text-lg font-semibold">
+                    Start chatting with{" "}
+                    {displayReceiver?.full_name || "this user"}
+                  </h3>
+                  <p className="max-w-sm text-sm text-muted-foreground">
+                    Send your first message to begin the conversation.
+                    {displayReceiver?.full_name &&
+                      ` Your messages with ${displayReceiver.full_name} will appear here.`}
+                  </p>
                 </div>
-              ))}
-            </>
-          )}
-        </div>
-      </div>
+              ) : (
+                <>
+                  <p className="mb-4 text-center text-xs text-muted-foreground">
+                    ● Welcome to ground zero of this conversation ●
+                  </p>
+                  {sortedDates.map((date) => (
+                    <div key={date}>
+                      <div
+                        ref={(el) => {
+                          dateRefs.current[date] = el;
+                        }}
+                        style={{
+                          opacity: stickyDate === date ? 0 : 1
+                        }}
+                      >
+                        <DateDivider date={date} isSticky={false} />
+                      </div>
 
-      <ChatInput
-        onSend={handleSend}
-        replyingTo={replyingTo}
-        editingMessage={editingMessage}
-        onCancelReply={() => setReplyingTo(null)}
-        onCancelEdit={handleCancelEdit}
-        disabled={
-          isSending || isEditing || (!displayReceiverId && !editingMessage)
-        }
-      />
-    </section>
+                      <div className="pb-10">
+                        {groupedMessages[date].map((msg, index) => {
+                          const messagesOnDate = groupedMessages[date];
+                          const prevMsg = messagesOnDate[index - 1];
+
+                          const sameAsPrev =
+                            prevMsg &&
+                            prevMsg.sender.name === msg.sender.name &&
+                            prevMsg.isOwn === msg.isOwn &&
+                            moment(msg.timestamp).isSame(
+                              moment(prevMsg.timestamp),
+                              "minute"
+                            );
+
+                          const isGrouped = sameAsPrev;
+                          const isFirstOfGroup = !sameAsPrev;
+
+                          return (
+                            <ChatBubble
+                              key={msg.id}
+                              message={msg.message}
+                              time={msg.time}
+                              sender={msg.sender}
+                              isOwn={msg.isOwn}
+                              isGrouped={isGrouped}
+                              isFirstOfGroup={isFirstOfGroup}
+                              isEdited={msg.isEdited}
+                              editedAt={msg.editedAt}
+                              repliedTo={msg.repliedTo}
+                              isOptimistic={msg.isOptimistic}
+                              attachments={msg.attachments}
+                              onReply={() => handleReply(msg)}
+                              onEdit={
+                                msg.isOwn ? () => handleEdit(msg) : undefined
+                              }
+                              onDelete={
+                                msg.isOwn
+                                  ? () => handleDelete(msg.id)
+                                  : undefined
+                              }
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+
+          <ChatInput
+            onSend={handleSend}
+            replyingTo={replyingTo}
+            editingMessage={editingMessage}
+            onCancelReply={() => setReplyingTo(null)}
+            onCancelEdit={handleCancelEdit}
+            disabled={
+              isSending || isEditing || (!displayReceiverId && !editingMessage)
+            }
+          />
+        </section>
+      </AnimatePresence>
+    </LazyMotion>
   );
 };
 

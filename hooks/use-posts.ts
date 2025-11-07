@@ -60,100 +60,12 @@ export const useCreatePost = () => {
   return useModifyResource({
     key: ["posts"],
     fn: (data: CreatePostData) => createPost(data),
-    onMutate: async (newPost: CreatePostData) => {
-      await queryClient.cancelQueries({ queryKey: ["posts"] });
-
-      const supabase = createClient();
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const optimisticPost: Post = {
-        id: `temp-${Date.now()}`,
-        ...newPost,
-        content: newPost.content || null,
-        title: newPost.title || null,
-        event_date: newPost.event_date || null,
-        reference_text: newPost.reference_text || null,
-        created_by: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        like_count: 0,
-        comment_count: 0,
-        repost_count: 0,
-        share_count: 0,
-        author: {
-          id: user.id,
-          full_name: user.user_metadata?.full_name || "You",
-          avatar_url: user.user_metadata?.avatar_url || "",
-          username: user.user_metadata?.username || "you"
-        },
-        user_interaction: { liked: false, reposted: false, shared: false },
-        user_rsvp: null,
-        _optimistic: true
-      } as any;
-
-      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old?.pages?.[0]) return old;
-
-        return {
-          ...old,
-          pages: [
-            {
-              posts: [optimisticPost, ...old.pages[0].posts],
-              hasMore: old.pages[0].hasMore
-            },
-            ...old.pages.slice(1)
-          ]
-        };
-      });
-
-      return { optimisticPost };
-    },
-    onError: (error, variables, context: any) => {
-      if (context?.optimisticPost) {
-        queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-          if (!old?.pages) return old;
-
-          return {
-            ...old,
-            pages: old.pages.map((page: any, idx: number) => {
-              if (idx === 0) {
-                return {
-                  ...page,
-                  posts: page.posts.filter(
-                    (p: Post) => p.id !== context.optimisticPost.id
-                  )
-                };
-              }
-              return page;
-            })
-          };
-        });
-      }
+    onError: (error) => {
       toast.error(error.message || "Failed to create post");
     },
-    onSuccess: (data, variables, context: any) => {
-      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
-        if (!old?.pages) return old;
-
-        return {
-          ...old,
-          pages: old.pages.map((page: any, idx: number) => {
-            if (idx === 0) {
-              return {
-                ...page,
-                posts: page.posts.map((p: Post) =>
-                  p.id === context?.optimisticPost?.id ? data : p
-                )
-              };
-            }
-            return page;
-          })
-        };
-      });
+    onSuccess: () => {
       toast.success("Post created successfully");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   });
 };
@@ -305,12 +217,7 @@ export const useToggleInteraction = () => {
                 if (p.id !== targetId) return p;
 
                 const countField = `${kind}_count` as keyof Post;
-                const interactionField =
-                  kind === "like"
-                    ? "liked"
-                    : kind === "repost"
-                      ? "reposted"
-                      : "shared";
+                const interactionField = kind === "like" ? "liked" : "shared";
                 const currentValue =
                   p.user_interaction?.[interactionField] || false;
 
@@ -588,13 +495,11 @@ export const usePostsSubscription = (kind?: PostKind) => {
 
             const userInteraction = {
               liked: false,
-              reposted: false,
               shared: false
             };
 
             interactions?.forEach((int) => {
               if (int.kind === "like") userInteraction.liked = true;
-              if (int.kind === "repost") userInteraction.reposted = true;
               if (int.kind === "share") userInteraction.shared = true;
             });
 

@@ -8,7 +8,12 @@ import {
   usePostsSubscription
 } from "@/hooks/use-posts";
 import { Post } from "@/services/posts.service";
-import { useInView } from "framer-motion";
+import {
+  AnimatePresence,
+  domAnimation,
+  LazyMotion,
+  useInView
+} from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import PostCard from "./post-card";
@@ -31,10 +36,8 @@ const Feed = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(loadMoreRef);
 
-  // Subscribe to real-time post updates
   usePostsSubscription();
 
-  // Auto-load more when scrolling to bottom
   useEffect(() => {
     if (isInView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -42,17 +45,13 @@ const Feed = () => {
   }, [isInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleDeletePost = (postId: string) => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      deletePost(postId);
-    }
+    deletePost(postId);
   };
 
-  // Show post detail if postId query param exists
   if (postId) {
     return <PostDetail postId={postId} />;
   }
 
-  // Show regular feed
   if (isLoading) {
     return (
       <section className="flex-center mt-5 min-h-[400px] border-t">
@@ -92,21 +91,24 @@ const Feed = () => {
   }
 
   return (
-    <section className="mt-5 grid gap-5 border-t border-border pt-5 ~px-2/7">
-      {posts.map((post: Post) => (
-        <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
-      ))}
+    <LazyMotion features={domAnimation}>
+      <section className="mt-5 grid gap-5 border-t border-border pt-5 ~px-2/7">
+        <AnimatePresence mode="popLayout">
+          {posts.map((post: Post) => (
+            <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
+          ))}
+        </AnimatePresence>
 
-      {/* Infinite scroll trigger */}
-      <div ref={loadMoreRef} className="flex justify-center py-4">
-        {isFetchingNextPage && <Spinner size={32} />}
-        {!hasNextPage && posts.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            You&apos;ve reached the end
-          </p>
-        )}
-      </div>
-    </section>
+        <div ref={loadMoreRef} className="flex justify-center py-4">
+          {isFetchingNextPage && <Spinner size={32} />}
+          {!hasNextPage && posts.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              You&apos;ve reached the end
+            </p>
+          )}
+        </div>
+      </section>
+    </LazyMotion>
   );
 };
 
