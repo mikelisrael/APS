@@ -40,7 +40,6 @@ const NewPost = () => {
           <UserAvatar
             src={user?.user_metadata?.avatar_url}
             alt={fullname || "User Avatar"}
-            fallback={abbr}
           />
 
           <div

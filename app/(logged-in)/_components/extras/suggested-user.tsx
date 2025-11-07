@@ -2,7 +2,6 @@ import Alumnus from "@/components/shared/alumnus-tag";
 import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
-import { getInitials } from "@/lib/utils";
 import { IoPersonAddOutline } from "react-icons/io5";
 
 interface SuggestedUserProps {
@@ -17,11 +16,7 @@ interface SuggestedUserProps {
 const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
   return (
     <li className="flex-center gap-2">
-      <UserAvatar
-        src={user.avatarUrl}
-        alt={user.name}
-        fallback={getInitials(user.name)}
-      />
+      <UserAvatar src={user.avatarUrl} alt={user.name} />
 
       <TransitionLink href={`/${user.username}`} className="flex-1 text-left">
         <h3 className="line-clamp-1 break-all text-sm font-semibold tracking-tight">

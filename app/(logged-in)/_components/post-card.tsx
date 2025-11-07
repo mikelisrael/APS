@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToggleInteraction } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
-import { cn, formatCount, formatRelativeTime, getInitials } from "@/lib/utils";
+import { cn, formatCount, formatRelativeTime } from "@/lib/utils";
 import { Post } from "@/services/posts.service";
 import { motion } from "framer-motion";
 import {
@@ -96,11 +96,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         onClick={(e) => e.stopPropagation()}
         className="h-fit"
       >
-        <UserAvatar
-          src={post.author?.avatar_url}
-          fallback={getInitials(post.author?.full_name || "Unknown User")}
-          className="h-10 w-10"
-        />
+        <UserAvatar src={post.author?.avatar_url} className="h-10 w-10" />
       </Link>
 
       <section>

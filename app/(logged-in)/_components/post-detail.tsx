@@ -19,7 +19,7 @@ import {
   useToggleInteraction
 } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
-import { cn, formatCount, formatRelativeTime, getInitials } from "@/lib/utils";
+import { cn, formatCount, formatRelativeTime } from "@/lib/utils";
 import { Comment } from "@/services/posts.service";
 import { motion } from "framer-motion";
 import {
@@ -187,11 +187,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
       >
         <div className="grid grid-cols-[auto,1fr] gap-3">
           <Link href={`/${post.author?.username}`} className="h-fit">
-            <UserAvatar
-              src={post.author?.avatar_url}
-              fallback={getInitials(post.author?.full_name || "Unknown User")}
-              className="h-12 w-12"
-            />
+            <UserAvatar src={post.author?.avatar_url} className="h-12 w-12" />
           </Link>
 
           <div className="flex-1">

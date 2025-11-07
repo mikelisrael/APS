@@ -62,7 +62,6 @@ const Sidebar = () => {
   const lastName = user?.user_metadata?.last_name || "";
   const username = user?.user_metadata?.username || "";
   const email = user?.email || "";
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
   return (
     <aside className="sticky top-0 hidden h-dvh flex-col border-r py-10 ~pr-2/5 sm:flex">
@@ -107,10 +106,7 @@ const Sidebar = () => {
 
       <Popover>
         <PopoverTrigger className="flex-center mt-auto justify-between gap-2 rounded-full px-2 py-3 hover:bg-accent hover:text-accent-foreground">
-          <UserAvatar
-            src={user?.user_metadata?.avatar_url}
-            fallback={initials}
-          />
+          <UserAvatar src={user?.user_metadata?.avatar_url} />
 
           <div className="hidden flex-1 text-left xl:inline-block">
             <h3 className="line-clamp-1 break-all font-semibold tracking-tight">
