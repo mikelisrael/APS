@@ -16,7 +16,7 @@ type NavigationItem = {
 
 export const navigationItems: NavigationItem[] = [
   {
-    title: "Home",
+    title: "Feed",
     Icon: HomeIcon,
     href: "/"
   },
