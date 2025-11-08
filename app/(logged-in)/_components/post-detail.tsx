@@ -336,7 +336,14 @@ const PostDetail = ({ postId }: PostDetailProps) => {
 
                 {/* Post Content */}
                 {post.content && (
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                  <p
+                    className="whitespace-pre-wrap text-sm leading-relaxed"
+                    style={{
+                      overflowWrap: "break-word",
+                      wordBreak: "break-word",
+                      hyphens: "auto"
+                    }}
+                  >
                     {post.content}
                   </p>
                 )}
