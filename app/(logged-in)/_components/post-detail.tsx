@@ -81,7 +81,8 @@ const PostDetail = ({ postId }: PostDetailProps) => {
     author: string;
     content: string;
   } | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteType, setDeleteType] = useState<"post" | "comment">("comment");
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -93,11 +94,11 @@ const PostDetail = ({ postId }: PostDetailProps) => {
     router.back();
   };
 
+  const [showDeletePostDialog, setShowDeletePostDialog] = useState(false);
+
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      deletePost(postId);
-      router.back();
-    }
+    setDeleteType("post");
+    setDeleteDialogOpen(true);
   };
 
   const handleInteraction = (
@@ -133,16 +134,20 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   };
 
   const handleDeleteComment = (commentId: string) => {
+    setDeleteType("comment");
     setCommentToDelete(commentId);
-    setShowDeleteDialog(true);
+    setDeleteDialogOpen(true);
   };
 
-  const confirmDeleteComment = () => {
-    if (commentToDelete) {
+  const handleConfirmDelete = () => {
+    if (deleteType === "post") {
+      deletePost(postId);
+      router.back();
+    } else if (deleteType === "comment" && commentToDelete) {
       deleteComment(commentToDelete);
-      setShowDeleteDialog(false);
       setCommentToDelete(null);
     }
+    setDeleteDialogOpen(false);
   };
 
   const handleImageClick = (index: number) => {
@@ -201,19 +206,20 @@ const PostDetail = ({ postId }: PostDetailProps) => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {deleteType}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. Are you sure you want to delete this
-              comment?
+              {deleteType === "post"
+                ? "This action cannot be undone. This will permanently delete your post and all its comments."
+                : "This action cannot be undone. Are you sure you want to delete this comment?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDeleteComment}
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
