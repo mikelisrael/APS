@@ -1,5 +1,6 @@
 "use client";
 
+import EmojiPickerButton from "@/components/shared/emoji-picker-button";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -578,6 +579,13 @@ const PostComposer = ({
                 {images.length > 0 && `(${images.length}/${MAX_IMAGES})`}
               </span>
             </Button>
+
+            <EmojiPickerButton
+              onEmojiSelect={(emoji) => editor?.commands.insertContent(emoji)}
+              disabled={isPending}
+              buttonSize="sm"
+              className="gap-2"
+            />
           </div>
         </div>
       </ResponsiveDialog>
