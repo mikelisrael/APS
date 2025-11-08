@@ -38,6 +38,8 @@ import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import PostImageGrid from "./post-image-grid";
+import ImageLightbox from "./image-light-box";
 
 interface PostCardProps {
   post: Post;
@@ -50,6 +52,8 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const { mutate: toggleInteraction, isPending: isInteractionLoading } =
     useToggleInteraction();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isOwner = user?.id === post.created_by;
 
@@ -72,6 +76,11 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteDialog(true);
+  };
+
+  const handleImageClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   const getPostTypeIndicator = () => {
@@ -119,6 +128,17 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Lightbox */}
+      {post.attachments && post.attachments.length > 0 && (
+        <ImageLightbox
+          images={post.attachments}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
 
       <m.article
         layout
@@ -229,6 +249,14 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
                   {post.reference_text}
                 </p>
               </div>
+            )}
+
+            {/* Image Grid */}
+            {post.attachments && post.attachments.length > 0 && (
+              <PostImageGrid
+                attachments={post.attachments}
+                onImageClick={handleImageClick}
+              />
             )}
           </div>
 

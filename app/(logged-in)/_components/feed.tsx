@@ -29,7 +29,8 @@ const Feed = () => {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-    isError
+    isError,
+    error // Add this to see the actual error
   } = useInfinitePosts();
 
   const { mutate: deletePost } = useDeletePost();
@@ -43,6 +44,13 @@ const Feed = () => {
       fetchNextPage();
     }
   }, [isInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Log the error for debugging
+  useEffect(() => {
+    if (error) {
+      console.error("Feed error:", error);
+    }
+  }, [error]);
 
   const handleDeletePost = (postId: string) => {
     deletePost(postId);
@@ -63,13 +71,24 @@ const Feed = () => {
   if (isError) {
     return (
       <section className="flex-center mt-5 min-h-[400px] border-t">
-        <div className="text-center">
+        <div className="space-y-3 text-center">
           <p className="text-lg font-semibold text-destructive">
             Failed to load posts
           </p>
           <p className="text-sm text-muted-foreground">
             Please try refreshing the page
           </p>
+          {/* Show error details in development */}
+          {process.env.NODE_ENV === "development" && error && (
+            <details className="mx-auto mt-4 max-w-md text-left">
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                Show error details
+              </summary>
+              <pre className="mt-2 overflow-auto rounded bg-muted p-3 text-xs">
+                {JSON.stringify(error, null, 2)}
+              </pre>
+            </details>
+          )}
         </div>
       </section>
     );

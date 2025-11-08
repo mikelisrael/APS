@@ -208,3 +208,116 @@ $$;
 create trigger interactions_before_insert_trg
 before insert on interactions
 for each row execute function interactions_before_insert();
+
+
+
+---------------------ATTACHMENTS TABLES FOR POSTS AND COMMENTS---------------------
+
+-- Create the post-attachments storage bucket
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'post-attachments',
+  'post-attachments',
+  true,
+  5242880, -- 5MB in bytes
+  ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg']
+);
+
+-- Enable RLS on storage.objects
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can upload their own post attachments
+CREATE POLICY "Users can upload post attachments"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'post-attachments' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- Policy: Anyone can view post attachments (public)
+CREATE POLICY "Anyone can view post attachments"
+ON storage.objects
+FOR SELECT
+TO public
+USING (bucket_id = 'post-attachments');
+
+-- Policy: Users can delete their own post attachments
+CREATE POLICY "Users can delete own post attachments"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'post-attachments' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- Create post_attachments table
+CREATE TABLE IF NOT EXISTS post_attachments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  file_url TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  metadata JSONB DEFAULT '{}',
+  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT fk_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+-- Create index for faster queries
+CREATE INDEX idx_post_attachments_post_id ON post_attachments(post_id);
+CREATE INDEX idx_post_attachments_uploaded_at ON post_attachments(uploaded_at);
+
+-- Enable RLS on post_attachments
+ALTER TABLE post_attachments ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Anyone can view post attachments
+CREATE POLICY "Anyone can view post attachments"
+ON post_attachments
+FOR SELECT
+TO public
+USING (true);
+
+-- Policy: Authenticated users can insert post attachments
+CREATE POLICY "Authenticated users can insert post attachments"
+ON post_attachments
+FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+-- Policy: Users can delete attachments for their own posts
+CREATE POLICY "Users can delete own post attachments"
+ON post_attachments
+FOR DELETE
+TO authenticated
+USING (
+  post_id IN (
+    SELECT id FROM posts WHERE created_by = auth.uid()
+  )
+);
+
+-- Add trigger to delete storage files when post_attachments row is deleted
+CREATE OR REPLACE FUNCTION delete_post_attachment_storage()
+RETURNS TRIGGER AS $$
+DECLARE
+  file_path text;
+BEGIN
+  -- Extract the file path from the URL
+  file_path := substring(OLD.file_url from 'post-attachments/(.+)');
+  
+  -- Delete from storage using the correct function signature
+  -- storage.delete(bucket_id text, name text) returns text
+  IF file_path IS NOT NULL THEN
+    PERFORM storage.delete('post-attachments', file_path);
+  END IF;
+  
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trigger_delete_post_attachment_storage
+AFTER DELETE ON post_attachments
+FOR EACH ROW
+EXECUTE FUNCTION delete_post_attachment_storage();

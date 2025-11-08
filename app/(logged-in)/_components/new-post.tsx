@@ -4,7 +4,6 @@ import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-query-resource";
-import { getInitials } from "@/lib/utils";
 import { PostKind } from "@/services/posts.service";
 import {
   BriefcaseBusiness,
@@ -19,17 +18,19 @@ const NewPost = () => {
   const { user } = useAuth();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState<PostKind>("post");
+  const [triggerMediaUpload, setTriggerMediaUpload] = useState(false);
 
   const fullname = user?.user_metadata?.full_name;
-  const abbr = getInitials(fullname || "User");
 
-  const handleQuickAction = (type: PostKind) => {
+  const handleQuickAction = (type: PostKind, isMedia = false) => {
     setSelectedPostType(type);
+    setTriggerMediaUpload(isMedia);
     setIsComposerOpen(true);
   };
 
   const handleOpenComposer = () => {
     setSelectedPostType("post");
+    setTriggerMediaUpload(false);
     setIsComposerOpen(true);
   };
 
@@ -54,7 +55,7 @@ const NewPost = () => {
 
         <div className="flex-center mt-2 w-full">
           {quickActions.map((action) => {
-            const { icon: Icon, text, color, type, href } = action;
+            const { icon: Icon, text, color, type, href, isMedia } = action;
 
             if (href) {
               return (
@@ -77,7 +78,7 @@ const NewPost = () => {
                 variant="ghost"
                 className="w-full whitespace-normal"
                 key={text}
-                onClick={() => handleQuickAction(type)}
+                onClick={() => handleQuickAction(type, isMedia)}
               >
                 <Icon className={`mr-2 ${color}`} />
                 <span className="hidden sm:inline-block">{text}</span>
@@ -91,6 +92,8 @@ const NewPost = () => {
         open={isComposerOpen}
         onOpenChange={setIsComposerOpen}
         initialType={selectedPostType}
+        triggerMediaUpload={triggerMediaUpload}
+        onMediaUploadTriggered={() => setTriggerMediaUpload(false)}
       />
     </>
   );
@@ -103,7 +106,8 @@ const quickActions = [
     icon: Image,
     text: "Media",
     color: "text-blue-400",
-    type: "post" as PostKind
+    type: "post" as PostKind,
+    isMedia: true
   },
   {
     icon: BriefcaseBusiness,

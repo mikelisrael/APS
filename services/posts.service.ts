@@ -4,6 +4,16 @@ export type PostKind = "post" | "article" | "event";
 export type InteractionKind = "like" | "share";
 export type RsvpStatus = "attending" | "interested" | "not_going";
 
+export interface PostAttachment {
+  id: string;
+  post_id: string;
+  file_url: string;
+  file_type: string;
+  file_size: number;
+  metadata: any;
+  uploaded_at: string;
+}
+
 export interface Post {
   id: string;
   kind: PostKind;
@@ -17,6 +27,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   share_count: number;
+  attachments?: PostAttachment[];
   author?: {
     id: string;
     full_name: string;
@@ -66,6 +77,7 @@ export interface CreatePostData {
   title?: string;
   event_date?: string;
   reference_text?: string;
+  images?: File[];
 }
 
 export interface UpdatePostData {
@@ -74,6 +86,89 @@ export interface UpdatePostData {
   event_date?: string;
   reference_text?: string;
 }
+
+// Helper function to delete attachments from storage
+const deletePostAttachmentsFromStorage = async (
+  attachments: PostAttachment[]
+): Promise<void> => {
+  if (!attachments || attachments.length === 0) return;
+
+  const supabase = createClient();
+
+  const filePaths = attachments
+    .map((attachment) => {
+      try {
+        const url = new URL(attachment.file_url);
+        const pathParts = url.pathname.split("/post-attachments/");
+        return pathParts[1];
+      } catch (error) {
+        console.error(
+          "Error parsing attachment URL:",
+          attachment.file_url,
+          error
+        );
+        return null;
+      }
+    })
+    .filter(Boolean) as string[];
+
+  if (filePaths.length === 0) return;
+
+  const { error } = await supabase.storage
+    .from("post-attachments")
+    .remove(filePaths);
+
+  if (error) {
+    console.error("Error deleting attachments from storage:", error);
+    throw error;
+  }
+};
+
+// Helper function to upload post attachment
+const uploadPostAttachment = async (
+  postId: string,
+  file: File
+): Promise<PostAttachment> => {
+  const supabase = createClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not authenticated");
+
+  // Upload file to storage
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${user.id}/${postId}/${Date.now()}.${fileExt}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from("post-attachments")
+    .upload(fileName, file);
+
+  if (uploadError) throw uploadError;
+
+  // Get public URL
+  const {
+    data: { publicUrl }
+  } = supabase.storage.from("post-attachments").getPublicUrl(fileName);
+
+  // Save attachment record
+  const { data: attachment, error: attachmentError } = await supabase
+    .from("post_attachments")
+    .insert({
+      post_id: postId,
+      file_url: publicUrl,
+      file_type: file.type,
+      file_size: file.size,
+      metadata: {}
+    })
+    .select()
+    .single();
+
+  if (attachmentError) throw attachmentError;
+
+  return attachment;
+};
 
 // Get paginated posts
 export const getPosts = async (
@@ -97,7 +192,8 @@ export const getPosts = async (
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+      attachments:post_attachments!post_attachments_post_id_fkey(*)
     `,
       { count: "exact" }
     )
@@ -110,7 +206,10 @@ export const getPosts = async (
 
   const { data: posts, error, count } = await query;
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching posts:", error);
+    throw error;
+  }
 
   // Get user interactions for these posts
   const postIds = posts?.map((p) => p.id) || [];
@@ -195,7 +294,8 @@ export const getPost = async (postId: string): Promise<Post> => {
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+      attachments:post_attachments!post_attachments_post_id_fkey(*)
     `
     )
     .eq("id", postId)
@@ -254,10 +354,12 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
 
   if (!user) throw new Error("Not authenticated");
 
+  const { images, ...postData } = data;
+
   const { data: post, error } = await supabase
     .from("posts")
     .insert({
-      ...data,
+      ...postData,
       created_by: user.id
     })
     .select(
@@ -270,8 +372,35 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
 
   if (error) throw error;
 
+  // Upload images if provided
+  if (images && images.length > 0) {
+    await Promise.all(
+      images.map((file) => uploadPostAttachment(post.id, file))
+    );
+
+    // Fetch the post again with attachments
+    const { data: postWithAttachments } = await supabase
+      .from("posts")
+      .select(
+        `
+        *,
+        author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+        attachments:post_attachments!post_attachments_post_id_fkey(*)
+      `
+      )
+      .eq("id", post.id)
+      .single();
+
+    return {
+      ...postWithAttachments,
+      user_interaction: { liked: false, reposted: false, shared: false },
+      user_rsvp: null
+    };
+  }
+
   return {
     ...post,
+    attachments: [],
     user_interaction: { liked: false, reposted: false, shared: false },
     user_rsvp: null
   };
@@ -298,7 +427,8 @@ export const updatePost = async (
     .select(
       `
       *,
-      author:users!posts_created_by_fkey(id, full_name, avatar_url)
+      author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+      attachments:post_attachments!post_attachments_post_id_fkey(*)
     `
     )
     .single();
@@ -318,13 +448,34 @@ export const deletePost = async (postId: string): Promise<void> => {
 
   if (!user) throw new Error("Not authenticated");
 
-  const { error } = await supabase
+  // First, fetch the post with its attachments
+  const { data: post, error: fetchError } = await supabase
+    .from("posts")
+    .select(
+      `
+      id,
+      attachments:post_attachments!post_attachments_post_id_fkey(*)
+    `
+    )
+    .eq("id", postId)
+    .eq("created_by", user.id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // Delete attachments from storage if they exist
+  if (post?.attachments && post.attachments.length > 0) {
+    await deletePostAttachmentsFromStorage(post.attachments);
+  }
+
+  // Delete the post (CASCADE will delete post_attachments records)
+  const { error: deleteError } = await supabase
     .from("posts")
     .delete()
     .eq("id", postId)
     .eq("created_by", user.id);
 
-  if (error) throw error;
+  if (deleteError) throw deleteError;
 };
 
 // Toggle interaction (like, repost, share)

@@ -23,21 +23,30 @@ import {
   CalendarPlus,
   Globe,
   Image as ImageIcon,
-  Newspaper
+  Newspaper,
+  X
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface PostComposerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialType?: PostKind;
+  triggerMediaUpload?: boolean;
+  onMediaUploadTriggered?: () => void;
 }
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES = 4;
 
 const PostComposer = ({
   open,
   onOpenChange,
-  initialType = "post"
+  initialType = "post",
+  triggerMediaUpload = false,
+  onMediaUploadTriggered
 }: PostComposerProps) => {
   const { user } = useAuth();
   const { mutate: createPost, isPending } = useCreatePost();
@@ -47,7 +56,12 @@ const PostComposer = ({
   const [eventDate, setEventDate] = useState("");
   const [hasContent, setHasContent] = useState(false);
   const [charCount, setCharCount] = useState(0);
-
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   const fullname = user?.user_metadata?.full_name;
   const abbr = fullname
     ? fullname
@@ -93,6 +107,124 @@ const PostComposer = ({
     setPostType(initialType);
   }, [initialType]);
 
+  // Trigger media upload when the Media button is clicked
+  useEffect(() => {
+    if (!triggerMediaUpload || !open) return;
+
+    // Wait for next tick to ensure the dialog is mounted
+    const timer = setTimeout(() => {
+      const fileInput = document.getElementById("post-image-input");
+      if (fileInput instanceof HTMLInputElement) {
+        fileInput.click();
+        // Delay the reset callback to ensure the file dialog opens
+        setTimeout(() => {
+          onMediaUploadTriggered?.();
+        }, 100);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [triggerMediaUpload, open, onMediaUploadTriggered]);
+
+  // Generate image previews
+  useEffect(() => {
+    const newPreviews: { [key: string]: string } = {};
+
+    images.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          newPreviews[`${index}-${file.name}`] = e.target.result as string;
+          setImagePreviews((prev) => ({ ...prev, ...newPreviews }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    return () => {
+      Object.values(imagePreviews).forEach((preview) => {
+        if (preview.startsWith("blob:")) {
+          URL.revokeObjectURL(preview);
+        }
+      });
+    };
+  }, [images]);
+
+  const validateFile = (file: File): boolean => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed");
+      return false;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`${file.name} exceeds 5MB limit`);
+      return false;
+    }
+    return true;
+  };
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files) return;
+
+    const validFiles: File[] = [];
+    Array.from(files).forEach((file) => {
+      if (validateFile(file)) {
+        validFiles.push(file);
+      }
+    });
+
+    const remainingSlots = MAX_IMAGES - images.length;
+    if (validFiles.length > remainingSlots) {
+      toast.error(`You can only add ${remainingSlots} more image(s)`);
+      setImages((prev) => [...prev, ...validFiles.slice(0, remainingSlots)]);
+    } else {
+      setImages((prev) => [...prev, ...validFiles]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const file = images[index];
+    const previewKey = `${index}-${file.name}`;
+    setImagePreviews((prev) => {
+      const newPreviews = { ...prev };
+      delete newPreviews[previewKey];
+      return newPreviews;
+    });
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+
+    const files = e.dataTransfer.files;
+    handleFileSelect(files);
+  };
+
   const handleReset = () => {
     editor?.commands.clearContent();
     setTitle("");
@@ -100,6 +232,8 @@ const PostComposer = ({
     setHasContent(false);
     setCharCount(0);
     setPostType("post");
+    setImages([]);
+    setImagePreviews({});
   };
 
   const handleClose = () => {
@@ -127,8 +261,8 @@ const PostComposer = ({
       return;
     }
 
-    if (!content && postType === "post") {
-      toast.error("Post content is required");
+    if (!content && postType === "post" && images.length === 0) {
+      toast.error("Post content or images are required");
       return;
     }
 
@@ -138,7 +272,8 @@ const PostComposer = ({
         kind: postType,
         content: content || undefined,
         title: title || undefined,
-        event_date: eventDate || undefined
+        event_date: eventDate || undefined,
+        images: images.length > 0 ? images : undefined
       },
       {
         onSuccess: () => {
@@ -163,7 +298,6 @@ const PostComposer = ({
   const isSubmitDisabled = () => {
     if (isPending) return true;
 
-    // For article or event, title and content are required.
     if (postType === "article" || postType === "event") {
       if (postType === "event" && !eventDate) {
         return true;
@@ -171,11 +305,20 @@ const PostComposer = ({
       return !title || !hasContent;
     }
 
-    return !hasContent;
+    return !hasContent && images.length === 0;
   };
 
   return (
     <>
+      <input
+        id="post-image-input"
+        type="file"
+        multiple
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => handleFileSelect(e.target.files)}
+        disabled={isPending || images.length >= MAX_IMAGES}
+      />
       <style jsx global>{`
         .ProseMirror p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
@@ -265,7 +408,7 @@ const PostComposer = ({
             </Select>
           </div>
 
-          {/* Dynamic Fields based on Post Type */}
+          {/* Dynamic Fields */}
           <AnimatePresence mode="wait">
             {(postType === "article" || postType === "event") && (
               <motion.div
@@ -313,18 +456,85 @@ const PostComposer = ({
             )}
           </AnimatePresence>
 
-          {/* TipTap Editor */}
+          {/* TipTap Editor with Drag & Drop */}
           <div className="space-y-2">
             <Label>
               Content
-              {postType === "post" && (
+              {postType === "post" && images.length === 0 && (
                 <span className="text-destructive">*</span>
               )}
             </Label>
-            <div className="rounded-lg border">
+            <div
+              className={`relative rounded-lg border ${
+                isDragging ? "ring-2 ring-primary" : ""
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
               <EditorContent editor={editor} />
+              <AnimatePresence>
+                {isDragging && (
+                  <motion.div
+                    className="flex-center absolute inset-0 bg-primary/10 p-4 backdrop-blur-sm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <p className="text-sm font-medium text-primary">
+                      Drop images here
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
+
+          {/* Image Previews */}
+          <AnimatePresence>
+            {images.length > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  {images.map((file, index) => {
+                    const previewKey = `${index}-${file.name}`;
+                    const previewUrl = imagePreviews[previewKey];
+
+                    return (
+                      <motion.div
+                        key={previewKey}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        className="group relative aspect-square overflow-hidden rounded-lg border"
+                      >
+                        {previewUrl && (
+                          <Image
+                            src={previewUrl}
+                            alt={file.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                        <button
+                          onClick={() => removeImage(index)}
+                          className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+                          disabled={isPending}
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Helper Text */}
           <motion.div
@@ -357,10 +567,16 @@ const PostComposer = ({
               variant="ghost"
               size="sm"
               className="gap-2"
-              disabled={isPending}
+              disabled={isPending || images.length >= MAX_IMAGES}
+              onClick={() =>
+                document.getElementById("post-image-input")?.click()
+              }
             >
               <ImageIcon className="h-4 w-4" />
-              <span>Add media</span>
+              <span>
+                Add images{" "}
+                {images.length > 0 && `(${images.length}/${MAX_IMAGES})`}
+              </span>
             </Button>
           </div>
         </div>

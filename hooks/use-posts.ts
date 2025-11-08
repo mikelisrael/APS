@@ -448,14 +448,12 @@ export const useRemoveRsvp = () => {
   });
 };
 
-// Real-time subscription for posts - PROPERLY FIXED
 export const usePostsSubscription = (kind?: PostKind) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Get current user for filtering interactions
     let currentUserId: string | null = null;
     supabase.auth.getUser().then(({ data: { user } }) => {
       currentUserId = user?.id || null;
@@ -478,14 +476,14 @@ export const usePostsSubscription = (kind?: PostKind) => {
             .select(
               `
               *,
-              author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
+              author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+              attachments:post_attachments(*)
             `
             )
             .eq("id", payload.new.id)
             .single();
 
           if (fullPost && currentUserId) {
-            // Get user interactions
             const { data: interactions } = await supabase
               .from("interactions")
               .select("kind")
@@ -551,14 +549,14 @@ export const usePostsSubscription = (kind?: PostKind) => {
             .select(
               `
               *,
-              author:users!posts_created_by_fkey(id, full_name, avatar_url, username)
+              author:users!posts_created_by_fkey(id, full_name, avatar_url, username),
+              attachments:post_attachments(*)
             `
             )
             .eq("id", payload.new.id)
             .single();
 
           if (fullPost) {
-            // Get user interactions
             const { data: interactions } = await supabase
               .from("interactions")
               .select("kind")
@@ -584,7 +582,6 @@ export const usePostsSubscription = (kind?: PostKind) => {
               user_rsvp: fullPost.kind === "event" ? null : undefined
             };
 
-            // Update all posts queries
             queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
               if (!old?.pages) return old;
 

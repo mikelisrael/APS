@@ -43,6 +43,7 @@ import {
   Ellipsis,
   Flag,
   Loader2,
+  LoaderCircle,
   MessageCircle,
   Newspaper,
   Send,
@@ -55,6 +56,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CommentInput from "./comment-input";
 import CommentItem from "./comment-item";
+import ImageLightbox from "./image-light-box";
+import PostImageGrid from "./post-image-grid";
 
 interface PostDetailProps {
   postId: string;
@@ -67,7 +70,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   const { data: comments, isLoading: commentsLoading } =
     usePostComments(postId);
   const { mutate: deletePost } = useDeletePost();
-  const { mutate: toggleInteraction } = useToggleInteraction();
+  const { mutate: toggleInteraction, isPending } = useToggleInteraction();
   const { mutate: createComment, isPending: isCreatingComment } =
     useCreateComment();
   const { mutate: deleteComment } = useDeleteComment();
@@ -79,6 +82,8 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   } | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Subscribe to real-time comment updates
   usePostCommentsSubscription(postId);
@@ -107,7 +112,6 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   };
 
   const handleSubmitComment = (content: string, parentCommentId?: string) => {
-    // Clear reply state immediately when submitting
     if (replyingTo) {
       setReplyingTo(null);
     }
@@ -138,6 +142,11 @@ const PostDetail = ({ postId }: PostDetailProps) => {
       setShowDeleteDialog(false);
       setCommentToDelete(null);
     }
+  };
+
+  const handleImageClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   if (isLoading) {
@@ -211,6 +220,17 @@ const PostDetail = ({ postId }: PostDetailProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Lightbox */}
+      {post.attachments && post.attachments.length > 0 && (
+        <ImageLightbox
+          images={post.attachments}
+          initialIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
 
       <div className="mx-auto mt-5 max-w-3xl border-t ~px-2/7 ~py-5/8">
         {/* Header with Back Button */}
@@ -328,6 +348,14 @@ const PostDetail = ({ postId }: PostDetailProps) => {
                     </p>
                   </div>
                 )}
+
+                {/* Image Grid */}
+                {post.attachments && post.attachments.length > 0 && (
+                  <PostImageGrid
+                    attachments={post.attachments}
+                    onImageClick={handleImageClick}
+                  />
+                )}
               </div>
 
               {/* Interaction Stats */}
@@ -343,12 +371,16 @@ const PostDetail = ({ postId }: PostDetailProps) => {
                   )}
                   onClick={(e) => handleInteraction(e, "like")}
                 >
-                  <ThumbsUp
-                    className={cn(
-                      "h-5 w-5",
-                      post.user_interaction?.liked && "fill-blue-500"
-                    )}
-                  />
+                  {isPending ? (
+                    <LoaderCircle className="h-5 w-5 animate-spin text-blue-500" />
+                  ) : (
+                    <ThumbsUp
+                      className={cn(
+                        "h-5 w-5",
+                        post.user_interaction?.liked && "fill-blue-500"
+                      )}
+                    />
+                  )}
                   <span className="font-medium">
                     {formatCount(post.like_count)}
                   </span>
@@ -378,6 +410,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
                       post.user_interaction?.shared && "fill-amber-500"
                     )}
                   />
+
                   <span className="font-medium">
                     {formatCount(post.share_count)}
                   </span>
