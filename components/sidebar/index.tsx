@@ -27,10 +27,12 @@ const Sidebar = () => {
   const isActive = (href: string) => {
     const hrefPath = href.split("?")[0];
 
-    if (hrefPath === "/" && pathname === "/") {
-      return true;
+    // Handle root path and post paths
+    if (hrefPath === "/") {
+      return pathname === "/" || pathname.startsWith("/post");
     }
 
+    // Handle other paths
     if (hrefPath !== "/" && pathname.startsWith(hrefPath)) {
       return true;
     }

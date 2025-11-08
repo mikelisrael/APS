@@ -14,15 +14,10 @@ import {
   LazyMotion,
   useInView
 } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import PostCard from "./post-card";
-import PostDetail from "./post-detail";
 
 const Feed = () => {
-  const searchParams = useSearchParams();
-  const postId = searchParams.get("post");
-
   const {
     data,
     fetchNextPage,
@@ -55,10 +50,6 @@ const Feed = () => {
   const handleDeletePost = (postId: string) => {
     deletePost(postId);
   };
-
-  if (postId) {
-    return <PostDetail postId={postId} />;
-  }
 
   if (isLoading) {
     return (

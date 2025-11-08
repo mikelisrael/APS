@@ -52,20 +52,19 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import CommentInput from "./comment-input";
-import CommentItem from "./comment-item";
-import ImageLightbox from "./image-light-box";
-import PostImageGrid from "./post-image-grid";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import CommentInput from "../../../_components/comment-input";
+import CommentItem from "../../../_components/comment-item";
+import ImageLightbox from "../../../_components/image-light-box";
+import PostImageGrid from "../../../_components/post-image-grid";
 
-interface PostDetailProps {
-  postId: string;
-}
-
-const PostDetail = ({ postId }: PostDetailProps) => {
+const PostDetail = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { ["post-id"]: currentId } = useParams();
+  const postId = currentId as string;
+
   const { data: post, isLoading, isError } = usePost(postId);
   const { data: comments, isLoading: commentsLoading } =
     usePostComments(postId);
@@ -87,14 +86,17 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  useEffect(() => {
+    const dashboardContainer = document.getElementById("dashboardContainer");
+    dashboardContainer?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   // Subscribe to real-time comment updates
   usePostCommentsSubscription(postId);
 
   const handleBack = () => {
     router.back();
   };
-
-  const [showDeletePostDialog, setShowDeletePostDialog] = useState(false);
 
   const handleDelete = () => {
     setDeleteType("post");
@@ -157,7 +159,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
 
   if (isLoading) {
     return (
-      <section className="flex-center mt-5 min-h-[400px] border-t">
+      <section className="flex-center min-h-[400px]">
         <LoaderSpinner />
       </section>
     );
@@ -239,9 +241,9 @@ const PostDetail = ({ postId }: PostDetailProps) => {
         />
       )}
 
-      <div className="mx-auto mt-5 max-w-3xl border-t ~px-2/7 ~py-5/8">
+      <div className="mx-auto max-w-3xl ~px-2/7">
         {/* Header with Back Button */}
-        <div className="mb-2 flex items-center gap-4">
+        <div className="mb-5 flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -250,7 +252,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-bold">Post</h1>
+          <h1 className="text-xl font-bold">Feed</h1>
         </div>
 
         {/* Post Content */}

@@ -70,7 +70,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   };
 
   const handleCardClick = () => {
-    router.push(`?post=${post.id}`);
+    router.push(`/post/${post.id}`);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
