@@ -13,7 +13,13 @@ import { useAuth } from "@/hooks/use-query-resource";
 import { cn, formatCount, formatRelativeTime, getInitials } from "@/lib/utils";
 import { Comment } from "@/services/posts.service";
 import { m } from "framer-motion";
-import { Ellipsis, MessageCircle, ThumbsUp, Trash2 } from "lucide-react";
+import {
+  Ellipsis,
+  LoaderCircle,
+  MessageCircle,
+  ThumbsUp,
+  Trash2
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -31,7 +37,8 @@ const CommentItem = ({
   depth = 0
 }: CommentItemProps) => {
   const { user } = useAuth();
-  const { mutate: toggleInteraction } = useToggleInteraction();
+  const { mutate: toggleInteraction, pendingInteraction } =
+    useToggleInteraction();
   const [showReplies, setShowReplies] = useState(true);
 
   const isOwner = user?.id === comment.created_by;
@@ -137,9 +144,16 @@ const CommentItem = ({
               )}
               onClick={handleLike}
             >
-              <ThumbsUp
-                className={cn("h-4 w-4", comment.user_liked && "fill-blue-500")}
-              />
+              {pendingInteraction === "like" ? (
+                <LoaderCircle className="h-4 w-4 animate-spin text-blue-500" />
+              ) : (
+                <ThumbsUp
+                  className={cn(
+                    "h-4 w-4",
+                    comment.user_liked && "fill-blue-500"
+                  )}
+                />
+              )}
               {comment.like_count > 0 && (
                 <span>{formatCount(comment.like_count)}</span>
               )}

@@ -70,7 +70,8 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   const { data: comments, isLoading: commentsLoading } =
     usePostComments(postId);
   const { mutate: deletePost } = useDeletePost();
-  const { mutate: toggleInteraction, isPending } = useToggleInteraction();
+  const { mutate: toggleInteraction, pendingInteraction } =
+    useToggleInteraction();
   const { mutate: createComment, isPending: isCreatingComment } =
     useCreateComment();
   const { mutate: deleteComment } = useDeleteComment();
@@ -371,7 +372,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
                   )}
                   onClick={(e) => handleInteraction(e, "like")}
                 >
-                  {isPending ? (
+                  {pendingInteraction === "like" ? (
                     <LoaderCircle className="h-5 w-5 animate-spin text-blue-500" />
                   ) : (
                     <ThumbsUp
@@ -404,12 +405,16 @@ const PostDetail = ({ postId }: PostDetailProps) => {
                   )}
                   onClick={(e) => handleInteraction(e, "share")}
                 >
-                  <Send
-                    className={cn(
-                      "h-5 w-5",
-                      post.user_interaction?.shared && "fill-amber-500"
-                    )}
-                  />
+                  {pendingInteraction === "share" ? (
+                    <LoaderCircle className="h-5 w-5 animate-spin text-amber-500" />
+                  ) : (
+                    <Send
+                      className={cn(
+                        "h-5 w-5",
+                        post.user_interaction?.shared && "fill-amber-500"
+                      )}
+                    />
+                  )}
 
                   <span className="font-medium">
                     {formatCount(post.share_count)}

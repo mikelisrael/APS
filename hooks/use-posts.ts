@@ -21,7 +21,7 @@ import {
   UpdatePostData
 } from "@/services/posts.service";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 // Hook for infinite scroll posts
@@ -186,8 +186,10 @@ export const useDeletePost = () => {
 // Hook for toggling interactions with optimistic updates
 export const useToggleInteraction = () => {
   const queryClient = useQueryClient();
+  const [pendingInteraction, setPendingInteraction] =
+    useState<InteractionKind | null>(null);
 
-  return useModifyResource({
+  const mutation = useModifyResource({
     key: ["posts"],
     fn: ({
       targetType,
@@ -197,7 +199,12 @@ export const useToggleInteraction = () => {
       targetType: "post" | "comment";
       targetId: string;
       kind: InteractionKind;
-    }) => toggleInteraction(targetType, targetId, kind),
+    }) => {
+      setPendingInteraction(kind);
+      return toggleInteraction(targetType, targetId, kind).finally(() => {
+        setPendingInteraction(null);
+      });
+    },
     onMutate: async ({ targetType, targetId, kind }) => {
       if (targetType === "post") {
         await queryClient.cancelQueries({ queryKey: ["posts"] });
@@ -255,6 +262,11 @@ export const useToggleInteraction = () => {
       // Silent success - optimistic update already applied
     }
   });
+
+  return {
+    ...mutation,
+    pendingInteraction
+  };
 };
 
 // Hook for fetching post comments

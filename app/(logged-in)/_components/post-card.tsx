@@ -38,8 +38,8 @@ import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import PostImageGrid from "./post-image-grid";
 import ImageLightbox from "./image-light-box";
+import PostImageGrid from "./post-image-grid";
 
 interface PostCardProps {
   post: Post;
@@ -49,7 +49,7 @@ interface PostCardProps {
 const PostCard = ({ post, onDelete }: PostCardProps) => {
   const router = useRouter();
   const { user } = useAuth();
-  const { mutate: toggleInteraction, isPending: isInteractionLoading } =
+  const { mutate: toggleInteraction, pendingInteraction } =
     useToggleInteraction();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -275,7 +275,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
               )}
               onClick={(e) => handleInteraction(e, "like")}
             >
-              {isInteractionLoading ? (
+              {pendingInteraction === "like" ? (
                 <LoaderCircle
                   size={20}
                   className="animate-spin text-blue-500"
@@ -312,12 +312,19 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
               )}
               onClick={(e) => handleInteraction(e, "share")}
             >
-              <Send
-                className={cn(
-                  "size-5",
-                  post.user_interaction?.shared && "fill-amber-500"
-                )}
-              />
+              {pendingInteraction === "share" ? (
+                <LoaderCircle
+                  size={20}
+                  className="animate-spin text-amber-500"
+                />
+              ) : (
+                <Send
+                  className={cn(
+                    "size-5",
+                    post.user_interaction?.shared && "fill-amber-500"
+                  )}
+                />
+              )}
               <span>{formatCount(post.share_count)}</span>
             </m.div>
           </footer>
