@@ -232,7 +232,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
 
             {post.content && (
               <p
-                className="line-clamp-4 whitespace-pre-wrap text-sm"
+                className="line-clamp-5 whitespace-pre-wrap text-sm"
                 style={{
                   overflowWrap: "break-word",
                   wordBreak: "break-word",

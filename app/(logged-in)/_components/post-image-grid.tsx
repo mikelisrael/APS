@@ -1,8 +1,8 @@
 "use client";
 
+import ImageLoader from "@/components/shared/image-loader";
 import { cn } from "@/lib/utils";
 import { PostAttachment } from "@/services/posts.service";
-import Image from "next/image";
 
 interface PostImageGridProps {
   attachments: PostAttachment[];
@@ -14,7 +14,6 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
 
   const imageCount = attachments.length;
 
-  // 🟢 Special Case: Only One Image → Center it with flex
   if (imageCount === 1) {
     const attachment = attachments[0];
     return (
@@ -26,12 +25,10 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
         }}
       >
         <div className="relative max-h-[500px] w-full">
-          <Image
+          <ImageLoader
             src={attachment.file_url}
             alt="Post Image"
-            width={800}
-            height={500}
-            className="mx-auto h-auto w-full object-contain"
+            className="mx-auto h-[500px] w-full object-contain"
             loading="lazy"
           />
         </div>
@@ -45,18 +42,17 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
       case 2:
         return "grid-cols-2";
       case 3:
-        return "grid-cols-2";
+        return "grid-cols-2 h-[400px]";
       case 4:
         return "grid-cols-2 grid-rows-2";
       default:
         return "grid-cols-2";
     }
   };
-
   const getImageClass = (index: number) => {
     if (imageCount === 2) return "col-span-1 aspect-square";
     if (imageCount === 3) {
-      if (index === 0) return "col-span-1 row-span-2 aspect-square";
+      if (index === 0) return "col-span-1 row-span-2 h-full";
       return "col-span-1 aspect-square";
     }
     return "col-span-1 aspect-square";
@@ -81,10 +77,10 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
             onImageClick?.(index);
           }}
         >
-          <Image
+          <ImageLoader
             src={attachment.file_url}
             alt={`Image ${index + 1}`}
-            fill
+            // fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"
