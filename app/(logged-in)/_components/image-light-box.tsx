@@ -4,7 +4,7 @@ import { PostAttachment } from "@/services/posts.service";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface ImageLightboxProps {
   images: PostAttachment[];
@@ -24,6 +24,7 @@ const ImageLightbox = ({
   const currentImage = images[initialIndex];
   const hasPrev = initialIndex > 0;
   const hasNext = initialIndex < images.length - 1;
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -46,6 +47,28 @@ const ImageLightbox = ({
       document.body.style.overflow = "unset";
     };
   }, [isOpen, initialIndex, hasPrev, hasNext, onClose, onNavigate]);
+
+  // Auto-scroll to center the active thumbnail
+  useEffect(() => {
+    if (!thumbnailContainerRef.current) return;
+
+    const container = thumbnailContainerRef.current;
+    const activeThumb = container.children[initialIndex] as HTMLElement;
+
+    if (activeThumb) {
+      const containerWidth = container.offsetWidth;
+      const thumbLeft = activeThumb.offsetLeft;
+      const thumbWidth = activeThumb.offsetWidth;
+
+      // Center the thumbnail
+      const scrollPosition = thumbLeft - containerWidth / 2 + thumbWidth / 2;
+
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: "smooth"
+      });
+    }
+  }, [initialIndex]);
 
   if (!isOpen || !currentImage) return null;
 
@@ -136,34 +159,44 @@ const ImageLightbox = ({
             </div>
           </motion.div>
 
-          {/* Thumbnail Strip (optional, for 3+ images) */}
           {images.length > 2 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-black/50 p-2"
+              className="absolute bottom-4 z-10 w-full max-w-3xl -translate-x-1/2 px-4"
               onClick={(e) => e.stopPropagation()}
             >
-              {images.map((image, index) => (
-                <button
-                  key={image.id}
-                  onClick={() => onNavigate(index)}
-                  className={`relative h-16 w-16 overflow-hidden rounded-lg transition-all ${
-                    index === initialIndex
-                      ? "ring-2 ring-white ring-offset-2 ring-offset-black"
-                      : "opacity-50 hover:opacity-100"
-                  }`}
+              <div className="flex justify-center">
+                <div
+                  ref={thumbnailContainerRef}
+                  className="no-scrollbar flex max-w-full gap-2 overflow-x-auto rounded-2xl bg-black/50 p-2"
+                  style={{
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none"
+                  }}
                 >
-                  <Image
-                    src={image.file_url}
-                    alt={`Thumbnail ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                  />
-                </button>
-              ))}
+                  {images.map((image, index) => (
+                    <button
+                      key={image.id}
+                      onClick={() => onNavigate(index)}
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg transition-all ${
+                        index === initialIndex
+                          ? "ring-2 ring-white ring-offset-2 ring-offset-black"
+                          : "opacity-50 hover:opacity-100"
+                      }`}
+                    >
+                      <Image
+                        src={image.file_url}
+                        alt={`Thumbnail ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
         </motion.div>
