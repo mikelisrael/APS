@@ -40,7 +40,7 @@ const Extras = () => {
 
       <section className="space-y-2 rounded-lg border bg-card p-2">
         {isLoading ? (
-          <div className="py-6">
+          <div className="h-[200px] py-6">
             <LoaderSpinner text="Loading suggestions..." />
           </div>
         ) : safeSuggestions.length > 0 ? (
