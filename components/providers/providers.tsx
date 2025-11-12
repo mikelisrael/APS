@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
+import NoMobileView from "../shared/no-mobile-view";
 import { ContextProvider } from "./context";
 import KeyboardCommandsProvider from "./keyboard-commands-provider";
 import { ThemeProvider } from "./theme-provider";
@@ -18,10 +19,10 @@ export default function Providers({ children }: PropsWithChildren) {
           enableSystem
           disableTransitionOnChange
         >
+          <NoMobileView />
           <KeyboardCommandsProvider>{children}</KeyboardCommandsProvider>
         </ThemeProvider>
       </ContextProvider>
     </QueryClientProvider>
   );
 }
-  
