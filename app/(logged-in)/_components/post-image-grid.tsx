@@ -80,7 +80,6 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
           <ImageLoader
             src={attachment.file_url}
             alt={`Image ${index + 1}`}
-            // fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"

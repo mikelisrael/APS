@@ -18,9 +18,26 @@ export const metadata: Metadata = {
     template: "%s • UICS Connect",
     default: "UICS Connect"
   },
-  description: "Connecting the students and Alumni of the university of ibadan",
+  description:
+    "Connecting the computer science students and Alumni of the university of ibadan",
+  robots: { index: true, follow: true },
+  authors: [{ name: "Michael Israel", url: `https://mikelisrael.vercel.app` }],
+  creator: "Michael Israel",
   formatDetection: {
     telephone: false
+  },
+  openGraph: {
+    type: "website",
+    url: "https://uicsproject.vercel.app/",
+    title: "UICS Connect",
+    siteName: "UICS Connect",
+    description:
+      "Connecting the computer science students and Alumni of the university of ibadan"
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@site",
+    creator: "@creator"
   }
 };
 

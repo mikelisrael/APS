@@ -126,10 +126,14 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                 <div className="flex-between gap-2">
                   <div className="flex grow items-center">
                     {isFileType && (
-                      <File className="size-4.5 mr-1 text-muted-foreground" />
+                      <File className="mr-1 size-4 text-muted-foreground" />
                     )}
                     <span className="line-clamp-1 break-all font-normal text-muted-foreground">
-                      {lastMessage?.content || "No messages yet"}
+                      {lastMessage?.content
+                        ? lastMessage.content
+                        : isFileType
+                          ? "Sent a file"
+                          : "No messages yet"}
                     </span>
                   </div>
                   {chat.unread_count && chat.unread_count > 0 ? (

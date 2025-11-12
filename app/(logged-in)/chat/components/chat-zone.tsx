@@ -446,6 +446,7 @@ const ChatZone: React.FC = () => {
                           return (
                             <ChatBubble
                               key={msg.id}
+                              messageId={msg.id}
                               message={msg.message}
                               time={msg.time}
                               sender={msg.sender}

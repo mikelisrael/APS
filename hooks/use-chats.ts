@@ -54,6 +54,7 @@ export const useChatMessages = (chatId: string) => {
 };
 
 // Hook for sending a message with OPTIMISTIC UPDATES
+// Hook for sending a message with OPTIMISTIC UPDATES
 export const useSendMessage = () => {
   const queryClient = useQueryClient();
 
@@ -85,7 +86,7 @@ export const useSendMessage = () => {
     onMutate: async (variables: any) => {
       if (!variables || !variables.chatId) return;
 
-      const { chatId, content, repliedToId, receiverId } = variables;
+      const { chatId, content, repliedToId, receiverId, attachments } = variables;
 
       // Cancel outgoing refetches
       await queryClient.cancelQueries({
@@ -99,7 +100,7 @@ export const useSendMessage = () => {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Snapshot previous value (SIMPLIFIED KEY)
+      // Snapshot previous value
       const previousMessages = queryClient.getQueryData([
         "chats",
         chatId,
@@ -113,6 +114,18 @@ export const useSendMessage = () => {
           (msg: any) => msg.id === repliedToId
         );
       }
+
+      // Create optimistic attachments from Files
+      const optimisticAttachments = attachments?.map((file: File, index: number) => ({
+        id: `temp-attachment-${Date.now()}-${index}`,
+        message_id: `temp-${Date.now()}`,
+        file_url: URL.createObjectURL(file), // Create blob URL for preview
+        file_type: file.type,
+        file_size: file.size,
+        metadata: { name: file.name },
+        uploaded_at: new Date().toISOString(),
+        _optimistic: true // Flag to identify optimistic attachments
+      })) || [];
 
       // Create optimistic message
       const optimisticMessage = {
@@ -132,7 +145,7 @@ export const useSendMessage = () => {
           full_name: user.user_metadata?.full_name || "You",
           avatar_url: user.user_metadata?.avatar_url || ""
         },
-        attachments: [],
+        attachments: optimisticAttachments,
         replied_to: repliedToMessage
           ? {
               id: repliedToMessage.id,
@@ -143,7 +156,7 @@ export const useSendMessage = () => {
         _optimistic: true
       };
 
-      // Optimistically update messages (SIMPLIFIED KEY)
+      // Optimistically update messages
       queryClient.setQueryData(["chats", chatId, "messages"], (old: any) => [
         ...(old || []),
         optimisticMessage
@@ -152,7 +165,16 @@ export const useSendMessage = () => {
       return { previousMessages, optimisticMessage };
     },
     onError: (error, variables: any, context: any) => {
-      // Rollback on error (SIMPLIFIED KEY)
+      // Cleanup blob URLs if they exist
+      if (context?.optimisticMessage?.attachments) {
+        context.optimisticMessage.attachments.forEach((att: any) => {
+          if (att._optimistic && att.file_url.startsWith('blob:')) {
+            URL.revokeObjectURL(att.file_url);
+          }
+        });
+      }
+
+      // Rollback on error
       if (context?.previousMessages && variables?.chatId) {
         queryClient.setQueryData(
           ["chats", variables.chatId, "messages"],
@@ -162,7 +184,16 @@ export const useSendMessage = () => {
       toast.error(error.message || "Failed to send message");
     },
     onSuccess: (data, variables: any, context: any) => {
-      // Replace optimistic message with real one (SIMPLIFIED KEY)
+      // Cleanup blob URLs
+      if (context?.optimisticMessage?.attachments) {
+        context.optimisticMessage.attachments.forEach((att: any) => {
+          if (att._optimistic && att.file_url.startsWith('blob:')) {
+            URL.revokeObjectURL(att.file_url);
+          }
+        });
+      }
+
+      // Replace optimistic message with real one
       if (variables?.chatId) {
         queryClient.setQueryData(
           ["chats", variables.chatId, "messages"],

@@ -15,8 +15,6 @@ import { cn } from "@/lib/utils";
 import { ChatAttachment } from "@/services/chats.service";
 import { AnimatePresence, m } from "framer-motion";
 import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
-import { useMemo } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { AttachmentPreview } from "./attachment-preview";
 import LinkPreview from "./link-preview";
 
@@ -40,6 +38,7 @@ interface MenuItem {
 }
 
 interface ChatBubbleProps {
+  messageId: string;
   message: string;
   time: string;
   sender: Sender;
@@ -97,6 +96,7 @@ const MessageText = ({ text, isOwn }: { text: string; isOwn: boolean }) => {
 };
 
 const ChatBubble = ({
+  messageId,
   message,
   time,
   sender,
@@ -204,14 +204,14 @@ const ChatBubble = ({
     }
   };
 
-  const stableKey = useMemo(() => uuidv4(), []);
+  // No generated keys here; parent list provides stable keys (msg.id).
 
   return (
     <m.div
+      key={messageId}
       variants={bubbleVariants}
       initial="hidden"
       animate="visible"
-      key={stableKey}
       exit="exit"
       layout
       className={cn(
@@ -221,7 +221,7 @@ const ChatBubble = ({
         isOptimistic && "!opacity-60"
       )}
     >
-      <m.div variants={avatarVariants} key={stableKey}>
+      <m.div variants={avatarVariants}>
         <UserAvatar className="h-8 w-8" src={sender.avatar} alt={sender.name} />
       </m.div>
 
@@ -231,7 +231,6 @@ const ChatBubble = ({
             <AnimatePresence>
               {repliedTo && (
                 <div
-                  key={stableKey}
                   className={cn(
                     "mb-1 flex w-full max-w-[320px] items-start gap-2 border-l-4 px-2",
                     isOwn && "flex-row-reverse border-l-0 border-r-4"
@@ -254,7 +253,6 @@ const ChatBubble = ({
 
             <m.div
               variants={contentVariants}
-              key={stableKey}
               className={cn(
                 "flex max-w-[320px] flex-col",
                 isOwn ? "ml-auto items-end" : "mr-auto items-start"
@@ -278,7 +276,6 @@ const ChatBubble = ({
                 {showName && (
                   <m.div
                     variants={itemVariants}
-                    key={stableKey}
                     className="mb-1 flex items-center gap-2"
                   >
                     <span
@@ -334,11 +331,7 @@ const ChatBubble = ({
                 {/* Attachments - placed before message text */}
                 <AnimatePresence>
                   {attachments && attachments.length > 0 && (
-                    <m.div
-                      variants={itemVariants}
-                      key={stableKey}
-                      className="mb-3 space-y-2"
-                    >
+                    <m.div variants={itemVariants} className="mb-3 space-y-2">
                       {attachments.map((attachment, index) => (
                         <m.div
                           key={attachment.id}
@@ -358,7 +351,7 @@ const ChatBubble = ({
 
                 {/* Link Preview */}
                 {message && (
-                  <m.div variants={itemVariants} key={stableKey}>
+                  <m.div variants={itemVariants}>
                     {!isOptimistic && extractFirstUrl(message) && (
                       <m.div
                         initial={{ opacity: 0, height: 0 }}

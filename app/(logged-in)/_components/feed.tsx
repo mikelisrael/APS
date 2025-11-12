@@ -103,8 +103,8 @@ const Feed = () => {
   return (
     <LazyMotion features={domAnimation}>
       <section className="mt-5 grid gap-5 border-t border-border pt-5 ~px-2/7">
-        <AnimatePresence mode="popLayout">
-          {posts.map((post: Post) => (
+        <AnimatePresence mode="sync">
+          {posts.map((post: Post) => (  
             <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
           ))}
         </AnimatePresence>
