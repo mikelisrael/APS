@@ -44,11 +44,45 @@
   .thin-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    /* scrollbar thumb color */
   }
 
   .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+  }
+
+  /* Add to your global CSS */
+  /* Add to your global CSS */
+  .scrollbar-on-hover {
+    scrollbar-width: thin; /* Firefox - keeps gutter */
+    scrollbar-color: transparent transparent; /* Hidden thumb */
+  }
+
+  .scrollbar-on-hover::-webkit-scrollbar {
+    width: 8px; /* Gutter width */
+  }
+
+  .scrollbar-on-hover::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-on-hover::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  /* Show scrollbar thumb on hover */
+  .scrollbar-on-hover:hover {
+    scrollbar-color: hsl(var(--scrollbar-thumb)) transparent;
+  }
+
+  .scrollbar-on-hover:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--scrollbar-thumb));
+  }
+
+  .scrollbar-on-hover:hover::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--scrollbar-thumb-hover));
   }
 }
 
@@ -79,6 +113,8 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --scrollbar-thumb: 240 4.8% 89.8%;
+    --scrollbar-thumb-hover: 240 4.9% 83.9%;
   }
 
   .dark {
@@ -106,6 +142,8 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --scrollbar-thumb: 240 3.7% 15.9%;
+    --scrollbar-thumb-hover: 240 5.9% 10%;
   }
 }
 

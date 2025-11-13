@@ -35,7 +35,7 @@ const Extras = () => {
   const safeSuggestions = suggestions.filter(isFullUser).slice(0, 4);
 
   return (
-    <aside className="safe-area hidden space-y-5 border-l pl-5 lg:block">
+    <aside className="safe-area scrollbar-on-hover sticky top-0 hidden h-dvh space-y-5 overflow-clip overflow-y-auto border-l pl-5 [scrollbar-color:#e4e4e7] lg:block">
       <Search />
 
       <section className="space-y-2 rounded-lg border bg-card p-2">
