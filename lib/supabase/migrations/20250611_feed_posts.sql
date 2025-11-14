@@ -321,3 +321,26 @@ CREATE TRIGGER trigger_delete_post_attachment_storage
 AFTER DELETE ON post_attachments
 FOR EACH ROW
 EXECUTE FUNCTION delete_post_attachment_storage();
+
+-------------------------------------------
+-- EDIT COMMENT
+
+-- Add is_edited column to comments table
+ALTER TABLE comments 
+ADD COLUMN IF NOT EXISTS is_edited boolean DEFAULT false;
+
+-- Create trigger to set is_edited to true on updates
+CREATE OR REPLACE FUNCTION set_comment_edited()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.content != OLD.content THEN
+    NEW.is_edited = true;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_set_comment_edited
+  BEFORE UPDATE ON comments
+  FOR EACH ROW
+  EXECUTE FUNCTION set_comment_edited();

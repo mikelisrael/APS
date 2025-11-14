@@ -8,20 +8,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useToggleInteraction } from "@/hooks/use-posts";
+import { useToggleInteraction, useUpdateComment } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
 import { cn, formatCount, formatRelativeTime, getInitials } from "@/lib/utils";
 import { Comment } from "@/services/posts.service";
 import { m } from "framer-motion";
 import {
   Ellipsis,
+  Flag,
   LoaderCircle,
   MessageCircle,
+  Pencil,
   ThumbsUp,
   Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 interface CommentItemProps {
   comment: Comment;
@@ -39,10 +43,25 @@ const CommentItem = ({
   const { user } = useAuth();
   const { mutate: toggleInteraction, pendingInteraction } =
     useToggleInteraction();
+  const { mutate: updateComment, isPending: isUpdating } = useUpdateComment();
   const [showReplies, setShowReplies] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   const isOwner = user?.id === comment.created_by;
   const hasReplies = comment.replies && comment.replies.length > 0;
+
+  // Editor for editing comments
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [StarterKit],
+    content: comment.content,
+    editorProps: {
+      attributes: {
+        class:
+          "prose dark:prose-invert prose-sm p-2 focus:outline-none min-h-[30px] max-h-[200px] overflow-y-auto thin-scrollbar border rounded-md"
+      }
+    }
+  });
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,8 +86,54 @@ const CommentItem = ({
     if (onDelete) onDelete(comment.id);
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editor) return;
+    const content = editor.getText().trim();
+    if (!content) return;
+
+    updateComment(
+      { commentId: comment.id, content },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+        }
+      }
+    );
+  };
+
+  const handleCancelEdit = () => {
+    if (editor) {
+      editor.commands.setContent(comment.content);
+    }
+    setIsEditing(false);
+  };
+
   return (
     <div className={cn("space-y-3", depth > 0 && "ml-8 border-l-2 pl-4")}>
+      <style jsx global>{`
+        .thin-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .thin-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .thin-scrollbar::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 3px;
+        }
+
+        .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
+
       <m.div
         layout
         initial={{ opacity: 0, y: 10 }}
@@ -91,13 +156,20 @@ const CommentItem = ({
 
         <div className="flex-1 space-y-2">
           <div className="mb-1 flex items-center justify-between gap-2">
-            <Link
-              href={`/${comment.author?.username}`}
-              className="text-sm font-semibold hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {comment.author?.full_name || "Unknown User"}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${comment.author?.username}`}
+                className="text-sm font-semibold hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {comment.author?.full_name || "Unknown User"}
+              </Link>
+              {comment.is_edited && (
+                <span className="text-xs italic text-muted-foreground">
+                  (Edited)
+                </span>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
@@ -115,70 +187,108 @@ const CommentItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {isOwner && (
-                    <DropdownMenuItem
-                      onClick={handleDelete}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                  {isOwner ? (
+                    <>
+                      <DropdownMenuItem onClick={handleEdit}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleDelete}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem>
+                      <Flag className="mr-2 h-4 w-4" />
+                      Report
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem>Report</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
 
-          <p className="whitespace-pre-wrap text-sm">{comment.content}</p>
-
-          <div className="flex items-center gap-4">
-            <m.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={cn(
-                "flex items-center gap-1 text-sm transition-colors",
-                comment.user_liked
-                  ? "text-blue-500"
-                  : "text-muted-foreground hover:text-blue-400"
-              )}
-              onClick={handleLike}
-            >
-              {pendingInteraction === "like" ? (
-                <LoaderCircle className="h-4 w-4 animate-spin text-blue-500" />
-              ) : (
-                <ThumbsUp
-                  className={cn(
-                    "h-4 w-4",
-                    comment.user_liked && "fill-blue-500"
+          {isEditing ? (
+            <div className="space-y-2">
+              <EditorContent editor={editor} />
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  disabled={isUpdating}
+                >
+                  {isUpdating && (
+                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                />
-              )}
-              {comment.like_count > 0 && (
-                <span>{formatCount(comment.like_count)}</span>
-              )}
-            </m.button>
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancelEdit}
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="whitespace-pre-wrap text-sm">{comment.content}</p>
+          )}
 
-            <m.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
-              onClick={handleReply}
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span>Reply</span>
-            </m.button>
-
-            {hasReplies && (
-              <button
-                className="text-xs font-medium text-muted-foreground hover:text-primary"
-                onClick={() => setShowReplies(!showReplies)}
+          {!isEditing && (
+            <div className="flex items-center gap-4">
+              <m.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  "flex items-center gap-1 text-sm transition-colors",
+                  comment.user_liked
+                    ? "text-blue-500"
+                    : "text-muted-foreground hover:text-blue-400"
+                )}
+                onClick={handleLike}
               >
-                {showReplies ? "Hide" : "Show"} {comment.reply_count}{" "}
-                {comment.reply_count === 1 ? "reply" : "replies"}
-              </button>
-            )}
-          </div>
+                {pendingInteraction === "like" ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin text-blue-500" />
+                ) : (
+                  <ThumbsUp
+                    className={cn(
+                      "h-4 w-4",
+                      comment.user_liked && "fill-blue-500"
+                    )}
+                  />
+                )}
+                {comment.like_count > 0 && (
+                  <span>{formatCount(comment.like_count)}</span>
+                )}
+              </m.button>
+
+              <m.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+                onClick={handleReply}
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span>Reply</span>
+              </m.button>
+
+              {hasReplies && (
+                <button
+                  className="text-xs font-medium text-muted-foreground hover:text-primary"
+                  onClick={() => setShowReplies(!showReplies)}
+                >
+                  {showReplies ? "Hide" : "Show"} {comment.reply_count}{" "}
+                  {comment.reply_count === 1 ? "reply" : "replies"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </m.div>
 

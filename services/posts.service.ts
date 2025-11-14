@@ -52,6 +52,7 @@ export interface Comment {
   depth: number;
   like_count: number;
   reply_count: number;
+  is_edited: boolean; // Add this line
   author?: {
     id: string;
     full_name: string;

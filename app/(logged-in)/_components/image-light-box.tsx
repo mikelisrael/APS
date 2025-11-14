@@ -159,7 +159,7 @@ const ImageLightbox = ({
             </div>
           </motion.div>
 
-          {images.length > 2 && (
+          {images.length > 1 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
