@@ -37,7 +37,7 @@ import {
 import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import ImageLightbox from "./image-light-box";
 import PostImageGrid from "./post-image-grid";
 
@@ -54,6 +54,8 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isPending, startTransition] = useTransition();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const isOwner = user?.id === post.created_by;
 
@@ -70,7 +72,10 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   };
 
   const handleCardClick = () => {
-    router.push(`/post/${post.id}`);
+    setIsNavigating(true);
+    startTransition(() => {
+      router.push(`/post/${post.id}`);
+    });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -146,9 +151,18 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
         transition={{ duration: 0.3 }}
-        className="grid cursor-pointer grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card px-5 pt-5 transition-colors hover:bg-accent/50"
+        className={cn(
+          "relative grid cursor-pointer grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card px-5 pt-5 transition-colors hover:bg-accent/50",
+          (isPending || isNavigating) && "pointer-events-none opacity-60"
+        )}
         onClick={handleCardClick}
       >
+        {(isPending || isNavigating) && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/50">
+            <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+
         <Link
           href={`/${post.author?.username}`}
           onClick={(e) => e.stopPropagation()}
@@ -295,7 +309,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex-center cursor-pointer gap-1 text-sm text-muted-foreground transition-colors hover:text-red-400"
-              onClick={(e) => e.stopPropagation()}
+              onClick={handleCardClick}
             >
               <MessageCircle className="size-5" />
               <span>{formatCount(post.comment_count)}</span>
