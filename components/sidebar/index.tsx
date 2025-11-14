@@ -6,6 +6,7 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { useUserChats } from "@/hooks/use-chats";
+import { usePendingConnectionsCount } from "@/hooks/use-connections";
 import { useAuth } from "@/hooks/use-query-resource";
 import { cn } from "@/lib/utils";
 import Logo from "@/public/main-logo.svg";
@@ -23,6 +24,7 @@ const Sidebar = () => {
   const pathname = usePathname();
   const { user, logout, isLoggingOut } = useAuth();
   const { data: chats } = useUserChats();
+  const { data: pendingConnectionsCount = 0 } = usePendingConnectionsCount();
 
   const isActive = (href: string) => {
     const hrefPath = href.split("?")[0];
@@ -52,13 +54,10 @@ const Sidebar = () => {
       ) || 0;
 
     counts["/chat"] = unreadChatsCount;
-
-    // Add more badge counts here for other routes as needed
-    // counts["/connections"] = someConnectionCount;
-    // counts["/notifications"] = someNotificationCount;
+    counts["/connections?tab=connections"] = pendingConnectionsCount;
 
     return counts;
-  }, [chats]);
+  }, [chats, pendingConnectionsCount]);
 
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";
@@ -73,10 +72,12 @@ const Sidebar = () => {
       </div>
       <ul className="mt-5">
         {navigationItems.map((item, index) => {
-          const { Icon, title, href, showBadge } = item;
-          const isLinkActive = isActive(href);
-          const Component = isLinkActive ? "span" : TransitionLink;
+          const { Icon, title, href, showBadge, dynamicHref } = item;
           const badgeCount = badgeCounts[href] || 0;
+
+          const actualHref = dynamicHref ? dynamicHref(badgeCount) : href;
+          const isLinkActive = isActive(actualHref);
+          const Component = isLinkActive ? "span" : TransitionLink;
           const shouldShowBadge = showBadge && badgeCount > 0 && !isLinkActive;
 
           return (
@@ -87,7 +88,7 @@ const Sidebar = () => {
                   isLinkActive &&
                     "cursor-default font-medium text-primary hover:bg-transparent hover:text-primary"
                 )}
-                href={href}
+                href={actualHref}
               >
                 <div className="relative">
                   <Icon

@@ -21,6 +21,7 @@ interface ConnectionCardProps {
   isAccepting?: boolean;
   isRejecting?: boolean;
   isConnecting?: boolean;
+  isSuccessful?: boolean;
 }
 
 export const ConnectionCard = ({
@@ -32,7 +33,8 @@ export const ConnectionCard = ({
   onConnect,
   isAccepting = false,
   isRejecting = false,
-  isConnecting = false
+  isConnecting = false,
+  isSuccessful = false
 }: ConnectionCardProps) => {
   return (
     <Card className="transition-shadow hover:shadow-md">
@@ -64,7 +66,11 @@ export const ConnectionCard = ({
                   disabled={isAccepting || isRejecting}
                 >
                   <Check className="mr-1 size-4" />
-                  {isAccepting ? "Accepting..." : "Accept"}
+                  {isSuccessful
+                    ? "Connected"
+                    : isAccepting
+                      ? "Accepting..."
+                      : "Accept"}
                 </Button>
                 <Button
                   className="text-xs text-red-500 dark:text-red-600"

@@ -16,6 +16,8 @@ import {
 } from "framer-motion";
 import { useEffect, useRef } from "react";
 import PostCard from "./post-card";
+import emptyAnimation from "@/public/animations/empty ghost.json";
+import Lottie from "lottie-react";
 
 const Feed = () => {
   const {
@@ -89,7 +91,14 @@ const Feed = () => {
 
   if (posts.length === 0) {
     return (
-      <section className="flex-center mt-5 min-h-[400px] border-t">
+      <section className="flex-col-center mt-5 min-h-[400px] border-t">
+        <Lottie
+          animationData={emptyAnimation}
+          loop
+          autoplay
+          style={{ width: 250, height: 250 }}
+        />
+        
         <div className="text-center">
           <p className="text-lg font-semibold">No posts yet</p>
           <p className="text-sm text-muted-foreground">
@@ -104,7 +113,7 @@ const Feed = () => {
     <LazyMotion features={domAnimation}>
       <section className="mt-5 grid gap-5 border-t border-border pt-5 ~px-2/7">
         <AnimatePresence mode="sync">
-          {posts.map((post: Post) => (  
+          {posts.map((post: Post) => (
             <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
           ))}
         </AnimatePresence>

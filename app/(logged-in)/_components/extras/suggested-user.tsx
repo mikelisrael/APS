@@ -51,7 +51,9 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
         onClick={handleConnect}
         disabled={sendRequestMutation.isPending}
       >
-        {sendRequestMutation.isPending ? (
+        {sendRequestMutation.isSuccess ? (
+          "Requested"
+        ) : sendRequestMutation.isPending ? (
           <LoaderCircle size={20} className="animate-spin" />
         ) : (
           "Connect"

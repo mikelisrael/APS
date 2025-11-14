@@ -36,6 +36,21 @@ export const usePendingRequests = () => {
   });
 };
 
+// Hook for fetching pending requests count
+export const usePendingConnectionsCount = () => {
+  return useGetResource({
+    key: ["connections", "pending", "count"],
+    fn: async () => {
+      const pendingRequests = await getPendingRequests();
+      return pendingRequests?.length || 0;
+    },
+    select: (data) => data || 0,
+    onError: (error) => {
+      console.error("Failed to load pending requests count:", error);
+    }
+  });
+};
+
 // Hook for fetching connection suggestions
 export const useConnectionSuggestions = (
   filter?: "undergraduate" | "alumnus"

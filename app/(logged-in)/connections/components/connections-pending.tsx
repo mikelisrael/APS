@@ -119,6 +119,7 @@ const ConnectionsPending = ({
               onReject={() => handleReject(connection.id)}
               isAccepting={acceptMutation.isPending}
               isRejecting={rejectMutation.isPending}
+              isSuccessful={acceptMutation.isSuccess}
             />
           ))}
         </div>

@@ -11,7 +11,8 @@ type NavigationItem = {
   title: string;
   Icon: typeof HomeIcon;
   href: string;
-  showBadge?: boolean; // Add this to identify which items should show badges
+  showBadge?: boolean;
+  dynamicHref?: (count: number) => string; 
 };
 
 export const navigationItems: NavigationItem[] = [
@@ -28,13 +29,16 @@ export const navigationItems: NavigationItem[] = [
   {
     title: "Connections",
     Icon: UsersRound,
-    href: "/connections?tab=connections"
+    href: "/connections?tab=connections",
+    showBadge: true,
+    dynamicHref: (count: number) => 
+      count > 0 ? "/connections?tab=pending" : "/connections?tab=connections"
   },
   {
     title: "Chat",
     Icon: MessageCircle,
     href: "/chat",
-    showBadge: true // Mark chat to show badge
+    showBadge: true 
   },
   {
     title: "Communities",
