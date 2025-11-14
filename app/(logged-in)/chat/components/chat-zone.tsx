@@ -13,6 +13,7 @@ import {
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useAuth } from "@/hooks/use-query-resource";
 import { Chat, ChatAttachment, Message } from "@/services/chats.service";
+import { AnimatePresence, domAnimation, LazyMotion } from "framer-motion";
 import { Loader2, MessageCircle } from "lucide-react";
 import moment from "moment";
 import { useParams, useRouter } from "next/navigation";
@@ -21,7 +22,6 @@ import { toast } from "sonner";
 import ChatBubble from "./chat-bubble";
 import ChatInput from "./chat-input";
 import DateDivider from "./date-divider";
-import { domAnimation, LazyMotion, AnimatePresence } from "framer-motion";
 
 interface Sender {
   name: string;
@@ -385,10 +385,10 @@ const ChatZone: React.FC = () => {
   return (
     <LazyMotion features={domAnimation}>
       <AnimatePresence mode="popLayout">
-        <section className="flex flex-col overflow-hidden border-l text-sm">
+        <section className="flex flex-col overflow-hidden border-x text-sm">
           <div
             ref={scrollContainerRef}
-            className="thin-scrollbar relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
+            className="scrollbar-on-hover relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
           >
             {stickyDate && <DateDivider date={stickyDate} isSticky={true} />}
 
