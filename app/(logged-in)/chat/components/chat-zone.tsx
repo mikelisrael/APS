@@ -385,7 +385,7 @@ const ChatZone: React.FC = () => {
   return (
     <LazyMotion features={domAnimation}>
       <AnimatePresence mode="popLayout">
-        <section className="flex flex-col overflow-hidden border-x text-sm">
+        <section className="flex flex-col overflow-hidden border-l text-sm">
           <div
             ref={scrollContainerRef}
             className="scrollbar-on-hover relative h-[calc(100vh-150px)] flex-1 overflow-y-auto"
