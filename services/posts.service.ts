@@ -526,7 +526,7 @@ export const toggleInteraction = async (
   }
 };
 
-// Get comments for a post - nested structure sorted by most recent activity
+// Get comments for a post - nested structure with intelligent priority
 export const getPostComments = async (postId: string): Promise<Comment[]> => {
   const supabase = createClient();
 
@@ -536,12 +536,24 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
 
   if (!user) throw new Error("Not authenticated");
 
+  // First, get the post to know who the author is
+  const { data: post, error: postError } = await supabase
+    .from("posts")
+    .select("created_by")
+    .eq("id", postId)
+    .single();
+
+  if (postError) throw postError;
+
+  const postAuthorId = post.created_by;
+  const currentUserId = user.id;
+
   const { data: comments, error } = await supabase
     .from("comments")
     .select(
       `
       *,
-      author:users!comments_created_by_fkey(id, full_name, avatar_url)
+      author:users!comments_created_by_fkey(id, full_name, avatar_url, username)
     `
     )
     .eq("post_id", postId)
@@ -605,15 +617,64 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     return mostRecent;
   };
 
-  // Sort top-level comments by most recent activity (including nested replies)
+  // Helper function to calculate engagement score
+  const getEngagementScore = (comment: Comment): number => {
+    return comment.like_count + (comment.reply_count * 2); // Replies weighted more
+  };
+
+  // Sort top-level comments with priority order
   topLevelComments.sort((a, b) => {
+    const aIsCurrentUser = a.created_by === currentUserId;
+    const bIsCurrentUser = b.created_by === currentUserId;
+    const aIsAuthor = a.created_by === postAuthorId;
+    const bIsAuthor = b.created_by === postAuthorId;
+
+    // 1. Priority: Current user's comments first
+    if (aIsCurrentUser && !bIsCurrentUser) return -1;
+    if (!aIsCurrentUser && bIsCurrentUser) return 1;
+
+    // 2. Priority: Post author's comments second
+    if (aIsAuthor && !bIsAuthor) return -1;
+    if (!aIsAuthor && bIsAuthor) return 1;
+
+    // 3. Priority: Sort by engagement (likes + replies)
+    const aEngagement = getEngagementScore(a);
+    const bEngagement = getEngagementScore(b);
+    
+    if (aEngagement !== bEngagement) {
+      return bEngagement - aEngagement; // Higher engagement first
+    }
+
+    // 4. Priority: Most recent activity as tiebreaker
     return getMostRecentTimestamp(b) - getMostRecentTimestamp(a);
   });
 
-  // Sort replies within each parent (newest first)
+  // Sort replies within each parent with same priority system
   const sortReplies = (comment: Comment) => {
     if (comment.replies && comment.replies.length > 0) {
       comment.replies.sort((a, b) => {
+        const aIsCurrentUser = a.created_by === currentUserId;
+        const bIsCurrentUser = b.created_by === currentUserId;
+        const aIsAuthor = a.created_by === postAuthorId;
+        const bIsAuthor = b.created_by === postAuthorId;
+
+        // 1. Current user's replies first
+        if (aIsCurrentUser && !bIsCurrentUser) return -1;
+        if (!aIsCurrentUser && bIsCurrentUser) return 1;
+
+        // 2. Author's replies second
+        if (aIsAuthor && !bIsAuthor) return -1;
+        if (!aIsAuthor && bIsAuthor) return 1;
+
+        // 3. Sort by engagement
+        const aEngagement = getEngagementScore(a);
+        const bEngagement = getEngagementScore(b);
+        
+        if (aEngagement !== bEngagement) {
+          return bEngagement - aEngagement;
+        }
+
+        // 4. Sort by newest first as tiebreaker
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
