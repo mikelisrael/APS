@@ -78,12 +78,30 @@ export async function sendConnectionRequest(
 export async function acceptConnectionRequest(
   connectionId: string
 ): Promise<Connection | null> {
-  const { data, error } = await createClient()
+  const user = await getCurrentUser();
+  const supabase = createClient();
+
+  // First, verify this connection exists and the user is the receiver
+  const { data: connection, error: fetchError } = await supabase
     .from("connections")
-    .update({ status: "accepted" } as UpdateConnection)
-    .eq("id", connectionId)
     .select("*")
-    .single();
+    .eq("id", connectionId)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (!connection) throw new Error("Connection not found");
+  if (connection.receiver_id !== user.id) {
+    throw new Error("You don't have permission to accept this connection");
+  }
+
+  // Now update it
+  const { data, error } = await supabase
+    .from("connections")
+    .update({ status: "accepted" })
+    .eq("id", connectionId)
+    .eq("receiver_id", user.id)
+    .select("*")
+    .maybeSingle();
 
   if (error) throw error;
   return data;
@@ -95,12 +113,30 @@ export async function acceptConnectionRequest(
 export async function rejectConnectionRequest(
   connectionId: string
 ): Promise<Connection | null> {
-  const { data, error } = await createClient()
+  const user = await getCurrentUser();
+  const supabase = createClient();
+
+  // First, verify this connection exists and the user is the receiver
+  const { data: connection, error: fetchError } = await supabase
+    .from("connections")
+    .select("*")
+    .eq("id", connectionId)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (!connection) throw new Error("Connection not found");
+  if (connection.receiver_id !== user.id) {
+    throw new Error("You don't have permission to reject this connection");
+  }
+
+  // Now update it
+  const { data, error } = await supabase
     .from("connections")
     .update({ status: "rejected" } as UpdateConnection)
     .eq("id", connectionId)
+    .eq("receiver_id", user.id)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;

@@ -9,10 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LoaderSpinner } from "@/components/ui/loaders";
 import { useDebounce } from "@/hooks/use-debounce";
-import {
-  useConnectionSuggestions,
-  useSendConnectionRequest
-} from "@/hooks/use-connections";
+import { useConnectionSuggestions } from "@/hooks/use-connections";
 import emptyAnimation from "@/public/animations/empty ghost.json";
 import type { UserProfile } from "@/types/models";
 import Lottie from "lottie-react";
@@ -36,7 +33,6 @@ const ConnectionsSuggestions = () => {
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   const { data: suggestions = [], isLoading } = useConnectionSuggestions();
-  const sendRequestMutation = useSendConnectionRequest();
 
   const filtered = useMemo(() => {
     return filterUsers(suggestions, debouncedQuery, filter);
@@ -45,10 +41,6 @@ const ConnectionsSuggestions = () => {
   const safeSuggestions = useMemo(() => {
     return filtered.filter(isFullUser);
   }, [filtered]);
-
-  const handleConnect = (userId: string) => {
-    sendRequestMutation.mutate(userId);
-  };
 
   if (isLoading) {
     return <LoaderSpinner text="Loading Suggestions..." className="py-10" />;
@@ -105,13 +97,7 @@ const ConnectionsSuggestions = () => {
       ) : (
         <div className="grid duration-300 ~gap-3/5 animate-in fade-in md:grid-cols-2">
           {safeSuggestions.map((user) => (
-            <ConnectionCard
-              key={user.id}
-              user={user}
-              type="suggestion"
-              onConnect={() => handleConnect(user.id)}
-              isConnecting={sendRequestMutation.isPending}
-            />
+            <ConnectionCard key={user.id} user={user} type="suggestion" />
           ))}
         </div>
       )}

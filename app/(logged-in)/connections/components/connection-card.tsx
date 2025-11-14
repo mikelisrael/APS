@@ -4,6 +4,11 @@ import Alumnus from "@/components/shared/alumnus-tag";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  useAcceptConnectionRequest,
+  useRejectConnectionRequest,
+  useSendConnectionRequest
+} from "@/hooks/use-connections";
 import { useMutualConnectionCount } from "@/hooks/use-user-connections";
 import { createClient } from "@/lib/supabase/client";
 import { UserProfile } from "@/types/models";
@@ -15,27 +20,34 @@ interface ConnectionCardProps {
   user: UserProfile;
   type: "pending" | "suggestion";
   connectionId?: string;
-  onAccept?: () => void;
-  onReject?: () => void;
-  onConnect?: () => void;
-  isAccepting?: boolean;
-  isRejecting?: boolean;
-  isConnecting?: boolean;
-  isSuccessful?: boolean;
 }
 
 export const ConnectionCard = ({
   user,
   type,
-  connectionId,
-  onAccept,
-  onReject,
-  onConnect,
-  isAccepting = false,
-  isRejecting = false,
-  isConnecting = false,
-  isSuccessful = false
+  connectionId
 }: ConnectionCardProps) => {
+  // Each card has its own mutation state
+  const acceptMutation = useAcceptConnectionRequest();
+  const rejectMutation = useRejectConnectionRequest();
+  const connectMutation = useSendConnectionRequest();
+
+  const handleAccept = () => {
+    if (connectionId) {
+      acceptMutation.mutate(connectionId);
+    }
+  };
+
+  const handleReject = () => {
+    if (connectionId) {
+      rejectMutation.mutate(connectionId);
+    }
+  };
+
+  const handleConnect = () => {
+    connectMutation.mutate(user.id);
+  };
+
   return (
     <Card className="transition-shadow hover:shadow-md">
       <CardContent className="flex gap-4 py-6">
@@ -62,13 +74,15 @@ export const ConnectionCard = ({
                   className="px-0 text-xs"
                   variant="link"
                   size="sm"
-                  onClick={onAccept}
-                  disabled={isAccepting || isRejecting}
+                  onClick={handleAccept}
+                  disabled={
+                    acceptMutation.isPending || rejectMutation.isPending
+                  }
                 >
                   <Check className="mr-1 size-4" />
-                  {isSuccessful
+                  {acceptMutation.isSuccess
                     ? "Connected"
-                    : isAccepting
+                    : acceptMutation.isPending
                       ? "Accepting..."
                       : "Accept"}
                 </Button>
@@ -76,11 +90,17 @@ export const ConnectionCard = ({
                   className="text-xs text-red-500 dark:text-red-600"
                   variant="link"
                   size="sm"
-                  onClick={onReject}
-                  disabled={isAccepting || isRejecting}
+                  onClick={handleReject}
+                  disabled={
+                    acceptMutation.isPending || rejectMutation.isPending
+                  }
                 >
                   <X className="mr-1 size-4" />
-                  {isRejecting ? "Rejecting..." : "Reject"}
+                  {rejectMutation.isSuccess
+                    ? "Rejected"
+                    : rejectMutation.isPending
+                      ? "Rejecting..."
+                      : "Reject"}
                 </Button>
               </>
             ) : (
@@ -88,11 +108,15 @@ export const ConnectionCard = ({
                 className="px-0 text-xs"
                 variant="link"
                 size="sm"
-                onClick={onConnect}
-                disabled={isConnecting}
+                onClick={handleConnect}
+                disabled={connectMutation.isPending}
               >
                 <UserRoundPlus className="mr-2 h-4 w-4" />
-                {isConnecting ? "Connecting..." : "Connect"}
+                {connectMutation.isSuccess
+                  ? "Requested"
+                  : connectMutation.isPending
+                    ? "Connecting..."
+                    : "Connect"}
               </Button>
             )}
           </div>

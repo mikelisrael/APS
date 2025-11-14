@@ -15,7 +15,7 @@ const ConnectionsClientV2 = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentTab = searchParams.get("tab") || "pending";
+  const currentTab = searchParams.get("tab") || "connections";
 
   const { data: acceptedConnections = [], isLoading: loadingAccepted } =
     useAcceptedConnections();

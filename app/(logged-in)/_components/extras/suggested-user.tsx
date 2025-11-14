@@ -36,7 +36,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
           {user.full_name}
         </h3>
 
-        <div className="flex -translate-y-0.5 items-center gap-1 text-xs">
+        <div className="flex items-center gap-1 text-xs">
           <span className="line-clamp-1 break-all text-muted-foreground">
             @{user.username}
           </span>

@@ -8,10 +8,6 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { LoaderSpinner } from "@/components/ui/loaders";
-import {
-  useAcceptConnectionRequest,
-  useRejectConnectionRequest
-} from "@/hooks/use-connections";
 import emptyAnimation from "@/public/animations/empty ghost.json";
 import { Connection } from "@/types/connection";
 import Lottie from "lottie-react";
@@ -36,20 +32,9 @@ const ConnectionsPending = ({
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  const acceptMutation = useAcceptConnectionRequest();
-  const rejectMutation = useRejectConnectionRequest();
-
   const filteredConnections = useMemo(() => {
     return filterConnections(connections, debouncedQuery, filter);
   }, [connections, debouncedQuery, filter]);
-
-  const handleAccept = (connectionId: string) => {
-    acceptMutation.mutate(connectionId);
-  };
-
-  const handleReject = (connectionId: string) => {
-    rejectMutation.mutate(connectionId);
-  };
 
   if (loading) {
     return (
@@ -115,11 +100,6 @@ const ConnectionsPending = ({
               user={connection.user}
               type="pending"
               connectionId={connection.id}
-              onAccept={() => handleAccept(connection.id)}
-              onReject={() => handleReject(connection.id)}
-              isAccepting={acceptMutation.isPending}
-              isRejecting={rejectMutation.isPending}
-              isSuccessful={acceptMutation.isSuccess}
             />
           ))}
         </div>
