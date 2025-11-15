@@ -121,7 +121,7 @@ export const useAuth = () => {
       return null;
     },
     onSuccess: () => {
-      router.push("/login");
+      window.location.href = "/login";
     },
     onError: (error) => {
       toast.error(error.message || "Failed to logout");
@@ -137,4 +137,3 @@ export const useAuth = () => {
     isLoggingOut: logout.isPending
   };
 };
-
