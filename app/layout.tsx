@@ -1,5 +1,6 @@
 import Providers from "@/components/providers/providers";
 import ThemeColorUpdater from "@/components/shared/theme-color-updater";
+import { SuspenseLoader } from "@/components/ui/loaders";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -59,12 +60,15 @@ export default function RootLayout({
         className={cn("font-sans antialiased ~text-sm/base", poppins.variable)}
         suppressHydrationWarning
       >
-        <ScrollArea className="h-dvh w-full">
-          <Providers>
-            <ThemeColorUpdater />
-            {children}
-          </Providers>
-        </ScrollArea>
+        <SuspenseLoader fullPage>
+          <ScrollArea className="h-dvh w-full">
+            <Providers>
+              <ThemeColorUpdater />
+              {children}
+            </Providers>
+          </ScrollArea>
+        </SuspenseLoader>
+
         <Toaster richColors position="top-center" />
       </body>
     </html>
