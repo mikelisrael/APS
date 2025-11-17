@@ -118,6 +118,7 @@ export const useAuth = () => {
     fn: async () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      window.location.href = "/login";
       return null;
     },
     onSuccess: () => {
