@@ -109,7 +109,9 @@ const SignUpForm = () => {
         setError(result.error);
       } else {
         setSubmitted();
-        toast.success(result?.message || "Account created successfully!");
+        toast.success(result?.message || "Account created successfully!", {
+          duration: Infinity
+        });
         form.reset();
         setUsernameStatus("idle");
         setEmailStatus("idle");
