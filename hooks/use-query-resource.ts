@@ -98,7 +98,9 @@ export const useGetResource = (options: ResourceOptionsProps) => {
 };
 
 export const useAuth = () => {
+  const router = useRouter();
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const { data: user, isLoading } = useGetResource({
     key: ["auth", "user"],
@@ -117,14 +119,22 @@ export const useAuth = () => {
     fn: async () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
+      queryClient.clear();
+
       return null;
     },
     onSuccess: () => {
-      window.location.href = "/login";
+      router.push("/login");
+
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 100);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to logout");
-    }
+    },
+    invalidateAll: false
   });
 
   return {
