@@ -16,11 +16,13 @@ export interface Message {
     id: string;
     full_name: string;
     avatar_url?: string;
+    username?: string;
   };
   receiver?: {
     id: string;
     full_name: string;
     avatar_url?: string;
+    username?: string;
   };
   attachments?: ChatAttachment[];
   replied_to?: Message | null;
@@ -141,7 +143,7 @@ export const getUserChats = async (): Promise<Chat[]> => {
         created_at,
         is_read,
         replied_to_id,
-        sender:users!messages_sender_id_fkey(id, full_name, avatar_url)
+        sender:users!messages_sender_id_fkey(id, full_name, avatar_url, username)
       `
       )
       .in("id", lastMessageIds);
@@ -195,7 +197,7 @@ export const getUserChats = async (): Promise<Chat[]> => {
           `
           user_id,
           joined_at,
-          user:users(id, full_name, avatar_url)
+          user:users(id, full_name, avatar_url, username)
         `
         )
         .eq("chat_id", chat.id)
@@ -298,8 +300,8 @@ export const getChatMessages = async (chatId: string): Promise<Message[]> => {
     .select(
       `
       *,
-      sender:users!messages_sender_id_fkey(id, full_name, avatar_url),
-      receiver:users!messages_receiver_id_fkey(id, full_name, avatar_url),
+      sender:users!messages_sender_id_fkey(id, full_name, avatar_url, username),
+      receiver:users!messages_receiver_id_fkey(id, full_name, avatar_url, username),
       attachments:chat_attachments(*)
     `
     )
@@ -382,8 +384,8 @@ export const sendMessage = async (
     .select(
       `
       *,
-      sender:users!messages_sender_id_fkey(id, full_name, avatar_url),
-      receiver:users!messages_receiver_id_fkey(id, full_name, avatar_url)
+      sender:users!messages_sender_id_fkey(id, full_name, avatar_url, username),
+      receiver:users!messages_receiver_id_fkey(id, full_name, avatar_url, username)
     `
     )
     .single();

@@ -86,7 +86,8 @@ export const useSendMessage = () => {
     onMutate: async (variables: any) => {
       if (!variables || !variables.chatId) return;
 
-      const { chatId, content, repliedToId, receiverId, attachments } = variables;
+      const { chatId, content, repliedToId, receiverId, attachments } =
+        variables;
 
       // Cancel outgoing refetches
       await queryClient.cancelQueries({
@@ -116,16 +117,17 @@ export const useSendMessage = () => {
       }
 
       // Create optimistic attachments from Files
-      const optimisticAttachments = attachments?.map((file: File, index: number) => ({
-        id: `temp-attachment-${Date.now()}-${index}`,
-        message_id: `temp-${Date.now()}`,
-        file_url: URL.createObjectURL(file), // Create blob URL for preview
-        file_type: file.type,
-        file_size: file.size,
-        metadata: { name: file.name },
-        uploaded_at: new Date().toISOString(),
-        _optimistic: true // Flag to identify optimistic attachments
-      })) || [];
+      const optimisticAttachments =
+        attachments?.map((file: File, index: number) => ({
+          id: `temp-attachment-${Date.now()}-${index}`,
+          message_id: `temp-${Date.now()}`,
+          file_url: URL.createObjectURL(file), // Create blob URL for preview
+          file_type: file.type,
+          file_size: file.size,
+          metadata: { name: file.name },
+          uploaded_at: new Date().toISOString(),
+          _optimistic: true // Flag to identify optimistic attachments
+        })) || [];
 
       // Create optimistic message
       const optimisticMessage = {
@@ -143,7 +145,8 @@ export const useSendMessage = () => {
         sender: {
           id: user.id,
           full_name: user.user_metadata?.full_name || "You",
-          avatar_url: user.user_metadata?.avatar_url || ""
+          avatar_url: user.user_metadata?.avatar_url || "",
+          username: user.user_metadata?.username || ""
         },
         attachments: optimisticAttachments,
         replied_to: repliedToMessage
@@ -168,7 +171,7 @@ export const useSendMessage = () => {
       // Cleanup blob URLs if they exist
       if (context?.optimisticMessage?.attachments) {
         context.optimisticMessage.attachments.forEach((att: any) => {
-          if (att._optimistic && att.file_url.startsWith('blob:')) {
+          if (att._optimistic && att.file_url.startsWith("blob:")) {
             URL.revokeObjectURL(att.file_url);
           }
         });
@@ -187,7 +190,7 @@ export const useSendMessage = () => {
       // Cleanup blob URLs
       if (context?.optimisticMessage?.attachments) {
         context.optimisticMessage.attachments.forEach((att: any) => {
-          if (att._optimistic && att.file_url.startsWith('blob:')) {
+          if (att._optimistic && att.file_url.startsWith("blob:")) {
             URL.revokeObjectURL(att.file_url);
           }
         });

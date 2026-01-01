@@ -165,7 +165,8 @@ const ChatZone: React.FC = () => {
       timestamp: msg.created_at,
       sender: {
         name: msg.sender?.full_name || "Unknown",
-        avatar: msg.sender?.avatar_url || ""
+        avatar: msg.sender?.avatar_url || "",
+        username: msg.sender?.username || ""
       },
       isOwn: msg.sender_id === user.id,
       isEdited: msg.is_edited || false,

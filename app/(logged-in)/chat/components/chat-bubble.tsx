@@ -15,12 +15,14 @@ import { cn } from "@/lib/utils";
 import { ChatAttachment } from "@/services/chats.service";
 import { AnimatePresence, m } from "framer-motion";
 import { Copy, Edit, Flag, MoreVertical, Reply, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { AttachmentPreview } from "./attachment-preview";
 import LinkPreview from "./link-preview";
 
 interface Sender {
   name: string;
   avatar: string;
+  username?: string;
 }
 
 interface RepliedMessage {
@@ -222,7 +224,24 @@ const ChatBubble = ({
       )}
     >
       <m.div variants={avatarVariants}>
-        <UserAvatar className="h-8 w-8" src={sender.avatar} alt={sender.name} />
+        {sender.username ? (
+          <Link
+            href={`/${sender.username}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <UserAvatar
+              className="h-8 w-8"
+              src={sender.avatar}
+              alt={sender.name}
+            />
+          </Link>
+        ) : (
+          <UserAvatar
+            className="h-8 w-8"
+            src={sender.avatar}
+            alt={sender.name}
+          />
+        )}
       </m.div>
 
       <ContextMenu>
