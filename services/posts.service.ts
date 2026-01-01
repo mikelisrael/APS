@@ -34,9 +34,8 @@ export interface Post {
     avatar_url?: string;
     username: string;
   };
-  user_interaction?: {
-    liked: boolean;
-  };
+  // flexible shape so we can track liked/shared/etc flags per post
+  user_interaction?: Record<string, boolean>;
   user_rsvp?: RsvpStatus | null;
 }
 
@@ -473,7 +472,7 @@ export const deletePost = async (postId: string): Promise<void> => {
 export const toggleInteraction = async (
   targetType: "post" | "comment",
   targetId: string,
-  kind: "like" // Only like is toggled
+  kind: InteractionKind
 ): Promise<{ action: "added" | "removed" }> => {
   const supabase = createClient();
 
