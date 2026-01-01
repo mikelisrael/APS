@@ -4,10 +4,13 @@ import Alumnus from "@/components/shared/alumnus-tag";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { LoaderSpinner } from "@/components/ui/loaders";
+import { useGetOrCreateChat } from "@/hooks/use-chats";
 import { useConnectionStatus } from "@/hooks/use-connections";
 import { useJobApplications } from "@/hooks/use-job-applications";
-import { MessageCircle, UserPlus, Users } from "lucide-react";
+import { Chat } from "@/services/chats.service";
+import { LoaderCircle, MessageCircle, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ApplicantItemProps {
   applicant: any;
@@ -15,6 +18,7 @@ interface ApplicantItemProps {
 }
 
 const ApplicantItem = ({ applicant, currentUserId }: ApplicantItemProps) => {
+  const router = useRouter();
   const { status, isLoading, sendRequest } = useConnectionStatus(
     applicant.applicant.id
   );
@@ -22,6 +26,17 @@ const ApplicantItem = ({ applicant, currentUserId }: ApplicantItemProps) => {
   const isMutualConnection = status === "accepted";
   const isPending = status === "pending";
   const isCurrentUser = applicant.applicant.id === currentUserId;
+
+  const { mutate: handleStartChat, isPending: isCreatingChat } =
+    useGetOrCreateChat({
+      onSuccess: (chat: Chat) => {
+        router.push(`/chat/${chat.id}`);
+      }
+    });
+
+  const handleMessageClick = () => {
+    handleStartChat(applicant.applicant.id);
+  };
 
   return (
     <li className="flex items-center gap-3 py-3">
@@ -61,11 +76,18 @@ const ApplicantItem = ({ applicant, currentUserId }: ApplicantItemProps) => {
         {!isCurrentUser && (
           <>
             {isMutualConnection ? (
-              <Button variant="default" size="sm" asChild>
-                <Link href={`/chat/${applicant.applicant.username}`}>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleMessageClick}
+                disabled={isCreatingChat}
+              >
+                {isCreatingChat ? (
+                  <LoaderCircle className="mr-1 size-4 animate-spin" />
+                ) : (
                   <MessageCircle className="mr-1 size-4" />
-                  Message
-                </Link>
+                )}
+                {isCreatingChat ? "Loading..." : "Message"}
               </Button>
             ) : (
               <Button
