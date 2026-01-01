@@ -12,6 +12,8 @@ import { useToggleInteraction, useUpdateComment } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
 import { cn, formatCount, formatRelativeTime, getInitials } from "@/lib/utils";
 import { Comment } from "@/services/posts.service";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { m } from "framer-motion";
 import {
   Ellipsis,
@@ -24,8 +26,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 
 interface CommentItemProps {
   comment: Comment;
@@ -155,8 +155,8 @@ const CommentItem = ({
         </Link>
 
         <div className="flex-1 space-y-2">
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+          <div className="mb-1 flex items-start justify-between gap-2">
+            <div className="flex-1">
               <Link
                 href={`/${comment.author?.username}`}
                 className="text-sm font-semibold hover:underline"
@@ -164,11 +164,9 @@ const CommentItem = ({
               >
                 {comment.author?.full_name || "Unknown User"}
               </Link>
-              {comment.is_edited && (
-                <span className="text-xs italic text-muted-foreground">
-                  (Edited)
-                </span>
-              )}
+              <span className="block text-xs text-muted-foreground">
+                @{comment.author?.username || "unknown"}
+              </span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -237,7 +235,14 @@ const CommentItem = ({
               </div>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap text-sm">{comment.content}</p>
+            <p className="whitespace-pre-wrap text-sm">
+              {comment.content}{" "}
+              {comment.is_edited && (
+                <span className="text-xs italic text-muted-foreground">
+                  (Edited)
+                </span>
+              )}
+            </p>
           )}
 
           {!isEditing && (

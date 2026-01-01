@@ -36,7 +36,6 @@ export interface Post {
   };
   user_interaction?: {
     liked: boolean;
-    shared: boolean;
   };
   user_rsvp?: RsvpStatus | null;
 }
@@ -52,7 +51,7 @@ export interface Comment {
   depth: number;
   like_count: number;
   reply_count: number;
-  is_edited: boolean; // Add this line
+  is_edited: boolean;
   author?: {
     id: string;
     full_name: string;
@@ -219,28 +218,24 @@ export const getPosts = async (
   let userRsvps: Record<string, RsvpStatus> = {};
 
   if (postIds.length > 0) {
-    // Fetch interactions - ONLY for current user
+    // Fetch interactions - ONLY for current user, ONLY for likes
     const { data: interactions } = await supabase
       .from("interactions")
       .select("target_id, kind")
       .eq("user_id", user.id)
       .eq("target_type", "post")
+      .eq("kind", "like") // Only fetch likes
       .in("target_id", postIds);
 
     if (interactions) {
       interactions.forEach((int) => {
         if (!userInteractions[int.target_id]) {
           userInteractions[int.target_id] = {
-            liked: false,
-            reposted: false,
-            shared: false
+            liked: false
           };
         }
-        // Only mark as true if THIS user has that interaction
+        // Only mark as true if THIS user has liked
         if (int.kind === "like") userInteractions[int.target_id].liked = true;
-        if (int.kind === "repost")
-          userInteractions[int.target_id].reposted = true;
-        if (int.kind === "share") userInteractions[int.target_id].shared = true;
       });
     }
 
@@ -265,11 +260,9 @@ export const getPosts = async (
   const postsWithInteractions =
     posts?.map((post) => ({
       ...post,
-      // Always default to false - only true if current user has interacted
+      // Always default to false - only true if current user has liked
       user_interaction: userInteractions[post.id] || {
-        liked: false,
-        reposted: false,
-        shared: false
+        liked: false
       },
       user_rsvp: post.kind === "event" ? userRsvps[post.id] || null : null
     })) || [];
@@ -304,25 +297,22 @@ export const getPost = async (postId: string): Promise<Post> => {
 
   if (error) throw error;
 
-  // Get user interactions - ONLY for current user
+  // Get user interactions - ONLY for likes
   const { data: interactions } = await supabase
     .from("interactions")
     .select("kind")
     .eq("user_id", user.id)
     .eq("target_type", "post")
-    .eq("target_id", postId);
+    .eq("target_id", postId)
+    .eq("kind", "like"); // Only fetch likes
 
   const userInteraction = {
-    liked: false,
-    reposted: false,
-    shared: false
+    liked: false
   };
 
-  // Only set to true if THIS user has the interaction
+  // Only set to true if THIS user has liked
   interactions?.forEach((int) => {
     if (int.kind === "like") userInteraction.liked = true;
-    if (int.kind === "repost") userInteraction.reposted = true;
-    if (int.kind === "share") userInteraction.shared = true;
   });
 
   // Get RSVP if event
@@ -394,7 +384,7 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
 
     return {
       ...postWithAttachments,
-      user_interaction: { liked: false, reposted: false, shared: false },
+      user_interaction: { liked: false },
       user_rsvp: null
     };
   }
@@ -402,7 +392,7 @@ export const createPost = async (data: CreatePostData): Promise<Post> => {
   return {
     ...post,
     attachments: [],
-    user_interaction: { liked: false, reposted: false, shared: false },
+    user_interaction: { liked: false },
     user_rsvp: null
   };
 };
@@ -479,11 +469,11 @@ export const deletePost = async (postId: string): Promise<void> => {
   if (deleteError) throw deleteError;
 };
 
-// Toggle interaction (like, repost, share)
+// Toggle interaction (like only)
 export const toggleInteraction = async (
   targetType: "post" | "comment",
   targetId: string,
-  kind: InteractionKind
+  kind: "like" // Only like is toggled
 ): Promise<{ action: "added" | "removed" }> => {
   const supabase = createClient();
 
@@ -526,6 +516,27 @@ export const toggleInteraction = async (
   }
 };
 
+// NEW: Share post (increments share count without toggling)
+export const sharePost = async (postId: string): Promise<void> => {
+  const supabase = createClient();
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not authenticated");
+
+  // Insert a share interaction (can have multiple shares per user)
+  const { error } = await supabase.from("interactions").insert({
+    user_id: user.id,
+    target_type: "post",
+    target_id: postId,
+    kind: "share"
+  });
+
+  if (error) throw error;
+};
+
 // Get comments for a post - nested structure with intelligent priority
 export const getPostComments = async (postId: string): Promise<Comment[]> => {
   const supabase = createClient();
@@ -557,7 +568,7 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     `
     )
     .eq("post_id", postId)
-    .order("created_at", { ascending: false }); // Newest first
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
 
@@ -619,7 +630,7 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
 
   // Helper function to calculate engagement score
   const getEngagementScore = (comment: Comment): number => {
-    return comment.like_count + (comment.reply_count * 2); // Replies weighted more
+    return comment.like_count + comment.reply_count * 2;
   };
 
   // Sort top-level comments with priority order
@@ -629,23 +640,19 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
     const aIsAuthor = a.created_by === postAuthorId;
     const bIsAuthor = b.created_by === postAuthorId;
 
-    // 1. Priority: Current user's comments first
     if (aIsCurrentUser && !bIsCurrentUser) return -1;
     if (!aIsCurrentUser && bIsCurrentUser) return 1;
 
-    // 2. Priority: Post author's comments second
     if (aIsAuthor && !bIsAuthor) return -1;
     if (!aIsAuthor && bIsAuthor) return 1;
 
-    // 3. Priority: Sort by engagement (likes + replies)
     const aEngagement = getEngagementScore(a);
     const bEngagement = getEngagementScore(b);
-    
+
     if (aEngagement !== bEngagement) {
-      return bEngagement - aEngagement; // Higher engagement first
+      return bEngagement - aEngagement;
     }
 
-    // 4. Priority: Most recent activity as tiebreaker
     return getMostRecentTimestamp(b) - getMostRecentTimestamp(a);
   });
 
@@ -658,28 +665,23 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
         const aIsAuthor = a.created_by === postAuthorId;
         const bIsAuthor = b.created_by === postAuthorId;
 
-        // 1. Current user's replies first
         if (aIsCurrentUser && !bIsCurrentUser) return -1;
         if (!aIsCurrentUser && bIsCurrentUser) return 1;
 
-        // 2. Author's replies second
         if (aIsAuthor && !bIsAuthor) return -1;
         if (!aIsAuthor && bIsAuthor) return 1;
 
-        // 3. Sort by engagement
         const aEngagement = getEngagementScore(a);
         const bEngagement = getEngagementScore(b);
-        
+
         if (aEngagement !== bEngagement) {
           return bEngagement - aEngagement;
         }
 
-        // 4. Sort by newest first as tiebreaker
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       });
-      // Recursively sort nested replies
       comment.replies.forEach(sortReplies);
     }
   };

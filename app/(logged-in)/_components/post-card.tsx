@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToggleInteraction } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
+import { useSharePost } from "@/hooks/use-share-post";
 import { cn, formatCount, formatRelativeTime } from "@/lib/utils";
 import { Post } from "@/services/posts.service";
 import { m } from "framer-motion";
@@ -40,6 +41,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import ImageLightbox from "./image-light-box";
 import PostImageGrid from "./post-image-grid";
+import ShareDialog from "./share-dialog";
 
 interface PostCardProps {
   post: Post;
@@ -51,7 +53,9 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const { user } = useAuth();
   const { mutate: toggleInteraction, pendingInteraction } =
     useToggleInteraction();
+  const { mutate: handleShare, isPending: isSharing } = useSharePost();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -59,10 +63,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
 
   const isOwner = user?.id === post.created_by;
 
-  const handleInteraction = (
-    e: React.MouseEvent,
-    kind: "like" | "repost" | "share"
-  ) => {
+  const handleInteraction = (e: React.MouseEvent, kind: "like") => {
     e.stopPropagation();
     toggleInteraction({
       targetType: "post",
@@ -81,6 +82,16 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteDialog(true);
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowShareDialog(true);
+  };
+
+  const handleShareComplete = () => {
+    // Record the share action using the hook
+    handleShare(post.id);
   };
 
   const handleImageClick = (index: number) => {
@@ -133,6 +144,16 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share Dialog */}
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        postId={post.id}
+        postTitle={post.title || undefined}
+        postContent={post.content || undefined}
+        onShareComplete={handleShareComplete}
+      />
 
       {/* Image Lightbox */}
       {post.attachments && post.attachments.length > 0 && (
@@ -318,26 +339,16 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             <m.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={cn(
-                "flex-center cursor-pointer gap-1 text-sm transition-colors",
-                post.user_interaction?.shared
-                  ? "text-amber-500"
-                  : "text-muted-foreground hover:text-amber-400"
-              )}
-              onClick={(e) => handleInteraction(e, "share")}
+              className="flex-center cursor-pointer gap-1 text-sm text-muted-foreground transition-colors hover:text-amber-400"
+              onClick={handleShareClick}
             >
-              {pendingInteraction === "share" ? (
+              {isSharing ? (
                 <LoaderCircle
                   size={20}
                   className="animate-spin text-amber-500"
                 />
               ) : (
-                <Send
-                  className={cn(
-                    "size-5",
-                    post.user_interaction?.shared && "fill-amber-500"
-                  )}
-                />
+                <Send className="size-5" />
               )}
               <span>{formatCount(post.share_count)}</span>
             </m.div>

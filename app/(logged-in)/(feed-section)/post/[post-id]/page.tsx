@@ -29,6 +29,7 @@ import {
   useToggleInteraction
 } from "@/hooks/use-posts";
 import { useAuth } from "@/hooks/use-query-resource";
+import { useSharePost } from "@/hooks/use-share-post";
 import { cn, formatCount, formatRelativeTime } from "@/lib/utils";
 import { Comment } from "@/services/posts.service";
 import {
@@ -58,6 +59,7 @@ import CommentInput from "../../../_components/comment-input";
 import CommentItem from "../../../_components/comment-item";
 import ImageLightbox from "../../../_components/image-light-box";
 import PostImageGrid from "../../../_components/post-image-grid";
+import ShareDialog from "../../../_components/share-dialog";
 
 const PostDetail = () => {
   const router = useRouter();
@@ -74,6 +76,7 @@ const PostDetail = () => {
   const { mutate: createComment, isPending: isCreatingComment } =
     useCreateComment();
   const { mutate: deleteComment } = useDeleteComment();
+  const { mutate: handleShare, isPending: isSharing } = useSharePost();
 
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
@@ -85,6 +88,7 @@ const PostDetail = () => {
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   useEffect(() => {
     const dashboardContainer = document.getElementById("dashboardContainer");
@@ -157,6 +161,15 @@ const PostDetail = () => {
     setLightboxOpen(true);
   };
 
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowShareDialog(true);
+  };
+
+  const handleShareComplete = () => {
+    handleShare(postId);
+  };
+
   if (isLoading) {
     return (
       <section className="flex-center min-h-[400px]">
@@ -208,6 +221,15 @@ const PostDetail = () => {
 
   return (
     <LazyMotion features={domAnimation}>
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        postId={postId}
+        postTitle={post.title || undefined}
+        postContent={post.content || undefined}
+        onShareComplete={handleShareComplete}
+      />
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-sm">
           <AlertDialogHeader>
@@ -275,7 +297,7 @@ const PostDetail = () => {
                   >
                     {post.author?.full_name || "Unknown User"}
                   </Link>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     @{post.author?.username || "unknown"}
                   </p>
                 </div>
@@ -418,9 +440,9 @@ const PostDetail = () => {
                       ? "text-amber-500"
                       : "text-muted-foreground hover:text-amber-400"
                   )}
-                  onClick={(e) => handleInteraction(e, "share")}
+                  onClick={handleShareClick}
                 >
-                  {pendingInteraction === "share" ? (
+                  {isSharing ? (
                     <LoaderCircle className="h-5 w-5 animate-spin text-amber-500" />
                   ) : (
                     <Send
