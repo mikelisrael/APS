@@ -105,12 +105,29 @@ const ChatInput = ({
 
   useEffect(() => {
     if (editor && editingMessage) {
-      editor.commands.setContent(editingMessage.message);
-      editor.commands.focus();
+      // Delay to allow context menu to close first
+      const timer = setTimeout(() => {
+        editor.commands.setContent(editingMessage.message);
+        editor.commands.focus();
+      }, 250);
+
+      return () => clearTimeout(timer);
     } else if (editor && !editingMessage) {
       editor.commands.clearContent();
     }
   }, [editingMessage, editor]);
+
+  // Focus editor when replying
+  useEffect(() => {
+    if (editor && replyingTo) {
+      // Delay focus to allow context menu to close first
+      const timer = setTimeout(() => {
+        editor.commands.focus();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [replyingTo, editor]);
 
   // Generate image previews when attachments change
   useEffect(() => {
@@ -231,6 +248,10 @@ const ChatInput = ({
     if (e.key === "Escape" && editingMessage && onCancelEdit) {
       e.preventDefault();
       onCancelEdit();
+    }
+    if (e.key === "Escape" && replyingTo && onCancelReply) {
+      e.preventDefault();
+      onCancelReply();
     }
   };
 

@@ -206,8 +206,6 @@ const ChatBubble = ({
     }
   };
 
-  // No generated keys here; parent list provides stable keys (msg.id).
-
   return (
     <m.div
       key={messageId}
@@ -279,7 +277,7 @@ const ChatBubble = ({
             >
               <m.div
                 className={cn(
-                  "relative p-4 transition-all",
+                  "relative p-4 transition-all cursor-pointer select-none",
                   isOwn
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground",
@@ -291,6 +289,12 @@ const ChatBubble = ({
                 )}
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  if (onReply && !isOptimistic) {
+                    onReply();
+                  }
+                }}
               >
                 {showName && (
                   <m.div
