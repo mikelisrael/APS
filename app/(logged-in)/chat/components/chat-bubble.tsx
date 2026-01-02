@@ -277,7 +277,7 @@ const ChatBubble = ({
             >
               <m.div
                 className={cn(
-                  "relative p-4 transition-all cursor-pointer select-none",
+                  "relative cursor-pointer select-none p-4 transition-all",
                   isOwn
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground",
