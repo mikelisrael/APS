@@ -140,7 +140,10 @@ const ConnectionListV2 = ({ connections, loading }: ConnectionListV2Props) => {
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   const filteredConnections = useMemo(() => {
-    return filterConnections(connections, debouncedQuery, filter);
+    const filtered = filterConnections(connections, debouncedQuery, filter);
+    return filtered.sort((a, b) =>
+      a.user.full_name.localeCompare(b.user.full_name)
+    );
   }, [connections, debouncedQuery, filter]);
 
   if (loading) {
