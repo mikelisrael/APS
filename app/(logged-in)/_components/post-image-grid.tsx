@@ -69,7 +69,7 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
         <div
           key={attachment.id}
           className={cn(
-            "relative cursor-pointer overflow-hidden bg-muted transition-opacity hover:opacity-90",
+            "relative cursor-pointer overflow-hidden bg-muted",
             getImageClass(index)
           )}
           onClick={(e) => {
