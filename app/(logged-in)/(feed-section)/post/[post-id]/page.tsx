@@ -53,8 +53,6 @@ export async function generateMetadata({
 
     const siteUrl = "https://uicsproject.vercel.app";
     const postUrl = `${siteUrl}/post/${postId}`;
-    // this is how it looks on the address bar when you open a post
-    // https://uicsproject.vercel.app/post/f064128b-2d5d-4ca7-af2c-2b61260ff7b5
 
     return {
       title,
