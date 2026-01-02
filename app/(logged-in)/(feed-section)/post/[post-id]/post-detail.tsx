@@ -1,5 +1,10 @@
 "use client";
 
+import CommentInput from "@/app/(logged-in)/_components/comment-input";
+import CommentItem from "@/app/(logged-in)/_components/comment-item";
+import ImageLightbox from "@/app/(logged-in)/_components/image-light-box";
+import PostImageGrid from "@/app/(logged-in)/_components/post-image-grid";
+import ShareDialog from "@/app/(logged-in)/_components/share-dialog";
 import UserAvatar from "@/components/shared/user-avatar";
 import {
   AlertDialog,
@@ -53,13 +58,8 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import CommentInput from "../../../_components/comment-input";
-import CommentItem from "../../../_components/comment-item";
-import ImageLightbox from "../../../_components/image-light-box";
-import PostImageGrid from "../../../_components/post-image-grid";
-import ShareDialog from "../../../_components/share-dialog";
 
 const PostDetail = () => {
   const router = useRouter();
@@ -179,22 +179,7 @@ const PostDetail = () => {
   }
 
   if (isError || !post) {
-    return (
-      <section className="flex-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-destructive">
-            Failed to load post
-          </p>
-          <p className="text-sm text-muted-foreground">
-            This post may have been deleted or you don&apos;t have permission to
-            view it
-          </p>
-          <Button onClick={handleBack} variant="outline" className="mt-4">
-            Go Back
-          </Button>
-        </div>
-      </section>
-    );
+    notFound();
   }
 
   const isOwner = user?.id === post.created_by;
