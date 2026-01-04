@@ -12,10 +12,10 @@ import {
   Facebook,
   Linkedin,
   Mail,
-  MessageCircle,
-  Twitter,
+  MessageCircle
 } from "lucide-react";
 import { useState } from "react";
+import { FaXTwitter } from "react-icons/fa6";
 import { toast } from "sonner";
 
 interface ShareDialogProps {
@@ -181,7 +181,7 @@ const ShareDialog = ({
                 className="w-full justify-start"
                 onClick={shareToTwitter}
               >
-                <Twitter className="mr-2 h-4 w-4" />
+                <FaXTwitter className="mr-2 h-4 w-4" />
                 Twitter
               </Button>
               <Button
