@@ -5,6 +5,7 @@ import { useAllChatsSubscription, useUserChats } from "@/hooks/use-chats";
 import { useAcceptedConnections } from "@/hooks/use-connections";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Chat } from "@/services/chats.service";
+import { AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
@@ -125,18 +126,20 @@ const ChatsSidebar = () => {
             )}
           </div>
         ) : (
-          filteredChats.map((chat: Chat) => (
-            <SingleChat
-              key={chat.id}
-              chat={chat}
-              onClick={() =>
-                router.replace(`/chat/${chat.id}`, {
-                  scroll: false
-                })
-              }
-              isActive={activeChatId === chat.id}
-            />
-          ))
+          <AnimatePresence mode="popLayout">
+            {filteredChats.map((chat: Chat) => (
+              <SingleChat
+                key={chat.id}
+                chat={chat}
+                onClick={() =>
+                  router.replace(`/chat/${chat.id}`, {
+                    scroll: false
+                  })
+                }
+                isActive={activeChatId === chat.id}
+              />
+            ))}
+          </AnimatePresence>
         )}
       </div>
 

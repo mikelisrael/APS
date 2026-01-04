@@ -13,6 +13,7 @@ import { useDeleteChat } from "@/hooks/use-chats";
 import { formatChatTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { Chat } from "@/services/chats.service";
+import { motion } from "framer-motion";
 import { CircleOff, File, MessageSquare, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -94,7 +95,14 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
     <>
       <ContextMenu>
         <ContextMenuTrigger>
-          <div className="group relative">
+          <motion.div
+            className="group relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            layout
+          >
             <div
               className={cn(
                 `relative flex w-full cursor-pointer items-center gap-3 rounded-md px-2 py-3 hover:bg-accent`,
@@ -144,7 +152,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </ContextMenuTrigger>
         <ContextMenuContent>{contextMenuItems}</ContextMenuContent>
       </ContextMenu>
