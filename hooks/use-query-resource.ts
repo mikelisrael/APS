@@ -7,7 +7,6 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
@@ -98,7 +97,6 @@ export const useGetResource = (options: ResourceOptionsProps) => {
 };
 
 export const useAuth = () => {
-  const router = useRouter();
   const supabase = createClient();
   const queryClient = useQueryClient();
 
@@ -120,16 +118,11 @@ export const useAuth = () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      queryClient.clear();
-
       return null;
     },
     onSuccess: () => {
-      router.push("/login");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 100);
+      queryClient.clear();
+      window.location.reload();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to logout");
