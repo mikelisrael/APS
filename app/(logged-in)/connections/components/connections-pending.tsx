@@ -44,7 +44,7 @@ const ConnectionsPending = ({
 
   return (
     <>
-      <section className="flex-between sticky top-0 bg-background py-5 dark:bg-[#121212]">
+      <section className="flex-between sticky top-0 z-10 bg-background py-5 dark:bg-[#121212]">
         <h2>Pending Requests ({connections.length})</h2>
 
         <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
