@@ -206,6 +206,17 @@ const ChatBubble = ({
     }
   };
 
+  const replyIconVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.15
+      }
+    }
+  };
+
   return (
     <m.div
       key={messageId}
@@ -244,7 +255,23 @@ const ChatBubble = ({
 
       <ContextMenu>
         <ContextMenuTrigger>
-          <div className="flex flex-col">
+          <div className="relative flex flex-col">
+            {/* Hover Reply Icon */}
+            {!isOptimistic && onReply && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReply();
+                }}
+                className={cn(
+                  "absolute top-1/2 z-10 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border bg-background opacity-0 shadow-md transition-all duration-200 hover:scale-110 hover:bg-accent active:scale-95 group-hover:opacity-100",
+                  isOwn ? "-left-10" : "-right-10"
+                )}
+              >
+                <Reply className="h-4 w-4 text-muted-foreground" />
+              </button>
+            )}
+
             <AnimatePresence>
               {repliedTo && (
                 <div

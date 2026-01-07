@@ -57,7 +57,7 @@ const LinkPreview = ({ url, isOwn }: LinkPreviewProps) => {
   }
 
   return (
-    <Card className="mb-2 w-full max-w-[300px] overflow-hidden">
+    <Card className="mb-2 w-[300px] overflow-hidden">
       {metadata?.image && (
         <div className="relative h-32 w-full">
           <Image
