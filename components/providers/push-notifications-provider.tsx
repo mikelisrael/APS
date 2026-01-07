@@ -3,7 +3,7 @@
 import {
   useGlobalChatNotifications,
   useNotificationPermission
-} from "@/hooks/use-notifications";
+} from "@/hooks/use-push-notifications";
 import { PropsWithChildren } from "react";
 
 /**
