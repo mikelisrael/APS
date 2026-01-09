@@ -7,6 +7,7 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
@@ -99,6 +100,7 @@ export const useGetResource = (options: ResourceOptionsProps) => {
 export const useAuth = () => {
   const supabase = createClient();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: user, isLoading } = useGetResource({
     key: ["auth", "user"],
@@ -120,8 +122,15 @@ export const useAuth = () => {
 
       return null;
     },
-    onSuccess: () => {
-      queryClient.clear();
+    onSuccess: async () => {
+      // Remove user from cache immediately
+      queryClient.setQueryData(["auth", "user"], null);
+      // Invalidate all other queries but keep auth state clean
+      await queryClient.invalidateQueries();
+      // Small delay to ensure session is cleared server-side before redirect
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      // router.push("/login");
+      //  window reload
       window.location.reload();
     },
     onError: (error) => {
