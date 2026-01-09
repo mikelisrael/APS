@@ -76,6 +76,12 @@ export async function forgotPassword(email: string) {
   };
 }
 
+export async function serverLogout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
+
 export async function resetPassword(password: string, code: string) {
   const supabase = await createClient();
 

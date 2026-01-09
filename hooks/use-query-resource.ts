@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { serverLogout } from "@/services/auth.service";
 import {
   QueryOptions,
   useMutation,
@@ -7,7 +8,6 @@ import {
   useQueryClient
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
@@ -100,7 +100,6 @@ export const useGetResource = (options: ResourceOptionsProps) => {
 export const useAuth = () => {
   const supabase = createClient();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   const { data: user, isLoading } = useGetResource({
     key: ["auth", "user"],
@@ -117,21 +116,11 @@ export const useAuth = () => {
   const logout = useModifyResource({
     key: ["auth"],
     fn: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      return null;
+      await serverLogout();
     },
-    onSuccess: async () => {
-      // Remove user from cache immediately
-      queryClient.setQueryData(["auth", "user"], null);
-      // Invalidate all other queries but keep auth state clean
-      await queryClient.invalidateQueries();
-      // Small delay to ensure session is cleared server-side before redirect
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      // router.push("/login");
-      //  window reload
-      window.location.reload();
+    onSuccess: () => {
+      // Clear query cache
+      queryClient.clear();
     },
     onError: (error) => {
       toast.error(error.message || "Failed to logout");
