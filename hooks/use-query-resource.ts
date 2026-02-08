@@ -119,7 +119,7 @@ export const useAuth = () => {
       await serverLogout();
     },
     onSuccess: () => {
-      // Clear query cache
+      // Clear query cache  
       queryClient.clear();
     },
     onError: (error) => {
