@@ -1,7 +1,6 @@
 "use client";
 
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
-import TransitionLink from "@/components/shared/transition-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +31,7 @@ import {
   Trash2
 } from "lucide-react";
 import moment from "moment";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -220,7 +220,7 @@ const SingleJob = ({ job, isOwner }: SingleJobProps) => {
         <ContextMenu>
           <ContextMenuTrigger>
             <div className="group relative">
-              <TransitionLink
+              <Link
                 href={`/jobs/${job.slug}`}
                 className="flex-between relative w-full px-6 py-5 transition-colors duration-150 hover:bg-accent"
               >
@@ -281,7 +281,7 @@ const SingleJob = ({ job, isOwner }: SingleJobProps) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </TransitionLink>
+              </Link>
             </div>
           </ContextMenuTrigger>
           <ContextMenuContent>{contextMenuItems}</ContextMenuContent>

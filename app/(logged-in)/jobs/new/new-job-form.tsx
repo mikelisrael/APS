@@ -1,7 +1,7 @@
 "use client";
 
+import AnimatedPage from "@/components/shared/animated-components";
 import RichTextEditor from "@/components/shared/rich-text-editor";
-import TransitionLink from "@/components/shared/transition-link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -24,6 +24,7 @@ import useFormState from "@/hooks/use-form-state";
 import { useAuth, useModifyResource } from "@/hooks/use-query-resource";
 import { createJob } from "@/services/job.service";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -94,7 +95,7 @@ const JobPostForm = () => {
   };
 
   return (
-    <main className="safe-area ~px-2/5">
+    <AnimatedPage className="safe-area ~px-2/5">
       <section className="mb-6">
         <h1 className="page-title !px-0">Post a Job</h1>
         <p className="text-muted-foreground">
@@ -283,12 +284,12 @@ const JobPostForm = () => {
               Post Job
             </SubmitButton>
             <Button type="button" asChild variant="outline" size="lg">
-              <TransitionLink href="/jobs">Cancel</TransitionLink>
+              <Link href="/jobs">Cancel</Link>
             </Button>
           </div>
         </form>
       </Form>
-    </main>
+    </AnimatedPage>
   );
 };
 

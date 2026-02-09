@@ -53,7 +53,6 @@
   }
 
   /* Add to your global CSS */
-  /* Add to your global CSS */
   .scrollbar-on-hover {
     scrollbar-width: thin; /* Firefox - keeps gutter */
     scrollbar-color: transparent transparent; /* Hidden thumb */
@@ -176,19 +175,7 @@
     background: var(--background);
   }
 
-  .main-content {
-    transition-property: opacity, transform, filter, background;
-    transition-duration: 500ms;
-  }
-
   .safe-area {
     @apply py-10;
-  }
-
-  .page-transition {
-    opacity: 0;
-    background: var(--background);
-    transform: translateY(40px);
-    filter: blur(12px);
   }
 }

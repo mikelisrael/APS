@@ -1,7 +1,6 @@
 "use client";
 
 import RichTextEditor from "@/components/shared/rich-text-editor";
-import TransitionLink from "@/components/shared/transition-link";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -30,6 +29,7 @@ import {
 } from "@/hooks/use-query-resource";
 import { getJobBySlug, updateJob } from "@/services/job.service";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -113,7 +113,8 @@ const EditJobForm = () => {
 
   const { mutate: updateJobMutation } = useModifyResource({
     key: ["jobs", slug as string],
-    fn: async (values: JobFormData) => await updateJob(slug as string, { ...values }),
+    fn: async (values: JobFormData) =>
+      await updateJob(slug as string, { ...values }),
     onSuccess: () => {
       setSubmitted();
       toast.success("Job updated successfully!");
@@ -323,7 +324,7 @@ const EditJobForm = () => {
               Update Job
             </SubmitButton>
             <Button type="button" asChild variant="outline" size="lg">
-              <TransitionLink href={`/jobs/${slug}`}>Cancel</TransitionLink>
+              <Link href={`/jobs/${slug}`}>Cancel</Link>
             </Button>
           </div>
         </form>

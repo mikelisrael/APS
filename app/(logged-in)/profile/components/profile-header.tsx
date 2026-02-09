@@ -2,7 +2,6 @@ import Alumnus from "@/components/shared/alumnus-tag";
 import ConnectionCount from "@/components/shared/connection-count";
 import ImageLoader from "@/components/shared/image-loader";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
-import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { useModifyResource } from "@/hooks/use-query-resource";
 import { updateProfilePicture } from "@/services/profile.service";
 import { AuthUserProfile } from "@/types/models";
 import { Camera } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import ProfilePictureUploader from "./profile-picture-uploader";
@@ -70,7 +70,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
 
           <div className="absolute right-10 top-5">
             <Button asChild variant="white" size="sm">
-              <TransitionLink href="/profile/edit">Edit Profile</TransitionLink>
+              <Link href="/profile/edit">Edit Profile</Link>
             </Button>
           </div>
         </CardHeader>

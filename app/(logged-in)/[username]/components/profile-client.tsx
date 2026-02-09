@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedPage from "@/components/shared/animated-components";
 import ProfileConnections from "@/components/shared/profile-connections";
 import { UserProfile } from "@/types/models";
 import ProfileAbout from "./profile-about";
@@ -14,7 +15,7 @@ export interface ProfileClientProps {
 
 const ProfileClient = ({ user }: ProfileClientProps) => {
   return (
-    <main className="safe-area ~space-y-4/5 ~px-2/5">
+    <AnimatedPage className="safe-area ~space-y-4/5 ~px-2/5">
       <ProfileHeader user={user} />
 
       <section className="grid ~gap-4/5 lg:grid-cols-[1fr,280px]">
@@ -29,7 +30,7 @@ const ProfileClient = ({ user }: ProfileClientProps) => {
           <ProfileConnections userId={user?.id as string} />
         </section>
       </section>
-    </main>
+    </AnimatedPage>
   );
 };
 

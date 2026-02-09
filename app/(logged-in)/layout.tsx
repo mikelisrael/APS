@@ -13,7 +13,7 @@ export default function DashboardLayout({
         className="relative mx-auto hidden h-full grid-cols-[auto,1fr] ~px-0/10 sm:max-w-5xl md:grid lg:max-w-[85rem] lg:grid-cols-[auto,1fr] xl:grid-cols-[250px,1fr]"
       >
         <Sidebar />
-        <div className="main-content">{children}</div>
+        <div>{children}</div>
       </div>
     </SuspenseLoader>
   );

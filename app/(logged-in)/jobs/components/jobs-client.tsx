@@ -1,6 +1,5 @@
 "use client";
 
-import TransitionLink from "@/components/shared/transition-link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,8 +18,10 @@ import { getJobs } from "@/services/job.service";
 import { IJob } from "@/types/job";
 import Lottie from "lottie-react";
 import { Filter, Search } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import SingleJob from "./single-job";
+import AnimatedPage from "@/components/shared/animated-components";
 
 const JobsClient = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,11 +85,11 @@ const JobsClient = () => {
   const hasActiveFilters = activeFilterCount < 4;
 
   return (
-    <main className="safe-area ~px-2/5">
+    <AnimatedPage className="safe-area ~px-2/5">
       <section className="flex-between">
         <h1 className="page-title">Jobs</h1>
         <Button asChild>
-          <TransitionLink href="/jobs/new">Post a Job</TransitionLink>
+          <Link href="/jobs/new">Post a Job</Link>
         </Button>
       </section>
 
@@ -212,7 +213,7 @@ const JobsClient = () => {
           </section>
         )}
       </ul>
-    </main>
+    </AnimatedPage>
   );
 };
 

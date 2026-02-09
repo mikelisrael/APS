@@ -1,6 +1,5 @@
 "use client";
 
-import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-query-resource";
@@ -11,6 +10,7 @@ import {
   Image,
   Newspaper
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import PostComposer from "./post-composer";
 
@@ -65,10 +65,10 @@ const NewPost = () => {
                   key={text}
                   asChild
                 >
-                  <TransitionLink href={href}>
+                  <Link href={href}>
                     <Icon className={`mr-2 ${color}`} />
                     <span className="hidden sm:inline-block">{text}</span>
-                  </TransitionLink>
+                  </Link>
                 </Button>
               );
             }

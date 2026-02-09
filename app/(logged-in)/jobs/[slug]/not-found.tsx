@@ -1,6 +1,6 @@
-import TransitionLink from "@/components/shared/transition-link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -13,10 +13,10 @@ export default function NotFound() {
       </div>
 
       <Button variant="ghost" asChild className="flex items-center gap-2">
-        <TransitionLink href="/jobs">
+        <Link href="/jobs">
           <ArrowLeft className="h-4 w-4" />
           Back to Jobs
-        </TransitionLink>
+        </Link>
       </Button>
     </main>
   );

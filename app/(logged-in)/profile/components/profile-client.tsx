@@ -1,5 +1,6 @@
 "use client";
 
+import AnimatedPage from "@/components/shared/animated-components";
 import ProfileConnections from "@/components/shared/profile-connections";
 import { LoaderSpinner } from "@/components/ui/loaders";
 import { useAuth } from "@/hooks/use-query-resource";
@@ -15,7 +16,7 @@ const ProfileClient = () => {
   if (isLoading) return <LoaderSpinner fullPage />;
 
   return (
-    <main className="safe-area ~space-y-4/5 ~px-2/5">
+    <AnimatedPage className="safe-area ~space-y-4/5 ~px-2/5">
       <ProfileHeader user={user} />
 
       <section className="grid ~gap-4/5 lg:grid-cols-[1fr,280px]">
@@ -34,7 +35,7 @@ const ProfileClient = () => {
           <ProfileConnections userId={user?.id as string} />
         </section>
       </section>
-    </main>
+    </AnimatedPage>
   );
 };
 

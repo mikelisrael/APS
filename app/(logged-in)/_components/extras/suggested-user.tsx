@@ -1,13 +1,13 @@
 "use client";
 
 import Alumnus from "@/components/shared/alumnus-tag";
-import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useSendConnectionRequest } from "@/hooks/use-connections";
 import { getInitials } from "@/lib/utils";
 import type { UserProfile } from "@/types/models";
 import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
 
 interface SuggestedUserProps {
   user: UserProfile;
@@ -31,7 +31,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
         fallback={getInitials(user.full_name)}
       />
 
-      <TransitionLink href={`/${user.username}`} className="flex-1 text-left">
+      <Link href={`/${user.username}`} className="flex-1 text-left">
         <h3 className="line-clamp-1 break-all text-sm font-semibold tracking-tight">
           {user.full_name}
         </h3>
@@ -43,7 +43,7 @@ const SuggestedUser: React.FC<SuggestedUserProps> = ({ user }) => {
 
           {isAlumnus && <Alumnus showCircle />}
         </div>
-      </TransitionLink>
+      </Link>
 
       <Button
         variant="link"

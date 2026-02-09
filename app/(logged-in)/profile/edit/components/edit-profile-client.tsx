@@ -2,13 +2,13 @@
 
 import Alumnus from "@/components/shared/alumnus-tag";
 import ImageLoader from "@/components/shared/image-loader";
-import TransitionLink from "@/components/shared/transition-link";
 import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-query-resource";
 import { ArrowLeft, Eye, PenSquare } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import ProfileEditForm from "./profile-edit-form";
 
@@ -46,10 +46,10 @@ const EditProfileClient = () => {
           asChild
           className="flex items-center gap-2 hover:bg-muted"
         >
-          <TransitionLink href="/profile">
+          <Link href="/profile">
             <ArrowLeft className="h-4 w-4" />
             Back to Profile
-          </TransitionLink>
+          </Link>
         </Button>
       </div>
 

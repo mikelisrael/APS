@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ConnectionsListV2 from "./connections-list-v2";
 import ConnectionsPending from "./connections-pending";
 import ConnectionsSuggestions from "./connections-suggestions";
+import AnimatedPage from "@/components/shared/animated-components";
 
 const ConnectionsClientV2 = () => {
   const router = useRouter();
@@ -31,7 +32,7 @@ const ConnectionsClientV2 = () => {
   };
 
   return (
-    <main className="safe-area ~px-2/5">
+    <AnimatedPage className="safe-area ~px-2/5">
       <h1 className="page-title !px-0">Connections</h1>
 
       <div className="mt-10">
@@ -65,7 +66,7 @@ const ConnectionsClientV2 = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </main>
+    </AnimatedPage>
   );
 };
 

@@ -1,3 +1,4 @@
+import AnimatedPage from "@/components/shared/animated-components";
 import {
   Card,
   CardDescription,
@@ -15,7 +16,7 @@ export const metadata = {
 
 const ResetPassword = () => {
   return (
-    <main className="flex-center h-svh">
+    <AnimatedPage className="flex-center h-svh">
       <SuspenseLoader>
         <Card className="mx-4 w-full max-w-sm duration-700 animate-in fade-in-30 slide-in-from-bottom-10">
           <CardHeader className="w-full text-center">
@@ -26,7 +27,7 @@ const ResetPassword = () => {
           <ResetPasswordForm />
         </Card>
       </SuspenseLoader>
-    </main>
+    </AnimatedPage>
   );
 };
 

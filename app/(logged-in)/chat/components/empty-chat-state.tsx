@@ -1,11 +1,12 @@
 "use client";
 
+import AnimatedPage from "@/components/shared/animated-components";
 import emptyAnimation from "@/public/animations/messageLoading.json";
 import Lottie from "lottie-react";
 
 const EmptyChatState = () => {
   return (
-    <div className="flex h-full items-center justify-center border-l px-4 text-sm">
+    <AnimatedPage className="flex h-full items-center justify-center border-l px-4 text-sm">
       <div className="flex max-w-md flex-col items-center text-center">
         <Lottie
           animationData={emptyAnimation}
@@ -24,7 +25,7 @@ const EmptyChatState = () => {
           conversation.
         </p>
       </div>
-    </div>
+    </AnimatedPage>
   );
 };
 

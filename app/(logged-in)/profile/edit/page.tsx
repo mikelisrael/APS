@@ -1,3 +1,4 @@
+import AnimatedPage from "@/components/shared/animated-components";
 import EditProfileClient from "./components/edit-profile-client";
 
 export const metadata = {
@@ -7,9 +8,9 @@ export const metadata = {
 
 const EditProfile = () => {
   return (
-    <main className="safe-area ~px-2/5">
+    <AnimatedPage className="safe-area ~px-2/5">
       <EditProfileClient />
-    </main>
+    </AnimatedPage>
   );
 };
 

@@ -1,3 +1,4 @@
+import AnimatedPage from "@/components/shared/animated-components";
 import { ICON_MAP, NotificationType } from "./icon-map";
 import notifications from "./notifications.json";
 
@@ -10,7 +11,7 @@ interface Notification {
 
 const Notifications = () => {
   return (
-    <main className="safe-area max-w-2xl">
+    <AnimatedPage className="safe-area max-w-2xl">
       <h1 className="page-title">Notifications</h1>
 
       <ul className="mt-8 divide-y">
@@ -32,7 +33,7 @@ const Notifications = () => {
           );
         })}
       </ul>
-    </main>
+    </AnimatedPage>
   );
 };
 

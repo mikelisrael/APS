@@ -1,7 +1,7 @@
 "use client";
 
+import AnimatedPage from "@/components/shared/animated-components";
 import ResponsiveDialog from "@/components/shared/responsive-dialog";
-import TransitionLink from "@/components/shared/transition-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,7 @@ import {
   Trash2
 } from "lucide-react";
 import moment from "moment";
+import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -98,16 +99,16 @@ const JobDetailsClient = () => {
 
   return (
     <>
-      <main className="safe-area space-y-5 duration-500 ~px-2/5 animate-in fade-in">
+      <AnimatedPage className="safe-area space-y-5 duration-500 ~px-2/5 animate-in fade-in">
         <Button
           variant="ghost"
           asChild
           className="flex items-center gap-2 hover:bg-muted"
         >
-          <TransitionLink href="/jobs">
+          <Link href="/jobs">
             <ArrowLeft className="h-4 w-4" />
             Back to Jobs
-          </TransitionLink>
+          </Link>
         </Button>
 
         <Card>
@@ -156,9 +157,9 @@ const JobDetailsClient = () => {
             {isOwner ? (
               <div className="flex gap-3">
                 <Button variant="outline" asChild className="flex-1">
-                  <TransitionLink href={`/jobs/${slug}/edit`}>
+                  <Link href={`/jobs/${slug}/edit`}>
                     Edit Job
-                  </TransitionLink>
+                  </Link>
                 </Button>
 
                 <Button
@@ -205,7 +206,7 @@ const JobDetailsClient = () => {
             />
           </CardContent>
         </Card>
-      </main>
+      </AnimatedPage>
 
       <ResponsiveDialog
         open={openApplyDialog}

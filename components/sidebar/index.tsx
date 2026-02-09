@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 import Logo from "@/public/main-logo.svg";
 import { Chat } from "@/services/chats.service";
 import { Ellipsis } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
-import TransitionLink from "../shared/transition-link";
 import UserAvatar from "../shared/user-avatar";
 import { Button } from "../ui/button";
 import LightDarkSwitch from "./light-dark-switch";
@@ -77,7 +77,7 @@ const Sidebar = () => {
 
           const actualHref = dynamicHref ? dynamicHref(badgeCount) : href;
           const isLinkActive = isActive(actualHref);
-          const Component = isLinkActive ? "span" : TransitionLink;
+          const Component = isLinkActive ? "span" : Link;
           const shouldShowBadge = showBadge && badgeCount > 0 && !isLinkActive;
 
           return (
