@@ -114,7 +114,7 @@ const CommentItem = ({
   };
 
   return (
-    <div className={cn("space-y-3", depth > 0 && "ml-8 border-l-2 pl-4")}>
+    <div className={cn("space-y-3", depth > 0 && "ml-4 border-l-2 pl-2 sm:ml-8 sm:pl-4")}>
       <style jsx global>{`
         .thin-scrollbar::-webkit-scrollbar {
           width: 6px;

@@ -147,7 +147,7 @@ const ImageLightbox = ({
             className="relative flex h-full w-full items-center justify-center p-12"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full -translate-y-5 sm:translate-y-0">
               <Image
                 src={currentImage.file_url}
                 alt={`Image ${initialIndex + 1}`}
@@ -164,7 +164,7 @@ const ImageLightbox = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-20 sm:bottom-4 z-10 w-full max-w-3xl -translate-x-1/2 px-4"
+              className="absolute bottom-28 z-10 w-full max-w-3xl -translate-x-1/2 px-4 sm:bottom-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-center">

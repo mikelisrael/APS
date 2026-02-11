@@ -114,7 +114,7 @@ const NewPost = () => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-20 right-4 z-50 md:hidden"
+            className="fixed bottom-32 right-4 z-50 md:hidden"
           >
             <Button
               onClick={handleOpenComposer}

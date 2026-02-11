@@ -244,7 +244,7 @@ const PostDetail = () => {
         />
       )}
 
-      <div className="mx-auto max-w-3xl ~px-2/7">
+      <div className="mx-auto max-w-3xl px-2 sm:~px-2/7">
         {/* Header with Back Button */}
         <div className="mb-5 flex items-center gap-4">
           <Button
@@ -262,11 +262,11 @@ const PostDetail = () => {
         <motion.article
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-t-lg border-x border-t bg-card px-6 pt-6"
+          className="rounded-t-lg border-x border-t bg-card px-3 pt-4 sm:px-6 sm:pt-6"
         >
           <div className="grid grid-cols-[auto,1fr] gap-3">
             <Link href={`/${post.author?.username}`} className="h-fit">
-              <UserAvatar src={post.author?.avatar_url} className="h-12 w-12" />
+              <UserAvatar src={post.author?.avatar_url} className="h-10 w-10 sm:h-12 sm:w-12" />
             </Link>
 
             <div className="flex-1">
@@ -441,7 +441,7 @@ const PostDetail = () => {
 
         {/* Comments Section */}
         <section className="space-y-6">
-          <div className="rounded-b-lg border bg-card px-6 py-3">
+          <div className="rounded-b-lg border bg-card px-3 py-3 sm:px-6">
             <CommentInput
               onSubmit={handleSubmitComment}
               isPending={isCreatingComment}
@@ -469,7 +469,7 @@ const PostDetail = () => {
                   <motion.div
                     key={comment.id}
                     layout
-                    className="rounded-lg border bg-card p-4"
+                    className="rounded-lg border bg-card p-3 sm:p-4"
                   >
                     <CommentItem
                       comment={comment}

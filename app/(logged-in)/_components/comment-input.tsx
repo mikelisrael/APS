@@ -172,28 +172,30 @@ const CommentInput = ({
       )}
 
       <div
-        className="grid grid-cols-[auto,1fr,auto] gap-2"
+        className="grid grid-cols-[auto,1fr] gap-2 sm:grid-cols-[auto,1fr,auto]"
         id="comment-input-container"
       >
         <UserAvatar
           src={user?.user_metadata?.avatar_url}
           fallback={abbr}
-          className="h-10 w-10"
+          className="h-8 w-8 sm:h-10 sm:w-10"
         />
 
         <div className="relative bg-background" onKeyDown={handleKeyDown}>
           <EditorContent editor={editor} />
         </div>
 
-        <div className="flex h-full items-end justify-end gap-1">
-          {/* Emoji Picker Button */}
+        <div className="col-span-2 flex items-center justify-end gap-1 sm:col-span-1 sm:items-end">
           <EmojiPickerButton
             onEmojiSelect={handleEmojiSelect}
             disabled={isPending}
           />
 
-          <Button onClick={handleSubmit} disabled={!hasContent || isPending}>
-            {isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}{" "}
+          <Button
+            onClick={handleSubmit}
+            disabled={!hasContent || isPending}
+          >
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Reply
           </Button>
         </div>
