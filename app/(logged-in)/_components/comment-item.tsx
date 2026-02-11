@@ -49,6 +49,7 @@ const CommentItem = ({
 
   const isOwner = user?.id === comment.created_by;
   const hasReplies = comment.replies && comment.replies.length > 0;
+  const isOptimistic = (comment as any)._optimistic === true;
 
   // Editor for editing comments
   const editor = useEditor({
@@ -137,10 +138,13 @@ const CommentItem = ({
       <m.div
         layout
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: isOptimistic ? 0.6 : 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
         transition={{ duration: 0.3 }}
-        className="grid grid-cols-[auto,1fr] gap-3"
+        className={cn(
+          "grid grid-cols-[auto,1fr] gap-3",
+          isOptimistic && "pointer-events-none"
+        )}
       >
         <Link
           href={`/${comment.author?.username}`}

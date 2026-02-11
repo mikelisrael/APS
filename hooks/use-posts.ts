@@ -1,6 +1,11 @@
-import { useGetResource, useModifyResource } from "@/hooks/use-query-resource";
+import {
+  useGetResource,
+  useModifyResource,
+  useAuth
+} from "@/hooks/use-query-resource";
 import { createClient } from "@/lib/supabase/client";
 import {
+  Comment,
   createComment,
   createPost,
   CreatePostData,
@@ -283,8 +288,58 @@ export const usePostComments = (postId: string) => {
 };
 
 // Hook for creating a comment - simplified without optimistic updates
+// Helper: Insert reply optimistically into nested comment tree
+const insertReplyOptimistically = (
+  comments: Comment[],
+  parentId: string,
+  newReply: Comment
+): Comment[] => {
+  return comments.map((comment) => {
+    if (comment.id === parentId) {
+      return {
+        ...comment,
+        replies: [newReply, ...(comment.replies || [])],
+        reply_count: comment.reply_count + 1
+      };
+    }
+    if (comment.replies && comment.replies.length > 0) {
+      return {
+        ...comment,
+        replies: insertReplyOptimistically(comment.replies, parentId, newReply)
+      };
+    }
+    return comment;
+  });
+};
+
+// Helper: Replace optimistic comment with real data
+const replaceOptimisticComment = (
+  comments: Comment[],
+  realComment: Comment,
+  optimisticId?: string
+): Comment[] => {
+  return comments.map((comment) => {
+    // Match by temporary ID if provided, or by _optimistic flag + content match
+    const isOptimistic = (comment as any)._optimistic;
+    const matchesId = optimisticId ? comment.id === optimisticId : false;
+    const matchesContent = isOptimistic && comment.content === realComment.content;
+
+    if (matchesId || matchesContent) {
+      return { ...realComment, user_liked: false, replies: comment.replies || [] };
+    }
+    if (comment.replies && comment.replies.length > 0) {
+      return {
+        ...comment,
+        replies: replaceOptimisticComment(comment.replies, realComment, optimisticId)
+      };
+    }
+    return comment;
+  });
+};
+
 export const useCreateComment = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useModifyResource({
     key: ["posts"],
@@ -297,26 +352,105 @@ export const useCreateComment = () => {
       content: string;
       parentCommentId?: string;
     }) => createComment(postId, content, parentCommentId),
-    onSuccess: (data) => {
-      if (!data?.post_id) {
-        console.error("No post_id found in comment data");
+    onMutate: async ({ postId, content, parentCommentId }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["posts", postId, "comments"]
+      });
+
+      // Snapshot the previous value for rollback
+      const previousComments = queryClient.getQueryData([
+        "posts",
+        postId,
+        "comments"
+      ]);
+
+      // Create optimistic comment with unique temp ID
+      const tempId = `temp-${Date.now()}-${Math.random()}`;
+      const optimisticComment: Comment & { _optimistic?: boolean } = {
+        id: tempId,
+        post_id: postId,
+        parent_comment_id: parentCommentId || null,
+        created_by: user?.id || null,
+        content,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        depth: parentCommentId ? 1 : 0,
+        like_count: 0,
+        reply_count: 0,
+        is_edited: false,
+        user_liked: false,
+        replies: [],
+        author: {
+          id: user?.id || "",
+          full_name: user?.user_metadata?.full_name || "You",
+          avatar_url: user?.user_metadata?.avatar_url,
+          username: user?.user_metadata?.username || "you"
+        },
+        _optimistic: true
+      };
+
+      // Optimistically update the comments
+      queryClient.setQueryData(
+        ["posts", postId, "comments"],
+        (old: Comment[] | undefined) => {
+          if (!old) return [optimisticComment];
+
+          if (!parentCommentId) {
+            // Top-level comment - insert at beginning (current user priority)
+            return [optimisticComment, ...old];
+          } else {
+            // Reply - insert into parent's replies array
+            return insertReplyOptimistically(old, parentCommentId, optimisticComment);
+          }
+        }
+      );
+
+      // Return context for rollback including the temp ID
+      return { previousComments, postId, tempId };
+    },
+    onError: (error: any, variables, context: any) => {
+      // Rollback on error
+      if (context?.previousComments) {
+        queryClient.setQueryData(
+          ["posts", context.postId, "comments"],
+          context.previousComments
+        );
+      }
+      toast.error(error.message || "Failed to create comment");
+    },
+    onSuccess: (data, variables, context: any) => {
+      if (!data || !data.post_id) {
+        console.error("Invalid comment data returned from server");
         return;
       }
 
-      // Invalidate queries to refetch fresh data
-      queryClient.invalidateQueries({
-        queryKey: ["posts", data.post_id, "comments"]
-      });
+      // Replace optimistic comment with real data using the temp ID from context
+      queryClient.setQueryData(
+        ["posts", data.post_id, "comments"],
+        (old: Comment[] | undefined) => {
+          if (!old) return [data];
+          return replaceOptimisticComment(old, data, context?.tempId);
+        }
+      );
 
-      // Also invalidate the posts query to update comment count
-      queryClient.invalidateQueries({
-        queryKey: ["posts"]
+      // Update post comment count optimistically
+      queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts.map((p: Post) =>
+              p.id === data.post_id
+                ? { ...p, comment_count: p.comment_count + 1 }
+                : p
+            )
+          }))
+        };
       });
 
       toast.success("Comment posted");
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to create comment");
     }
   });
 };
@@ -645,13 +779,108 @@ export const usePostsSubscription = (kind?: PostKind) => {
 };
 
 // Real-time subscription for comments on a specific post
+// Helper: Check if comment exists in tree (for duplicate detection)
+const findCommentInTree = (comments: Comment[], id: string): boolean => {
+  for (const comment of comments) {
+    if (comment.id === id) return true;
+    if (comment.replies && findCommentInTree(comment.replies, id)) return true;
+  }
+  return false;
+};
+
+// Helper: Sort comments with priority ordering
+const sortComments = (
+  comments: Comment[],
+  currentUserId: string | undefined,
+  postAuthorId: string | null
+): Comment[] => {
+  return [...comments].sort((a, b) => {
+    // Priority 1: Current user's comments first
+    if (a.created_by === currentUserId && b.created_by !== currentUserId) return -1;
+    if (a.created_by !== currentUserId && b.created_by === currentUserId) return 1;
+
+    // Priority 2: Post author's comments
+    if (a.created_by === postAuthorId && b.created_by !== postAuthorId) return -1;
+    if (a.created_by !== postAuthorId && b.created_by === postAuthorId) return 1;
+
+    // Priority 3: Engagement score (likes + replies*2)
+    const aEngagement = a.like_count + a.reply_count * 2;
+    const bEngagement = b.like_count + b.reply_count * 2;
+    if (aEngagement !== bEngagement) return bEngagement - aEngagement;
+
+    // Priority 4: Recency
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+};
+
+// Helper: Insert reply with proper sorting
+const insertReplyWithSorting = (
+  comments: Comment[],
+  newReply: Comment,
+  currentUserId: string | undefined,
+  postAuthorId: string | null
+): Comment[] => {
+  return comments.map((comment) => {
+    if (comment.id === newReply.parent_comment_id) {
+      const updatedReplies = [
+        ...(comment.replies || []),
+        { ...newReply, user_liked: false, replies: [] }
+      ];
+      return {
+        ...comment,
+        replies: sortComments(updatedReplies, currentUserId, postAuthorId),
+        reply_count: comment.reply_count + 1
+      };
+    }
+    if (comment.replies && comment.replies.length > 0) {
+      return {
+        ...comment,
+        replies: insertReplyWithSorting(
+          comment.replies,
+          newReply,
+          currentUserId,
+          postAuthorId
+        )
+      };
+    }
+    return comment;
+  });
+};
+
+// Helper: Remove comment from tree
+const removeCommentFromTree = (comments: Comment[], id: string): Comment[] => {
+  return comments
+    .filter((comment) => comment.id !== id)
+    .map((comment) => {
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: removeCommentFromTree(comment.replies, id)
+        };
+      }
+      return comment;
+    });
+};
+
 export const usePostCommentsSubscription = (postId: string) => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!postId) return;
 
     const supabase = createClient();
+    let postAuthorId: string | null = null;
+
+    // Fetch post author once for sorting logic
+    supabase
+      .from("posts")
+      .select("created_by")
+      .eq("id", postId)
+      .single()
+      .then(({ data }) => {
+        postAuthorId = data?.created_by || null;
+      });
 
     const channel = supabase
       .channel(`post-comments:${postId}`)
@@ -669,7 +898,7 @@ export const usePostCommentsSubscription = (postId: string) => {
             .select(
               `
               *,
-              author:users!comments_created_by_fkey(id, full_name, avatar_url)
+              author:users!comments_created_by_fkey(id, full_name, avatar_url, username)
             `
             )
             .eq("id", payload.new.id)
@@ -678,13 +907,34 @@ export const usePostCommentsSubscription = (postId: string) => {
           if (fullComment) {
             queryClient.setQueryData(
               ["posts", postId, "comments"],
-              (old: any) => {
-                if (!old) return [{ ...fullComment, replies: [] }];
+              (old: Comment[] | undefined) => {
+                if (!old) {
+                  return [{ ...fullComment, user_liked: false, replies: [] }];
+                }
 
-                const exists = old.some((c: any) => c.id === fullComment.id);
-                if (exists) return old;
+                // Check if already exists (prevent duplicates from optimistic update)
+                if (findCommentInTree(old, fullComment.id)) {
+                  return old;
+                }
 
-                return [...old, { ...fullComment, replies: [] }];
+                const currentUserId = user?.id;
+
+                // If it's a reply, insert into parent's replies
+                if (fullComment.parent_comment_id) {
+                  return insertReplyWithSorting(
+                    old,
+                    fullComment,
+                    currentUserId,
+                    postAuthorId
+                  );
+                }
+
+                // Top-level comment - insert with proper priority
+                const newComment = { ...fullComment, user_liked: false, replies: [] };
+                const updatedComments = [...old, newComment];
+
+                // Re-sort top-level comments
+                return sortComments(updatedComments, currentUserId, postAuthorId);
               }
             );
           }
@@ -699,6 +949,7 @@ export const usePostCommentsSubscription = (postId: string) => {
           filter: `post_id=eq.${postId}`
         },
         async (payload) => {
+          // Invalidate to refetch - updates are less frequent
           queryClient.invalidateQueries({
             queryKey: ["posts", postId, "comments"]
           });
@@ -715,9 +966,9 @@ export const usePostCommentsSubscription = (postId: string) => {
         (payload) => {
           queryClient.setQueryData(
             ["posts", postId, "comments"],
-            (old: any) => {
+            (old: Comment[] | undefined) => {
               if (!old) return old;
-              return old.filter((c: any) => c.id !== payload.old.id);
+              return removeCommentFromTree(old, payload.old.id);
             }
           );
         }
@@ -727,5 +978,5 @@ export const usePostCommentsSubscription = (postId: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [postId, queryClient]);
+  }, [postId, queryClient, user?.id]);
 };

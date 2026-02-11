@@ -22,6 +22,7 @@ export interface Post {
   event_date: string | null;
   reference_text: string | null;
   created_by: string | null;
+  community_id: string | null; // For community posts
   created_at: string;
   updated_at: string;
   like_count: number;
@@ -77,6 +78,7 @@ export interface CreatePostData {
   event_date?: string;
   reference_text?: string;
   images?: File[];
+  community_id?: string; // Optional: when posting to a community
 }
 
 export interface UpdatePostData {
@@ -196,6 +198,7 @@ export const getPosts = async (
     `,
       { count: "exact" }
     )
+    .is("community_id", null) // Only show main feed posts (not community posts)
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -585,51 +588,76 @@ export const getPostComments = async (postId: string): Promise<Comment[]> => {
 
   const likedCommentIds = new Set(likes?.map((l) => l.target_id) || []);
 
-  // Build nested comment structure
-  const commentMap: Record<string, Comment> = {};
+  // Build nested comment structure using Maps for O(n) performance
+  const commentMap = new Map<string, Comment>();
+  const repliesMap = new Map<string, Comment[]>();
   const topLevelComments: Comment[] = [];
 
-  // First pass: Create all comment objects with user_liked flag
+  // First pass: Create all comment objects and group replies by parent - O(n)
   comments.forEach((comment) => {
-    const commentWithLike = {
+    const commentWithLike: Comment = {
       ...comment,
       user_liked: likedCommentIds.has(comment.id),
       replies: []
     };
-    commentMap[comment.id] = commentWithLike;
-  });
+    commentMap.set(comment.id, commentWithLike);
 
-  // Second pass: Build the nested structure
-  comments.forEach((comment) => {
+    // Group replies by parent for efficient attachment
     if (comment.parent_comment_id) {
-      const parent = commentMap[comment.parent_comment_id];
-      if (parent) {
-        parent.replies!.push(commentMap[comment.id]);
+      if (!repliesMap.has(comment.parent_comment_id)) {
+        repliesMap.set(comment.parent_comment_id, []);
       }
+      repliesMap.get(comment.parent_comment_id)!.push(commentWithLike);
     } else {
-      topLevelComments.push(commentMap[comment.id]);
+      topLevelComments.push(commentWithLike);
     }
   });
 
-  // Helper function to get the most recent timestamp in a comment thread
+  // Second pass: Attach replies to parents - O(n)
+  repliesMap.forEach((replies, parentId) => {
+    const parent = commentMap.get(parentId);
+    if (parent) {
+      parent.replies = replies;
+    }
+  });
+
+  // Memoization caches for performance
+  const engagementCache = new Map<string, number>();
+  const timestampCache = new Map<string, number>();
+
+  // Helper function to get the most recent timestamp in a comment thread (iterative)
   const getMostRecentTimestamp = (comment: Comment): number => {
+    if (timestampCache.has(comment.id)) {
+      return timestampCache.get(comment.id)!;
+    }
+
     let mostRecent = new Date(comment.created_at).getTime();
 
-    if (comment.replies && comment.replies.length > 0) {
-      comment.replies.forEach((reply) => {
-        const replyTimestamp = getMostRecentTimestamp(reply);
-        if (replyTimestamp > mostRecent) {
-          mostRecent = replyTimestamp;
-        }
-      });
+    // Use iterative approach with queue instead of recursion
+    const queue = [...(comment.replies || [])];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      const timestamp = new Date(current.created_at).getTime();
+      if (timestamp > mostRecent) {
+        mostRecent = timestamp;
+      }
+      if (current.replies && current.replies.length > 0) {
+        queue.push(...current.replies);
+      }
     }
 
+    timestampCache.set(comment.id, mostRecent);
     return mostRecent;
   };
 
-  // Helper function to calculate engagement score
+  // Helper function to calculate engagement score with memoization
   const getEngagementScore = (comment: Comment): number => {
-    return comment.like_count + comment.reply_count * 2;
+    if (engagementCache.has(comment.id)) {
+      return engagementCache.get(comment.id)!;
+    }
+    const score = comment.like_count + comment.reply_count * 2;
+    engagementCache.set(comment.id, score);
+    return score;
   };
 
   // Sort top-level comments with priority order

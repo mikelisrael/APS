@@ -37,6 +37,7 @@ interface PostComposerProps {
   initialType?: PostKind;
   triggerMediaUpload?: boolean;
   onMediaUploadTriggered?: () => void;
+  communityId?: string; // Optional: when posting to a community
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -47,7 +48,8 @@ const PostComposer = ({
   onOpenChange,
   initialType = "post",
   triggerMediaUpload = false,
-  onMediaUploadTriggered
+  onMediaUploadTriggered,
+  communityId
 }: PostComposerProps) => {
   const { user } = useAuth();
   const { mutate: createPost, isPending } = useCreatePost();
@@ -274,7 +276,8 @@ const PostComposer = ({
         content: content || undefined,
         title: title || undefined,
         event_date: eventDate || undefined,
-        images: images.length > 0 ? images : undefined
+        images: images.length > 0 ? images : undefined,
+        community_id: communityId // Pass community_id if posting to a community
       },
       {
         onSuccess: () => {
