@@ -71,7 +71,7 @@ const ChatsSidebar = ({ onChatSelect }: ChatsSidebarProps = {}) => {
     <section className="safe-area relative flex h-svh flex-col pr-2">
       <header className="flex-between gap-2">
         <div className="flex items-center gap-2">
-          <h1 className="page-title !px-0">Chats</h1>
+          <h1 className="page-title pl-2 md:!px-0">Chats</h1>
           {totalUnreadCount > 0 && (
             <span className="flex-center h-6 min-w-6 rounded-full bg-primary px-2 text-xs text-primary-foreground">
               {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
@@ -87,7 +87,7 @@ const ChatsSidebar = ({ onChatSelect }: ChatsSidebarProps = {}) => {
         </Button>
       </header>
 
-      <div className="mt-5 flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
+      <div className="ml-2 mt-5 flex items-center gap-2 rounded-lg border bg-card px-4 py-2 md:ml-0">
         <Search size={20} />
         <input
           type="text"

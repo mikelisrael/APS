@@ -74,7 +74,7 @@ const NotificationItem = ({
 
   const content = (
     <>
-      <Icon className={`size-12 shrink-0 ${color}`} />
+      <Icon className={`~size-8/12 shrink-0 ${color}`} />
       <div className="flex-grow">
         <h3 className="font-semibold">{notification.title}</h3>
         <p className="text-sm">{notification.message}</p>

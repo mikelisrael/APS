@@ -164,7 +164,7 @@ const ImageLightbox = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-4 z-10 w-full max-w-3xl -translate-x-1/2 px-4"
+              className="absolute bottom-20 sm:bottom-4 z-10 w-full max-w-3xl -translate-x-1/2 px-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-center">
