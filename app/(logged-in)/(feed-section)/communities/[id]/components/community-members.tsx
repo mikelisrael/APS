@@ -132,7 +132,7 @@ const CommunityMembers = ({ communityId }: CommunityMembersProps) => {
           </div>
         )}
         {!hasNextPage && members.length > 0 && (
-          <p className="text-sm text-muted-foreground">You've reached the end</p>
+          <p className="text-sm text-muted-foreground">{`You've `}reached the end</p>
         )}
       </div>
     </div>
