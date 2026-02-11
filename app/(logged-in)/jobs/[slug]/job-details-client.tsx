@@ -99,7 +99,7 @@ const JobDetailsClient = () => {
 
   return (
     <>
-      <AnimatedPage className="safe-area space-y-5 duration-500 ~px-2/5 animate-in fade-in">
+      <AnimatedPage className="safe-area space-y-5 px-3 duration-500 animate-in fade-in md:~px-2/5">
         <Button
           variant="ghost"
           asChild
@@ -112,50 +112,48 @@ const JobDetailsClient = () => {
         </Button>
 
         <Card>
-          <CardHeader className="flex-row items-center justify-between gap-5">
-            <div className="space-y-2">
-              <CardTitle>{job.title}</CardTitle>
-              <div className="flex-center w-max gap-2 text-sm">
-                <div className="flex-center gap-1">
-                  <Briefcase size={18} />
+          <CardHeader className="flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-5">
+            <div className="min-w-0 flex-1 space-y-2">
+              <CardTitle className="text-xl md:text-2xl">{job.title}</CardTitle>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <div className="flex items-center gap-1">
+                  <Briefcase size={16} className="shrink-0" />
                   <span className="capitalize text-muted-foreground">
                     {job.level}
                   </span>
                 </div>
 
-                <div className="flex-center gap-1">
-                  <Building size={18} />
+                <div className="flex items-center gap-1">
+                  <Building size={16} className="shrink-0" />
                   <span className="text-muted-foreground">{job.company}</span>
                 </div>
 
-                <div className="flex-center gap-1">
-                  <MapPin size={18} />
+                <div className="flex items-center gap-1">
+                  <MapPin size={16} className="shrink-0" />
                   <span className="text-muted-foreground">
                     {job.is_remote ? "Remote" : job.location}
                   </span>
                 </div>
               </div>
-              <div className="flex-center w-max gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={job.employment_type}>
                   <span className="capitalize-first">
                     {job.employment_type}
                   </span>
                 </Badge>
-                <span>{job.compensation}</span>
+                <span className="text-sm">{job.compensation}</span>
               </div>
             </div>
 
-            <div className="flex-center gap-2">
-              <Clock size={18} />
-              <span className="text-sm text-muted-foreground">
-                Posted {moment(job.created_at).fromNow()}
-              </span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground md:flex-col md:items-end">
+              <Clock size={16} className="shrink-0" />
+              <span>Posted {moment(job.created_at).fromNow()}</span>
             </div>
           </CardHeader>
 
           <CardContent>
             {isOwner ? (
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <Button variant="outline" asChild className="flex-1">
                   <Link href={`/jobs/${slug}/edit`}>
                     Edit Job
@@ -173,6 +171,7 @@ const JobDetailsClient = () => {
                   variant="destructive"
                   onClick={handleDeleteJob}
                   disabled={deleteJobMutation.isPending}
+                  className="sm:flex-initial"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   {deleteJobMutation.isPending ? "Deleting..." : "Delete"}

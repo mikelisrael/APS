@@ -222,45 +222,45 @@ const SingleJob = ({ job, isOwner }: SingleJobProps) => {
             <div className="group relative">
               <Link
                 href={`/jobs/${job.slug}`}
-                className="flex-between relative w-full px-6 py-5 transition-colors duration-150 hover:bg-accent"
+                className="relative flex w-full flex-col gap-3 px-3 py-5 transition-colors duration-150 hover:bg-accent md:flex-row md:items-center md:justify-between md:px-6"
               >
-                <div className="space-y-2">
-                  <h3 className="w-max font-semibold">{job.title}</h3>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <h3 className="font-semibold">{job.title}</h3>
 
-                  <div className="flex-center w-max gap-2 text-sm">
-                    <div className="flex-center gap-1">
-                      <Briefcase size={18} />
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Briefcase size={16} className="shrink-0" />
                       <span className="capitalize text-muted-foreground">
                         {job.level}
                       </span>
                     </div>
 
-                    <div className="flex-center gap-1">
-                      <Building size={18} />
+                    <div className="flex items-center gap-1">
+                      <Building size={16} className="shrink-0" />
                       <span className="text-muted-foreground">
                         {job.company}
                       </span>
                     </div>
 
-                    <div className="flex-center gap-1">
-                      <MapPin size={18} />
+                    <div className="flex items-center gap-1">
+                      <MapPin size={16} className="shrink-0" />
                       <span className="text-muted-foreground">
                         {job.is_remote ? "Remote" : job.location}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex-center w-max gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={job.employment_type}>
                       <span className="capitalize-first">
                         {job.employment_type}
                       </span>
                     </Badge>
-                    <span>{job.compensation}</span>
+                    <span className="text-sm">{job.compensation}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-3 md:flex-col md:items-end">
                   <span className="text-xs text-muted-foreground">
                     Posted {moment(job.created_at).fromNow()}
                   </span>
@@ -270,7 +270,7 @@ const SingleJob = ({ job, isOwner }: SingleJobProps) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                        className="opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <MoreVertical className="h-4 w-4" />

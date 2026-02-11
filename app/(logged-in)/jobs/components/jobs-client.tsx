@@ -85,11 +85,14 @@ const JobsClient = () => {
   const hasActiveFilters = activeFilterCount < 4;
 
   return (
-    <AnimatedPage className="safe-area ~px-2/5">
-      <section className="flex-between">
+    <AnimatedPage className="safe-area px-3 md:~px-2/5">
+      <section className="flex-between gap-2">
         <h1 className="page-title">Jobs</h1>
-        <Button asChild>
-          <Link href="/jobs/new">Post a Job</Link>
+        <Button asChild size="sm" className="shrink-0">
+          <Link href="/jobs/new">
+            <span className="hidden sm:inline">Post a Job</span>
+            <span className="sm:hidden">Post</span>
+          </Link>
         </Button>
       </section>
 
@@ -100,13 +103,13 @@ const JobsClient = () => {
         </TabsList>
       </Tabs>
 
-      <section className="sticky top-0 z-10 flex items-stretch gap-4 bg-background pb-7 pt-4 dark:bg-[#121212]">
-        <div className="flex flex-grow items-center gap-2 rounded-lg border bg-card px-4 py-2">
-          <Search size={20} />
+      <section className="sticky top-0 z-10 flex items-stretch gap-2 bg-background pb-7 pt-4 dark:bg-[#121212] md:gap-4">
+        <div className="flex flex-grow items-center gap-2 rounded-lg border bg-card px-3 py-2 md:px-4">
+          <Search size={20} className="shrink-0" />
           <input
             type="text"
             placeholder="Search for jobs"
-            className="grow bg-card text-sm focus:outline-none"
+            className="min-w-0 grow bg-card text-sm focus:outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -114,9 +117,9 @@ const JobsClient = () => {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative gap-1 border bg-card">
+            <Button variant="ghost" className="relative shrink-0 gap-1 border bg-card">
               <Filter size="18" />
-              Filter
+              <span className="hidden sm:inline">Filter</span>
               {hasActiveFilters && (
                 <div className="flex-center ml-1 h-5 w-5 rounded-full bg-primary p-0 text-xs text-primary-foreground">
                   {activeFilterCount}
