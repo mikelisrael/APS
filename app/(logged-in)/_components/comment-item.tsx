@@ -41,8 +41,7 @@ const CommentItem = ({
   depth = 0
 }: CommentItemProps) => {
   const { user } = useAuth();
-  const { mutate: toggleInteraction, pendingInteraction } =
-    useToggleInteraction();
+  const { mutate: toggleInteraction } = useToggleInteraction();
   const { mutate: updateComment, isPending: isUpdating } = useUpdateComment();
   const [showReplies, setShowReplies] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -262,16 +261,12 @@ const CommentItem = ({
                 )}
                 onClick={handleLike}
               >
-                {pendingInteraction === "like" ? (
-                  <LoaderCircle className="h-4 w-4 animate-spin text-blue-500" />
-                ) : (
-                  <ThumbsUp
-                    className={cn(
-                      "h-4 w-4",
-                      comment.user_liked && "fill-blue-500"
-                    )}
-                  />
-                )}
+                <ThumbsUp
+                  className={cn(
+                    "h-4 w-4",
+                    comment.user_liked && "fill-blue-500"
+                  )}
+                />
                 {comment.like_count > 0 && (
                   <span>{formatCount(comment.like_count)}</span>
                 )}
