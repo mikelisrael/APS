@@ -24,11 +24,11 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
           onImageClick?.(0);
         }}
       >
-        <div className="relative max-h-[500px] w-full">
+        <div className="relative max-h-[300px] w-full md:max-h-[500px]">
           <ImageLoader
             src={attachment.file_url}
             alt="Post Image"
-            className="mx-auto h-[500px] w-full object-contain"
+            className="mx-auto h-[300px] w-full object-contain md:h-[500px]"
             loading="lazy"
           />
         </div>
@@ -42,7 +42,7 @@ const PostImageGrid = ({ attachments, onImageClick }: PostImageGridProps) => {
       case 2:
         return "grid-cols-2";
       case 3:
-        return "grid-cols-2 h-[400px]";
+        return "grid-cols-2 h-[250px] md:h-[400px]";
       case 4:
         return "grid-cols-2 grid-rows-2";
       default:

@@ -77,34 +77,36 @@ const SingleConnection = ({ connection }: SingleConnectionProps) => {
             {connection.user.status === "alumnus" && <Alumnus />}
           </div>
         </div>
-        <div className="flex-center">
+        <div className="flex items-center gap-1">
           <Button
             variant="link"
-            className="text-xs"
+            className="min-w-0 p-2 text-xs md:px-4"
             size="sm"
             onClick={() => handleStartChat(connection.user.id)}
             disabled={isCreatingChat}
           >
             {isCreatingChat ? (
-              <LoaderCircle size={20} className="mr-2 size-4 animate-spin" />
+              <LoaderCircle size={20} className="size-4 animate-spin md:mr-2" />
             ) : (
-              <MessageCircle className="mr-1 size-4" />
+              <MessageCircle className="size-4 md:mr-1" />
             )}
-            Message
+            <span className="hidden md:inline">Message</span>
           </Button>
           <Button
-            className="text-xs text-red-500 dark:text-red-600"
+            className="min-w-0 p-2 text-xs text-red-500 dark:text-red-600 md:px-4"
             variant="link"
             size="sm"
             onClick={() => setOpenRemoveDialog(true)}
             disabled={removeConnectionMutation.isPending}
           >
             {removeConnectionMutation.isPending ? (
-              <LoaderCircle size={20} className="mr-1 size-4 animate-spin" />
+              <LoaderCircle size={20} className="size-4 animate-spin md:mr-1" />
             ) : (
-              <UserRoundX className="mr-1 size-4" />
+              <UserRoundX className="size-4 md:mr-1" />
             )}
-            {removeConnectionMutation.isPending ? "Removing..." : "Remove"}
+            <span className="hidden md:inline">
+              {removeConnectionMutation.isPending ? "Removing..." : "Remove"}
+            </span>
           </Button>
         </div>
       </li>
@@ -152,23 +154,25 @@ const ConnectionListV2 = ({ connections, loading }: ConnectionListV2Props) => {
 
   return (
     <>
-      <section className="flex-between sticky top-0 z-10 bg-background py-5 dark:bg-[#121212]">
-        <h2>Your Connections ({connections.length})</h2>
+      <section className="sticky top-0 z-10 space-y-3 bg-background py-5 dark:bg-[#121212] md:space-y-0">
+        <h2 className="hidden md:block">Your Connections ({connections.length})</h2>
 
-        <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
-          <Search size={20} />
-          <input
-            type="text"
-            placeholder="Search connections..."
-            className="grow bg-card text-sm focus:outline-none"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center gap-2 rounded-lg border bg-card px-3 py-2 md:px-4">
+            <Search size={18} className="shrink-0 md:size-5" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="min-w-0 grow bg-card text-sm focus:outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <ListFilter className="mr-2 h-4 w-4" />
-                <span className="capitalize">
+              <Button variant="ghost" size="sm" className="shrink-0">
+                <ListFilter className="h-4 w-4 md:mr-2" />
+                <span className="hidden capitalize md:inline">
                   {filter === "all" ? "All" : filter}
                 </span>
               </Button>

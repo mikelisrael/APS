@@ -121,7 +121,7 @@ const Notifications = () => {
 
   if (isLoading) {
     return (
-      <AnimatedPage className="safe-area max-w-2xl">
+      <AnimatedPage className="safe-area max-w-2xl px-3 md:px-6">
         <h1 className="page-title">Notifications</h1>
         <NotificationSkeletonList count={8} />
       </AnimatedPage>
@@ -129,8 +129,8 @@ const Notifications = () => {
   }
 
   return (
-    <AnimatedPage className="safe-area max-w-2xl">
-      <div className="flex items-center justify-between">
+    <AnimatedPage className="safe-area max-w-2xl px-3 md:px-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="page-title">Notifications</h1>
         {unreadCount > 0 && (
           <Button onClick={() => markAllAsRead()} variant="outline" size="sm">

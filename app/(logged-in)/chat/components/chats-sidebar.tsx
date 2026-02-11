@@ -14,7 +14,11 @@ import ChatSkeleton from "./chat-skeleton";
 import NewConversationDialog from "./new-conversation-dialog";
 import SingleChat from "./single-chat";
 
-const ChatsSidebar = () => {
+interface ChatsSidebarProps {
+  onChatSelect?: () => void;
+}
+
+const ChatsSidebar = ({ onChatSelect }: ChatsSidebarProps = {}) => {
   const router = useRouter();
   const { ["chat-id"]: activeChatId } = useParams();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -131,11 +135,12 @@ const ChatsSidebar = () => {
               <SingleChat
                 key={chat.id}
                 chat={chat}
-                onClick={() =>
+                onClick={() => {
                   router.replace(`/chat/${chat.id}`, {
                     scroll: false
-                  })
-                }
+                  });
+                  onChatSelect?.();
+                }}
                 isActive={activeChatId === chat.id}
               />
             ))}

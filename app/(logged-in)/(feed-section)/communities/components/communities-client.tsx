@@ -87,7 +87,7 @@ const CommunitiesClient = () => {
 
   if (isLoading) {
     return (
-      <main className="~px-2/5">
+      <main className="px-3 md:~px-2/5">
         <section className="flex-between mb-6">
           <h1 className="page-title !px-0">Communities</h1>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -130,7 +130,7 @@ const CommunitiesClient = () => {
 
   if (isError) {
     return (
-      <main className="~px-2/5">
+      <main className="px-3 md:~px-2/5">
         <section className="flex-between mb-6">
           <h1 className="page-title !px-0">Communities</h1>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -147,7 +147,7 @@ const CommunitiesClient = () => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <main className="~px-2/5">
+      <main className="px-3 md:~px-2/5">
         <section className="flex-between mb-6">
           <h1 className="page-title !px-0">Communities</h1>
           <Button onClick={() => setShowCreateDialog(true)}>

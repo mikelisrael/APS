@@ -1,6 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const PostCardSkeleton = () => {
+interface PostCardSkeletonProps {
+  showImage?: boolean;
+}
+
+export const PostCardSkeleton = ({ showImage = false }: PostCardSkeletonProps) => {
   return (
     <article className="grid grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card px-5 pt-5">
       {/* Avatar */}
@@ -27,8 +31,8 @@ export const PostCardSkeleton = () => {
           <Skeleton className="h-4 w-3/4" />
         </div>
 
-        {/* Image placeholder (optional - show sometimes) */}
-        {Math.random() > 0.5 && <Skeleton className="h-64 w-full rounded-md" />}
+        {/* Image placeholder (deterministic based on prop) */}
+        {showImage && <Skeleton className="h-64 w-full rounded-md" />}
 
         {/* Footer interactions */}
         <div className="flex items-center gap-6 py-5">
@@ -45,7 +49,7 @@ export const PostCardSkeletonList = ({ count = 3 }: { count?: number }) => {
   return (
     <div className="space-y-5">
       {Array.from({ length: count }).map((_, index) => (
-        <PostCardSkeleton key={index} />
+        <PostCardSkeleton key={index} showImage={index % 2 === 0} />
       ))}
     </div>
   );

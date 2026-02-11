@@ -55,7 +55,7 @@ const Feed = () => {
 
   if (isLoading) {
     return (
-      <section className="mt-5 border-t pt-5 ~px-2/7">
+      <section className="mt-5 border-t px-3 pt-5 md:~px-2/5">
         <PostCardSkeletonList count={5} />
       </section>
     );
@@ -111,7 +111,7 @@ const Feed = () => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <section className="mt-5 grid gap-5 border-t border-border pt-5 ~px-2/7">
+      <section className="mt-5 grid gap-5 border-t border-border px-3 pt-5 md:~px-2/5">
         <AnimatePresence mode="sync">
           {posts.map((post: Post) => (
             <PostCard key={post.id} post={post} onDelete={handleDeletePost} />

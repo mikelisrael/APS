@@ -48,23 +48,25 @@ const ConnectionsSuggestions = () => {
 
   return (
     <>
-      <section className="flex-between sticky top-0 z-10 bg-background py-5 dark:bg-[#121212]">
-        <h2>Suggestions ({safeSuggestions.length})</h2>
+      <section className="sticky top-0 z-10 space-y-3 bg-background py-5 dark:bg-[#121212] md:space-y-0">
+        <h2 className="hidden md:block">Suggestions ({safeSuggestions.length})</h2>
 
-        <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
-          <Search size={20} />
-          <input
-            type="text"
-            placeholder="Search users..."
-            className="grow bg-card text-sm focus:outline-none"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center gap-2 rounded-lg border bg-card px-3 py-2 md:px-4">
+            <Search size={18} className="shrink-0 md:size-5" />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="min-w-0 grow bg-card text-sm focus:outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <ListFilter className="mr-2 h-4 w-4" />
-                <span className="capitalize">
+              <Button variant="ghost" size="sm" className="shrink-0">
+                <ListFilter className="h-4 w-4 md:mr-2" />
+                <span className="hidden capitalize md:inline">
                   {filter === "all" ? "All" : filter}
                 </span>
               </Button>

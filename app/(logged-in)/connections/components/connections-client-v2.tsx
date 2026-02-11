@@ -32,20 +32,24 @@ const ConnectionsClientV2 = () => {
   };
 
   return (
-    <AnimatedPage className="safe-area ~px-2/5">
+    <AnimatedPage className="safe-area px-3 md:~px-2/5">
       <h1 className="page-title !px-0">Connections</h1>
 
       <div className="mt-10">
         <Tabs value={currentTab} onValueChange={handleTabChange}>
-          <TabsList>
-            <TabsTrigger value="pending">
-              Pending Requests ({pendingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
-            <TabsTrigger value="connections">
-              Your Connections ({acceptedConnections.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto">
+            <TabsList className="w-full justify-start">
+              <TabsTrigger value="pending" className="whitespace-nowrap">
+                Pending Requests ({pendingRequests.length})
+              </TabsTrigger>
+              <TabsTrigger value="suggestions" className="whitespace-nowrap">
+                Suggestions
+              </TabsTrigger>
+              <TabsTrigger value="connections" className="whitespace-nowrap">
+                Your Connections ({acceptedConnections.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="pending">
             <ConnectionsPending

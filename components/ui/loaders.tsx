@@ -22,7 +22,7 @@ export const LoaderSpinner = ({
       )}
     >
       <LoaderCircle size={20} className="animate-spin" />
-      <span className="text-sm">{text}</span>
+      <span className="text-sm">{text} lala</span>
     </div>
   );
 };

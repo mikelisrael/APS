@@ -172,7 +172,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
         transition={{ duration: 0.3 }}
         className={cn(
-          "relative grid cursor-pointer grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card px-5 pt-5 transition-colors hover:bg-accent/50",
+          "relative grid cursor-pointer grid-cols-[auto,1fr] gap-2 rounded-lg border bg-card px-3 py-3 transition-colors hover:bg-accent/50 md:px-5 md:pt-5",
           (isPending || isNavigating) && "pointer-events-none opacity-60"
         )}
         onClick={handleCardClick}
@@ -295,14 +295,14 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
           </div>
 
           <footer
-            className="flex items-center gap-6 py-5"
+            className="flex items-center gap-4 py-4 md:gap-6 md:py-5"
             onClick={(e) => e.stopPropagation()}
           >
             <m.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "flex-center cursor-pointer gap-1 text-sm transition-colors",
+                "flex-center min-h-[44px] cursor-pointer gap-1.5 text-sm transition-colors",
                 post.user_interaction?.liked
                   ? "text-blue-500"
                   : "text-muted-foreground hover:text-blue-400"
@@ -311,7 +311,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             >
               <ThumbsUp
                 className={cn(
-                  "size-5",
+                  "h-5 w-5 md:h-5 md:w-5",
                   post.user_interaction?.liked && "fill-blue-500"
                 )}
               />
@@ -321,17 +321,17 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             <m.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex-center cursor-pointer gap-1 text-sm text-muted-foreground transition-colors hover:text-red-400"
+              className="flex-center min-h-[44px] cursor-pointer gap-1.5 text-sm text-muted-foreground transition-colors hover:text-red-400"
               onClick={handleCardClick}
             >
-              <MessageCircle className="size-5" />
+              <MessageCircle className="h-5 w-5 md:h-5 md:w-5" />
               <span>{formatCount(post.comment_count)}</span>
             </m.div>
 
             <m.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex-center cursor-pointer gap-1 text-sm text-muted-foreground transition-colors hover:text-amber-400"
+              className="flex-center min-h-[44px] cursor-pointer gap-1.5 text-sm text-muted-foreground transition-colors hover:text-amber-400"
               onClick={handleShareClick}
             >
               {isSharing ? (
@@ -340,7 +340,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
                   className="animate-spin text-amber-500"
                 />
               ) : (
-                <Send className="size-5" />
+                <Send className="h-5 w-5 md:h-5 md:w-5" />
               )}
               <span>{formatCount(post.share_count)}</span>
             </m.div>
