@@ -188,11 +188,33 @@ export const useDeletePost = () => {
   });
 };
 
+// Helper: Update comment likes in nested tree
+const updateCommentLikeInTree = (
+  comments: Comment[],
+  commentId: string,
+  isLiked: boolean
+): Comment[] => {
+  return comments.map((comment) => {
+    if (comment.id === commentId) {
+      return {
+        ...comment,
+        like_count: Math.max(0, comment.like_count + (isLiked ? -1 : 1)),
+        user_liked: !isLiked
+      };
+    }
+    if (comment.replies && comment.replies.length > 0) {
+      return {
+        ...comment,
+        replies: updateCommentLikeInTree(comment.replies, commentId, isLiked)
+      };
+    }
+    return comment;
+  });
+};
+
 // Hook for toggling interactions with optimistic updates
 export const useToggleInteraction = () => {
   const queryClient = useQueryClient();
-  const [pendingInteraction, setPendingInteraction] =
-    useState<InteractionKind | null>(null);
 
   const mutation = useModifyResource({
     key: ["posts"],
@@ -205,19 +227,39 @@ export const useToggleInteraction = () => {
       targetId: string;
       kind: InteractionKind;
     }) => {
-      setPendingInteraction(kind);
-      return toggleInteraction(targetType, targetId, kind).finally(() => {
-        setPendingInteraction(null);
-      });
+      return toggleInteraction(targetType, targetId, kind);
     },
     onMutate: async ({ targetType, targetId, kind }) => {
+      // Cancel any outgoing queries
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousData = queryClient.getQueriesData({
+        queryKey: ["posts"]
+      });
+
       if (targetType === "post") {
-        await queryClient.cancelQueries({ queryKey: ["posts"] });
+        // Helper to update a post
+        const updatePost = (p: Post) => {
+          if (p.id !== targetId) return p;
 
-        const previousData = queryClient.getQueriesData({
-          queryKey: ["posts"]
-        });
+          const countField = `${kind}_count` as keyof Post;
+          const interactionField = kind === "like" ? "liked" : "shared";
+          const currentValue = p.user_interaction?.[interactionField] || false;
 
+          return {
+            ...p,
+            [countField]: Math.max(
+              0,
+              (p[countField] as number) + (currentValue ? -1 : 1)
+            ),
+            user_interaction: {
+              ...p.user_interaction,
+              [interactionField]: !currentValue
+            }
+          };
+        };
+
+        // Update main feed posts (infinite queries with key ["posts"])
         queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
           if (!old?.pages) return old;
 
@@ -225,35 +267,75 @@ export const useToggleInteraction = () => {
             ...old,
             pages: old.pages.map((page: any) => ({
               ...page,
-              posts: page.posts.map((p: Post) => {
-                if (p.id !== targetId) return p;
-
-                const countField = `${kind}_count` as keyof Post;
-                const interactionField = kind === "like" ? "liked" : "shared";
-                const currentValue =
-                  p.user_interaction?.[interactionField] || false;
-
-                return {
-                  ...p,
-                  [countField]: Math.max(
-                    0,
-                    (p[countField] as number) + (currentValue ? -1 : 1)
-                  ),
-                  user_interaction: {
-                    ...p.user_interaction,
-                    [interactionField]: !currentValue
-                  },
-                  _optimistic: true
-                };
-              })
+              posts: page.posts.map(updatePost)
             }))
           };
         });
 
-        return { previousData, targetType, targetId };
+        // Update community posts (infinite queries with key ["communities", id, "posts"])
+        queryClient.setQueriesData({ queryKey: ["communities"] }, (old: any) => {
+          if (!old?.pages) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              posts: page.posts ? page.posts.map(updatePost) : page.posts
+            }))
+          };
+        });
+
+        // Also update single post query (for post detail page)
+        queryClient.setQueryData(["posts", targetId], (old: any) => {
+          if (!old) return old;
+
+          const countField = `${kind}_count` as keyof Post;
+          const interactionField = kind === "like" ? "liked" : "shared";
+          const currentValue = old.user_interaction?.[interactionField] || false;
+
+          return {
+            ...old,
+            [countField]: Math.max(
+              0,
+              (old[countField] as number) + (currentValue ? -1 : 1)
+            ),
+            user_interaction: {
+              ...old.user_interaction,
+              [interactionField]: !currentValue
+            }
+          };
+        });
+      } else if (targetType === "comment" && kind === "like") {
+        // Update comment likes in all post comment queries
+        queryClient.setQueriesData(
+          { queryKey: ["posts"], predicate: (query) =>
+            query.queryKey.includes("comments")
+          },
+          (old: Comment[] | undefined) => {
+            if (!old) return old;
+
+            // Find the comment and get its current like status
+            let isCurrentlyLiked = false;
+            const findLikeStatus = (comments: Comment[]): void => {
+              for (const comment of comments) {
+                if (comment.id === targetId) {
+                  isCurrentlyLiked = comment.user_liked || false;
+                  return;
+                }
+                if (comment.replies) {
+                  findLikeStatus(comment.replies);
+                }
+              }
+            };
+            findLikeStatus(old);
+
+            // Update the comment
+            return updateCommentLikeInTree(old, targetId, isCurrentlyLiked);
+          }
+        );
       }
 
-      return { targetType, targetId };
+      return { previousData, targetType, targetId, kind };
     },
     onError: (error, variables, context: any) => {
       if (context?.previousData) {
@@ -268,10 +350,7 @@ export const useToggleInteraction = () => {
     }
   });
 
-  return {
-    ...mutation,
-    pendingInteraction
-  };
+  return mutation;
 };
 
 // Hook for fetching post comments

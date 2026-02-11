@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/popover";
 import { useUserChats } from "@/hooks/use-chats";
 import { usePendingConnectionsCount } from "@/hooks/use-connections";
+import { useUnreadNotificationsCount } from "@/hooks/use-unread-notifications-count";
 import { useAuth } from "@/hooks/use-query-resource";
 import { cn } from "@/lib/utils";
 import Logo from "@/public/main-logo.svg";
@@ -25,6 +26,7 @@ const Sidebar = () => {
   const { user, logout, isLoggingOut } = useAuth();
   const { data: chats } = useUserChats();
   const { data: pendingConnectionsCount = 0 } = usePendingConnectionsCount();
+  const unreadNotificationsCount = useUnreadNotificationsCount();
 
   const isActive = (href: string) => {
     const hrefPath = href.split("?")[0];
@@ -55,9 +57,10 @@ const Sidebar = () => {
 
     counts["/chat"] = unreadChatsCount;
     counts["/connections?tab=connections"] = pendingConnectionsCount;
+    counts["/notifications"] = unreadNotificationsCount;
 
     return counts;
-  }, [chats, pendingConnectionsCount]);
+  }, [chats, pendingConnectionsCount, unreadNotificationsCount]);
 
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";

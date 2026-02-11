@@ -51,8 +51,7 @@ interface PostCardProps {
 const PostCard = ({ post, onDelete }: PostCardProps) => {
   const router = useRouter();
   const { user } = useAuth();
-  const { mutate: toggleInteraction, pendingInteraction } =
-    useToggleInteraction();
+  const { mutate: toggleInteraction } = useToggleInteraction();
   const { mutate: handleShare, isPending: isSharing } = useSharePost();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -310,19 +309,12 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
               )}
               onClick={(e) => handleInteraction(e, "like")}
             >
-              {pendingInteraction === "like" ? (
-                <LoaderCircle
-                  size={20}
-                  className="animate-spin text-blue-500"
-                />
-              ) : (
-                <ThumbsUp
-                  className={cn(
-                    "size-5",
-                    post.user_interaction?.liked && "fill-blue-500"
-                  )}
-                />
-              )}
+              <ThumbsUp
+                className={cn(
+                  "size-5",
+                  post.user_interaction?.liked && "fill-blue-500"
+                )}
+              />
               <span>{formatCount(post.like_count)}</span>
             </m.div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import PostCard from "@/app/(logged-in)/_components/post-card";
+import { PostCardSkeletonList } from "@/app/(logged-in)/_components/post-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCommunityPosts } from "@/hooks/use-communities";
 import emptyAnimation from "@/public/animations/emptyBusiness.json";
@@ -39,22 +40,7 @@ const CommunityFeed = ({ communityId, isMember }: CommunityFeedProps) => {
   const posts = data?.posts || [];
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-lg border bg-card p-4">
-            <div className="flex items-start gap-3">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <PostCardSkeletonList count={5} />;
   }
 
   if (isError) {
@@ -106,13 +92,7 @@ const CommunityFeed = ({ communityId, isMember }: CommunityFeedProps) => {
 
         {/* Infinite scroll trigger */}
         <div ref={loadMoreRef} className="flex justify-center py-4">
-          {isFetchingNextPage && (
-            <div className="w-full space-y-4">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full" />
-              ))}
-            </div>
-          )}
+          {isFetchingNextPage && <PostCardSkeletonList count={2} />}
           {!hasNextPage && posts.length > 0 && (
             <p className="text-sm text-muted-foreground">{`You've`} reached the end</p>
           )}

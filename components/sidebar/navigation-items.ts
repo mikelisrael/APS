@@ -24,7 +24,8 @@ export const navigationItems: NavigationItem[] = [
   {
     title: "Notifications",
     Icon: BellIcon,
-    href: "/notifications"
+    href: "/notifications",
+    showBadge: true
   },
   {
     title: "Connections",

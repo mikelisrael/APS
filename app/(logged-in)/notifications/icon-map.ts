@@ -14,8 +14,7 @@ import {
   Target,
   Inbox,
   Eye,
-  
-  ThumbsUp as TestimonialIcon,
+  ThumbsUp as TestimonialIcon
 } from "lucide-react";
 
 export const ICON_MAP = {
@@ -89,8 +88,12 @@ export const ICON_MAP = {
   },
   testimonial: {
     icon: TestimonialIcon,
-    color: "text-rose-500",
+    color: "text-rose-500"
   },
+  messageCircle: {
+    icon: MessageCircle,
+    color: "text-cyan-500"
+  }
 };
 
 export type NotificationType = keyof typeof ICON_MAP;

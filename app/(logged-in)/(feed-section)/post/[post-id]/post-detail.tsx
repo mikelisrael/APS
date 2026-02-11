@@ -5,6 +5,7 @@ import CommentItem from "@/app/(logged-in)/_components/comment-item";
 import ImageLightbox from "@/app/(logged-in)/_components/image-light-box";
 import PostImageGrid from "@/app/(logged-in)/_components/post-image-grid";
 import ShareDialog from "@/app/(logged-in)/_components/share-dialog";
+import { PostDetailSkeleton } from "./components/post-detail-skeleton";
 import UserAvatar from "@/components/shared/user-avatar";
 import {
   AlertDialog,
@@ -71,8 +72,7 @@ const PostDetail = () => {
   const { data: comments, isLoading: commentsLoading } =
     usePostComments(postId);
   const { mutate: deletePost } = useDeletePost();
-  const { mutate: toggleInteraction, pendingInteraction } =
-    useToggleInteraction();
+  const { mutate: toggleInteraction } = useToggleInteraction();
   const { mutate: createComment, isPending: isCreatingComment } =
     useCreateComment();
   const { mutate: deleteComment } = useDeleteComment();
@@ -171,11 +171,7 @@ const PostDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <section className="flex-center min-h-[400px]">
-        <LoaderSpinner />
-      </section>
-    );
+    return <PostDetailSkeleton />;
   }
 
   if (isError || !post) {
@@ -394,16 +390,12 @@ const PostDetail = () => {
                   )}
                   onClick={(e) => handleInteraction(e, "like")}
                 >
-                  {pendingInteraction === "like" ? (
-                    <LoaderCircle className="h-5 w-5 animate-spin text-blue-500" />
-                  ) : (
-                    <ThumbsUp
-                      className={cn(
-                        "h-5 w-5",
-                        post.user_interaction?.liked && "fill-blue-500"
-                      )}
-                    />
-                  )}
+                  <ThumbsUp
+                    className={cn(
+                      "h-5 w-5",
+                      post.user_interaction?.liked && "fill-blue-500"
+                    )}
+                  />
                   <span className="font-medium">
                     {formatCount(post.like_count)}
                   </span>

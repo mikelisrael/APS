@@ -1,7 +1,6 @@
 "use client";
 
 import Spinner from "@/components/shared/spinner";
-import { LoaderSpinner } from "@/components/ui/loaders";
 import {
   useDeletePost,
   useInfinitePosts,
@@ -16,6 +15,7 @@ import {
 } from "framer-motion";
 import { useEffect, useRef } from "react";
 import PostCard from "./post-card";
+import { PostCardSkeletonList } from "./post-card-skeleton";
 import emptyAnimation from "@/public/animations/empty ghost.json";
 import Lottie from "lottie-react";
 
@@ -55,8 +55,8 @@ const Feed = () => {
 
   if (isLoading) {
     return (
-      <section className="flex-center mt-5 min-h-[400px] border-t">
-        <LoaderSpinner />
+      <section className="mt-5 border-t pt-5 ~px-2/7">
+        <PostCardSkeletonList count={5} />
       </section>
     );
   }
