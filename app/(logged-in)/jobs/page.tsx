@@ -8,7 +8,7 @@ export const metadata = {
 
 const JobPosting = () => {
   return (
-    <SuspenseLoader>
+    <SuspenseLoader fullPage>
       <JobsClient />
     </SuspenseLoader>
   );
