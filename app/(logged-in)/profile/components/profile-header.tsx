@@ -97,7 +97,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground ~text-xs/sm">
                     @{username}
                   </span>
 

@@ -8,7 +8,7 @@ export const metadata = {
 
 const ConnectionsPage = () => {
   return (
-    <SuspenseLoader>
+    <SuspenseLoader fullPage>
       <ConnectionsClientV2 />
     </SuspenseLoader>
   );

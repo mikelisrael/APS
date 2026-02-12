@@ -77,7 +77,7 @@ const NotificationItem = ({
       <Icon className={`~size-8/12 shrink-0 ${color}`} />
       <div className="flex-grow">
         <h3 className="font-semibold">{notification.title}</h3>
-        <p className="text-sm">{notification.message}</p>
+        <p className="~text-xs/sm">{notification.message}</p>
         <p className="mt-1 text-xs text-muted-foreground">
           {formatDistanceToNow(new Date(notification.created_at), {
             addSuffix: true
@@ -95,7 +95,7 @@ const NotificationItem = ({
       <li ref={itemRef}>
         <Link
           href={navigationUrl}
-          className={`flex gap-5 px-5 py-4 transition-colors ${
+          className={`flex gap-5 px-5 ~py-3/4 transition-colors ${
             !notification.read ? "bg-muted/50" : ""
           } hover:bg-muted`}
         >

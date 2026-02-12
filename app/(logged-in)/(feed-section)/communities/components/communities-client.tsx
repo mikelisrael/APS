@@ -302,7 +302,7 @@ const CommunitiesClient = () => {
               style={{ width: 300, height: 300 }}
             />
             <div className="flex-col-center -mt-12 max-w-md gap-1 text-balance text-center">
-              <h2 className="text-center text-2xl">No communities found</h2>
+              <h2 className="text-center ~text-lg/2xl">No communities found</h2>
               <p className="text-muted-foreground">
                 {searchQuery
                   ? "Try a different search term"

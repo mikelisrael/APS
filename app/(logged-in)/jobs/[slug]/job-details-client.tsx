@@ -115,7 +115,7 @@ const JobDetailsClient = () => {
           <CardHeader className="flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-5">
             <div className="min-w-0 flex-1 space-y-2">
               <CardTitle className="text-xl md:text-2xl">{job.title}</CardTitle>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 ~text-xs/sm">
                 <div className="flex items-center gap-1">
                   <Briefcase size={16} className="shrink-0" />
                   <span className="capitalize text-muted-foreground">
@@ -145,7 +145,7 @@ const JobDetailsClient = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground md:flex-col md:items-end">
+            <div className="flex items-center gap-2 text-muted-foreground ~text-xs/sm md:flex-col md:items-end">
               <Clock size={16} className="shrink-0" />
               <span>Posted {moment(job.created_at).fromNow()}</span>
             </div>
@@ -155,9 +155,7 @@ const JobDetailsClient = () => {
             {isOwner ? (
               <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <Button variant="outline" asChild className="flex-1">
-                  <Link href={`/jobs/${slug}/edit`}>
-                    Edit Job
-                  </Link>
+                  <Link href={`/jobs/${slug}/edit`}>Edit Job</Link>
                 </Button>
 
                 <Button
@@ -198,9 +196,9 @@ const JobDetailsClient = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <h2 className="mb-3 text-2xl font-semibold">Job Description</h2>
+            <h2 className="mb-3 !text-lg/2xl font-semibold">Job Description</h2>
             <article
-              className="prose prose-sm prose-ul:text-sm prose-h3:text-base prose-ol:text-sm prose-h1:text-3xl prose-h2:text-xl prose-p:text-sm prose-headings:text-foreground prose-headings:font-semibold prose-h1:mb-5 prose-h2:mt-5 dark:prose-invert lg:prose-xl [&_li>p]:!my-0"
+              className="prose prose-sm dark:prose-invert lg:prose-xl prose-headings:font-semibold prose-headings:text-foreground prose-h1:mb-5 prose-h1:text-3xl prose-h2:mt-5 prose-h2:text-xl prose-h3:text-base prose-p:~text-xs/sm prose-ol:~text-xs/sm prose-ul:~text-xs/sm [&_li>p]:!my-0"
               dangerouslySetInnerHTML={{ __html: job.description }}
             />
           </CardContent>

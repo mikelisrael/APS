@@ -8,7 +8,7 @@ export const metadata = {
 
 const Profile = () => {
   return (
-    <SuspenseLoader>
+    <SuspenseLoader fullPage>
       <ProfileClient />
     </SuspenseLoader>
   );

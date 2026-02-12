@@ -70,7 +70,7 @@ const ProfileEducation: React.FC<ProfileEducationProps> = ({ education }) => {
         <CardHeader className="flex-row items-center justify-between py-4">
           <h2 className="font-semibold">Education</h2>
           <button
-            className="flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="flex items-center gap-1 font-medium text-primary underline-offset-4 ~text-xs/sm hover:underline"
             onClick={() => setOpenDialog(true)}
           >
             <Plus size={14} />
@@ -93,11 +93,11 @@ const ProfileEducation: React.FC<ProfileEducationProps> = ({ education }) => {
                     <h3 className="font-medium text-foreground">
                       {edu.institution}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="~text-xs/sm text-muted-foreground">
                       {edu.degree}
                       {edu.fieldOfStudy && ` in ${edu.fieldOfStudy}`}{" "}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="~text-xs/sm text-muted-foreground">
                       {edu.location && ` ${edu.location}`}
                     </p>
                     <p className="text-xs text-muted-foreground">

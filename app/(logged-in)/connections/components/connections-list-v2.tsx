@@ -57,16 +57,16 @@ const SingleConnection = ({ connection }: SingleConnectionProps) => {
 
   return (
     <>
-      <li className="flex items-center gap-3 py-3">
+      <li className="flex items-center gap-3 ~py-2/3">
         <UserAvatar
-          className="size-14"
+          className="~size-12/14"
           src={connection.user.avatar_url}
           alt={`${connection.user.first_name} ${connection.user.last_name}`}
         />
         <div className="grow">
           <Link
             href={`/${connection.user.username}`}
-            className="font-medium hover:underline"
+            className="font-medium ~text-xs/sm hover:underline"
           >
             {connection.user.full_name}
           </Link>
@@ -163,7 +163,7 @@ const ConnectionListV2 = ({ connections, loading }: ConnectionListV2Props) => {
             <input
               type="text"
               placeholder="Search..."
-              className="min-w-0 grow bg-card text-sm focus:outline-none"
+              className="min-w-0 grow bg-card ~text-xs/sm focus:outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

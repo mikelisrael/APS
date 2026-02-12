@@ -84,7 +84,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile }) => {
           <h2 className="font-semibold">About</h2>
 
           <button
-            className="flex gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="flex gap-1 font-medium text-primary underline-offset-4 ~text-xs/sm hover:underline"
             onClick={() => setOpenDialog(true)}
           >
             <Pencil size={15} /> Edit
@@ -94,7 +94,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile }) => {
         <CardContent className="space-y-6">
           <section>
             {hasAbout ? (
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="leading-relaxed text-muted-foreground ~text-xs/sm">
                 {profile.about}
               </p>
             ) : (
@@ -126,7 +126,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile }) => {
                 {hasEmail && (
                   <Link
                     href={`mailto:${profile?.email}`}
-                    className="flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                    className="flex items-center gap-1.5 text-muted-foreground underline-offset-4 transition-colors ~text-xs/sm hover:text-foreground hover:underline"
                   >
                     <Mail size={15} />
                     <span>{profile?.email}</span>
@@ -138,7 +138,7 @@ const ProfileAbout: React.FC<ProfileAboutProps> = ({ profile }) => {
                     href={profile?.website?.url || ""}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                    className="flex items-center gap-1.5 text-muted-foreground underline-offset-4 transition-colors ~text-xs/sm hover:text-foreground hover:underline"
                   >
                     <Globe size={15} />
                     <span>{profile?.website?.title}</span>

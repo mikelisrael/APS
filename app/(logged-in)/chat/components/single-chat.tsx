@@ -105,7 +105,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
           >
             <div
               className={cn(
-                `relative flex w-full cursor-pointer items-center gap-3 rounded-md px-2 py-3 hover:bg-accent`,
+                `relative flex w-full cursor-pointer items-center gap-3 rounded-md px-2 ~py-2/3 hover:bg-accent`,
                 {
                   "bg-accent/30 font-semibold before:absolute before:left-0 before:top-1/2 before:h-2/5 before:w-[2px] before:-translate-y-1/2 before:animate-stretch before:rounded-full before:bg-primary before:content-['']":
                     isActive
@@ -118,7 +118,7 @@ const SingleChat = ({ chat, onClick, isActive }: SingleChatProps) => {
                 alt={otherParticipant?.user?.full_name || "User"}
               />
 
-              <div className="grow text-sm">
+              <div className="grow ~text-xs/sm">
                 <div className="flex-between mb-1 gap-0.5">
                   <h3 className="line-clamp-1 break-all font-medium">
                     {otherParticipant?.user?.full_name || "Unknown User"}

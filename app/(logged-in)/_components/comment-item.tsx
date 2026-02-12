@@ -238,7 +238,7 @@ const CommentItem = ({
               </div>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap text-sm">
+            <p className="whitespace-pre-wrap ~text-xs/sm">
               {comment.content}{" "}
               {comment.is_edited && (
                 <span className="text-xs italic text-muted-foreground">

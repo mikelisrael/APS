@@ -92,7 +92,7 @@ const ChatsSidebar = ({ onChatSelect }: ChatsSidebarProps = {}) => {
         <input
           type="text"
           placeholder="Search chats..."
-          className="grow bg-card text-sm focus:outline-none"
+          className="grow bg-card ~text-xs/sm focus:outline-none"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           autoComplete="off"

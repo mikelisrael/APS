@@ -85,7 +85,7 @@ const ProfileExperience: React.FC<ProfileExperienceProps> = ({
         <CardHeader className="flex-row items-center justify-between py-4">
           <h2 className="font-semibold">Experience</h2>
           <button
-            className="flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="flex items-center gap-1 font-medium text-primary underline-offset-4 ~text-xs/sm hover:underline"
             onClick={() => setOpenDialog(true)}
           >
             <Plus size={14} />
@@ -115,7 +115,7 @@ const ProfileExperience: React.FC<ProfileExperienceProps> = ({
                       <h3 className="font-medium text-foreground">
                         {experience.position}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground ~text-xs/sm">
                         {experience.company}
                         {experience.location && ` • ${experience.location}`}
                       </p>

@@ -284,7 +284,7 @@ const PostDetail = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="~text-xs/sm text-muted-foreground">
                     {formatRelativeTime(post.created_at)}
                   </span>
                   <DropdownMenu>
@@ -317,7 +317,7 @@ const PostDetail = () => {
 
                 {/* Article Title */}
                 {post.kind === "article" && post.title && (
-                  <h2 className="text-2xl font-bold tracking-tight">
+                  <h2 className="~text-lg/2xl font-bold tracking-tight">
                     {post.title}
                   </h2>
                 )}
@@ -326,7 +326,7 @@ const PostDetail = () => {
                 {post.kind === "event" && (
                   <div className="space-y-3">
                     {post.title && (
-                      <h2 className="text-2xl font-bold tracking-tight">
+                      <h2 className="~text-lg/2xl font-bold tracking-tight">
                         {post.title}
                       </h2>
                     )}
@@ -348,7 +348,7 @@ const PostDetail = () => {
                 {/* Post Content */}
                 {post.content && (
                   <p
-                    className="whitespace-pre-wrap text-sm leading-relaxed"
+                    className="whitespace-pre-wrap ~text-xs/sm leading-relaxed"
                     style={{
                       overflowWrap: "break-word",
                       wordBreak: "break-word",

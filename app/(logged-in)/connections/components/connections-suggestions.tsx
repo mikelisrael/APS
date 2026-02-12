@@ -49,7 +49,9 @@ const ConnectionsSuggestions = () => {
   return (
     <>
       <section className="sticky top-0 z-10 space-y-3 bg-background py-5 dark:bg-[#121212] md:space-y-0">
-        <h2 className="hidden md:block">Suggestions ({safeSuggestions.length})</h2>
+        <h2 className="hidden md:block">
+          Suggestions ({safeSuggestions.length})
+        </h2>
 
         <div className="flex items-center gap-2">
           <div className="flex flex-1 items-center gap-2 rounded-lg border bg-card px-3 py-2 md:px-4">
@@ -57,7 +59,7 @@ const ConnectionsSuggestions = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="min-w-0 grow bg-card text-sm focus:outline-none"
+              className="min-w-0 grow bg-card ~text-xs/sm focus:outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

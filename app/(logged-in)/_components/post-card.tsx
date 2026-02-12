@@ -239,7 +239,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             {getPostTypeIndicator()}
 
             {post.kind === "article" && post.title && (
-              <h2 className="mb-2 text-lg font-bold tracking-tight">
+              <h2 className="mb-2 ~text-base/lg font-bold tracking-tight">
                 {post.title}
               </h2>
             )}
@@ -247,7 +247,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
             {post.kind === "event" && (
               <div className="mb-3 space-y-2">
                 {post.title && (
-                  <h2 className="text-lg font-bold tracking-tight">
+                  <h2 className="~text-base/lg font-bold tracking-tight">
                     {post.title}
                   </h2>
                 )}
@@ -266,7 +266,7 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
 
             {post.content && (
               <p
-                className="line-clamp-5 whitespace-pre-wrap text-sm"
+                className="line-clamp-5 whitespace-pre-wrap ~text-xs/sm"
                 style={{
                   overflowWrap: "break-word",
                   wordBreak: "break-word",
